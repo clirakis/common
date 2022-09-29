@@ -1,0 +1,121 @@
+##################################################################
+#
+#	Common makefile stuff, include this for all other makefiles.
+#
+#
+#	Modified	by	Reason
+# 	--------	--	------
+#	05-Nov-01       CBL     Original
+#                               Linux or IRIX transparently. 
+#
+#       19-May-05       CBL     Added in /usr/local/include for include path
+#       10-Feb-06       CBL     Using cpp as preprocessor with M option for
+#                               creating dependencies.
+######################################################################
+# Machine specific stuff
+#
+#
+# Compilier defs.
+#
+
+CC  = gcc
+CPP = g++
+LD  = g++
+AR  = ar
+ARFLAGS = -r
+
+#
+# RCS stuff.
+#
+# Proceedure for checking the sources out of RCS. Assume that 
+# LEVEL is defined outside of this file or not at all. In
+# the event LEVEL is not defined the TIP revision will 
+# be retreived.
+.cpp.cpp:
+	co -r $(LEVEL) $<
+.c.c:
+	co -r $(LEVEL) $<
+.h.h:
+	co -r $(LEVEL) $<
+
+#
+# Other useful defines.
+# 
+COMMON=$(DRIVE)/common
+#
+# IT++ stuff
+#
+ATLAS_INC=$(COMMON)/atlas/include
+IT++_INC=$(COMMON)/it++3.7.1/include
+LIB_IT++ = -lit++ -llapack -lf77blas -lcblas -latlas -lg2c
+IT++_CFLAGS = -mcpu=i686 -D__LITTLE_ENDIAN__
+#
+# Compile time resolution.
+#
+X11MACROS = -D_XOPEN_SOURCE -DXT_CODE -DXOPEN_CATALOG -DMOTIF 
+#
+#
+# Load time resolution.
+#
+XLIBS   =  -L/usr/i386-linux-gnu -lXm -lXt -lX11 -lXmu -lXi -lXmu 
+# -lXxf86vm
+GL_LIBS =  -lGL -lGLU /usr/lib/libglut.so
+#
+# Define link and compile flags.
+#
+# MACHTYPE is defined externally to this makefile
+# it is essentially defined as uname -s
+# Currently defined MACHTYPES are:
+#     IRIX
+#     Linux
+#
+#DEFINES= -D$(MACHTYPE) -DUNIX -D_GNU_SOURCE -DPOSIX $(X11MACROS)
+CFLAGS = -Wall -DPOSIX $(INCLUDE) $(DEFINES) $(EXT_CFLAGS)
+# LIBPATH defined externally for more stuff if necessary. 
+LDFLAGS = -L$(LIBDIR) $(LIBPATH) $(LIBS) $(EXT_LDFLAGS) -lm -lpthread -lrt
+
+# Rules to make the object files depend on the sources.
+SRCS    = $(SRC) $(SRCCPP)
+
+# Rules to make the object files depend on the sources.
+OBJSC   = ${SRC:.c=.o}
+OBJSCPP = ${SRCCPP:.cpp=.o}
+OBJS    = $(OBJSC) $(OBJSCPP)
+
+.cpp.o:
+	$(CPP) $(CFLAGS) -c $<
+.c.o:
+	$(CC) $(CFLAGS) -c $<
+
+# Rules to make dependencies. seems a little better
+%.d: %.c
+	$(CPP) $(CFLAGS) -M $< > $@
+%.d: %.cpp
+	$(CC) $(CFLAGS) -M $< > $@
+
+DEPENDS   = ${OBJS:.o=.d} 
+
+make.depend: $(DEPENDS)
+	cat *.d > make.depend
+
+$(LIBRARY): $(OBJS)
+	$(AR) $(ARFLAGS) $(LIBRARY) $(OBJS)
+
+$(TARGET): $(OBJS) 
+echo "External Compliation flags were $(EXT_CFLAGS) \n" 
+$(LD) $(EXT_OBJ) $(OBJS) $(LDFLAGS) -o $(TARGET)
+
+makedoc:
+	doc++ -H -p -u -d ../html *.h
+
+.PHONY : clean makedoc make.depend
+
+clean:
+	\rm -f *.d
+	\rm -f *.o
+	\rm -f make.depend
+	\rm -f *.bak
+	\rm -f *~
+	\rm -f *Dict*
+	\rm -f $(TARGET)
+

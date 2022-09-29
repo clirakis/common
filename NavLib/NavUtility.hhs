@@ -1,0 +1,29 @@
+/**
+ ******************************************************************
+ *
+ * Module Name : Dimensions.hh
+ *
+ * Author/Date : C.B. Lirakis / 29-Jul-14
+ *
+ * Description :
+ *
+ * Restrictions/Limitations :
+ *
+ * Change Descriptions :
+ *
+ * Classification : Unclassified
+ *
+ * References :
+ *
+ *
+ *******************************************************************
+ */
+#ifndef __DIMENSIONS_h_
+#define __DIMENSIONS_h_
+#define LABEL_SIZE        0.1
+#define TEXT_SIZE         0.20
+const UInt_t kXYPlotSize = 1000;
+const UInt_t kHPlotSize  =  300;
+const UInt_t kPlotWidth  =  350;
+const UInt_t kPlotHeight =  350;
+#endif

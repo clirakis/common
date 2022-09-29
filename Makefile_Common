@@ -1,0 +1,61 @@
+##################################################################
+#
+#	master Makefile for libraries  using gcc on Linux. 
+#
+#
+#	Modified	by	Reason
+# 	--------	--	------
+#       16-Sep-17	CBL	Original, do clean and full build 
+# 				of libraries. 
+#
+##################################################################
+
+MYLIB = $(HOME)/lib_Linux
+COMMON = $(HOME)/common
+#
+all: $(MYLIB)/libBC635.a $(MYLIB)/libio.a $(MYLIB)/libKeithly.a \
+	$(MYLIB)/libmygpib.a $(MYLIB)/libNav.a $(MYLIB)/libTSIP.a \
+	$(MYLIB)/libutility.a $(COMMON)/nmealib/lib/libnmea.a \
+	$(MYLIB)/libNavBasic.a
+
+$(MYLIB)/libio.a:
+	\cd $(COMMON)/iolib; make
+
+$(MYLIB)/libKeithly.a: 
+	\cd $(COMMON)/Keithley; make
+
+$(MYLIB)/libmygpib.a:
+	\cd $(COMMON)/GPIB; make
+
+$(MYLIB)/libhp.a:
+	\cd $(COMMON)/HP; make
+
+$(MYLIB)/libNav.a:
+	\cd $(COMMON)/NavLib; make
+
+$(MYLIB)/libTSIP.a:
+	\cd $(COMMON)/libTSIP; make
+
+$(MYLIB)/libutility.a:
+	\cd $(COMMON)/utility; make
+
+$(MYLIB)/libBC635.a:
+	\cd $(COMMON)/libBC635; make
+
+$(MYLIB)/libNavBasic.a:
+	\cd $(COMMON)/libNavBasic; make
+
+$(COMMON)/nmealib/lib/libnmea.a:
+	\cd $(COMMON)/nmealib; make
+
+clean:
+	\cd $(COMMON)/libBC635; make clean
+	\cd $(COMMON)/iolib; make clean
+	\cd $(COMMON)/Keithley; make clean
+	\cd $(COMMON)/GPIB; make clean
+	\cd $(COMMON)/HP; make clean
+	\cd $(COMMON)/NavLib; make clean
+	\cd $(COMMON)/libTSIP; make clean
+	\cd $(COMMON)/utility; make clean
+	\cd $(COMMON)/nmealib; make clean
+	\cd $(COMMON)/libNavBasic; make clean
