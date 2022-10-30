@@ -69,6 +69,7 @@ public:
     static CLogger* GetThis(void) {return fLogger;};
 
 private:
+
     /*! Control ther verbosity level of output. */
     unsigned int       fVerbose;
     /*! Turn logging on/off, this isn't used everywhere. */

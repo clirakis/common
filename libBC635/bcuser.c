@@ -6,6 +6,9 @@
  * @version 1.0
  * @brief  User space entry points for bc635 driver, BIG ENDIAN hardware! 
  * @see bc625 PCI_PCIe User Guide RevA.pdf. Intel is little endian
+ *
+ * 29-Oct-22 CBL removed stropts.h
+ *
  *******************************************************************
  */
 /* System includes. */
@@ -23,7 +26,7 @@
 #include <fcntl.h>
 #include <linux/fs.h>
 #include <inttypes.h>
-#include <stropts.h>
+//#include <stropts.h>
 #include <arpa/inet.h>
 
 /** Local Includes. */
