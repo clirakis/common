@@ -38,6 +38,7 @@
 #include <sys/shm.h>
 #include <sys/stat.h>
 #include <string.h>
+#include <errno.h>
 
 
 #include <iostream>
@@ -65,8 +66,9 @@ using namespace std;
 #include "SharedMem2.hh"
 #include "debug.h"
 #include "CLogger.hh"
-
-static const int kPERM  = 0600;
+// 01-Nov-22
+//static const int kPERM  = 0600;
+static const int kPERM  = 0644;
 static const size_t kSHM_Size = 4096; // Size of shared memory at initial 
 
 
@@ -152,6 +154,7 @@ SharedMem2::SharedMem2( const char *Name, size_t UserSize, bool Server, int Debu
     if ((fDebug>0) && pLogger)
     {
 	pLogger->LogError(__FILE__,__LINE__,'I',"SharedMem2 - Creation");
+	pLogger->Log("# %s\n", strerror(errno));
 	pLogger->Log("#Name: %s Header Size: %d User Size: %d Total Size %d\n", 
 		     Name, sizeof(struct MyMemoryHeader), UserSize, AllocSize);
     }
@@ -299,7 +302,9 @@ bool SharedMem2::CreateSpace( void )
     size_t AllocSize = sizeof(struct MyMemoryHeader) + fNumberUserBytes;
 
     // Create the shared memory
-    fSMHandle = shm_open( fSM_Name, O_RDWR | O_CREAT | O_EXCL, kPERM);
+    // 01-Nov-22 change how we open. 
+    //fSMHandle = shm_open( fSM_Name, O_RDWR | O_CREAT | O_EXCL, kPERM);
+    fSMHandle = shm_open( fSM_Name, O_RDWR | O_CREAT , kPERM);
     
     if (fSMHandle == -1) 
     {
@@ -308,6 +313,8 @@ bool SharedMem2::CreateSpace( void )
 	{
 	    pLogger->LogError(__FILE__, __LINE__, 'F', 
 			      "SharedMem2 - Error shm_open.");
+	    pLogger->LogError(__FILE__, __LINE__, 'F', 
+			      strerror(errno));
 	}
 	SetError( NO_OPEN, __LINE__);
 	return false;
@@ -324,6 +331,7 @@ bool SharedMem2::CreateSpace( void )
 	    {
 		pLogger->LogError(__FILE__, __LINE__, 'F', 
 			      "SharedMem2 - Error truncate.");
+		pLogger->Log("# %s\n", strerror(errno));
 	    }
 	    SetError( NO_RESIZE, __LINE__);
 	    return false;
@@ -349,6 +357,7 @@ bool SharedMem2::CreateSpace( void )
 		{
 		    pLogger->LogError(__FILE__, __LINE__, 'F', 
 				      "SharedMem2 - MMapping the shared memory failed");
+		    pLogger->Log("# %s\n", strerror(errno));
 		}
 		SetError( NO_MAP, __LINE__);
 		return false;
@@ -367,7 +376,6 @@ bool SharedMem2::CreateSpace( void )
     // We have successfuly created the shared memory. 
     // Create the semaphore
     sprintf(Working, "SEM_%s", fSM_Name);
-
     fSemaphoreHandle = sem_open(Working, O_CREAT, kPERM, 0);
     
     if (fSemaphoreHandle == SEM_FAILED) 
@@ -376,6 +384,7 @@ bool SharedMem2::CreateSpace( void )
 	{
 	    pLogger->LogError(__FILE__, __LINE__, 'F', 
 			      "SharedMem2 - Semaphore failed");
+	    pLogger->Log("# %s\n", strerror(errno));
 	}   
 	SetError( NO_SEMAPHORE, __LINE__);
 	fSemaphoreHandle = NULL;
@@ -443,6 +452,7 @@ bool SharedMem2::AttachSpace( void )
 	{
 	    pLogger->LogError(__FILE__, __LINE__, 'F', 
 			      "SharedMem2 - Error attaching to semaphore.");
+	    pLogger->Log("# %s\n", strerror(errno));
 	}
 	SetError(NO_SEMAPHORE, __LINE__);
 	return false;
@@ -453,6 +463,7 @@ bool SharedMem2::AttachSpace( void )
 	{
 	    pLogger->LogError(__FILE__, __LINE__, 'I', 
 			      "SharedMem2 - Client side got semaphore.");
+	    pLogger->Log("# %s\n", strerror(errno));
 	}
 
         // get a handle to the shared memory
@@ -464,6 +475,7 @@ bool SharedMem2::AttachSpace( void )
 	    {
 		pLogger->LogError(__FILE__, __LINE__, 'F', 
 				  "SharedMem2 - Error attaching to SM");
+		pLogger->Log("# %s\n", strerror(errno));
 	    }
 	    SetError(NO_ATTACH, __LINE__);
 	    return false;
@@ -484,6 +496,7 @@ bool SharedMem2::AttachSpace( void )
 		{
 		    pLogger->LogError(__FILE__, __LINE__, 'F',
 				      "SharedMem2 - failed mmap.");
+		    pLogger->Log("# %s\n", strerror(errno));
 		} 
 		SET_DEBUG_STACK;
 		return false;
