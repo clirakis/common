@@ -18,6 +18,7 @@
 
 #ifndef __TOOLS_h_
 #define __TOOLS_h_
+#include <stdint.h>
 #include <limits.h>
 #include <float.h>
 #include <math.h>
@@ -80,5 +81,7 @@ namespace tools {
     inline void ClearBit(unsigned char *val,  const unsigned char bit)
     {*val &= ~(1<<bit);};
 }
-
+    /*! Calculat UTM Zone from Longitude in Degrees. */
+    inline uint32_t Zone(double LonDegree) 
+        {return ((uint32_t) ceil(LonDegree+180.0)/6.0);};
 #endif

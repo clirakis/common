@@ -378,6 +378,7 @@ bool SharedMem2::CreateSpace( void )
 			      "SharedMem2 - Semaphore failed");
 	}   
 	SetError( NO_SEMAPHORE, __LINE__);
+	fSemaphoreHandle = NULL;
 	return false;
     }
     /*
@@ -441,7 +442,7 @@ bool SharedMem2::AttachSpace( void )
 	if (pLogger)
 	{
 	    pLogger->LogError(__FILE__, __LINE__, 'F', 
-			      "SharedMem2 - Error attaching to semaphore ");
+			      "SharedMem2 - Error attaching to semaphore.");
 	}
 	SetError(NO_SEMAPHORE, __LINE__);
 	return false;
