@@ -30,6 +30,8 @@
  * Classification : Unclassified
  *
  * References :
+ * https://stackoverflow.com/questions/5658568/how-to-list-processes-attached-to-a-shared-memory-segment-in-linux
+ * 
  *
  ********************************************************************/
 // System includes.
@@ -301,8 +303,14 @@ bool SharedMem2::CreateSpace( void )
 
     size_t AllocSize = sizeof(struct MyMemoryHeader) + fNumberUserBytes;
 
-    // Create the shared memory
-    // 01-Nov-22 change how we open. 
+    /*
+     * Create the shared memory
+     * 01-Nov-22 change how we open. 
+     * Using O_EXCL causes an error to be thrown if used with O_CREAT
+     * and the segment already exists. This can happen if the clean up
+     * didn't happen appropriately. With O_EXCL 
+     * if the segment existed, errno would equal EEXIST
+     */
     //fSMHandle = shm_open( fSM_Name, O_RDWR | O_CREAT | O_EXCL, kPERM);
     fSMHandle = shm_open( fSM_Name, O_RDWR | O_CREAT , kPERM);
     
