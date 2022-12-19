@@ -32,7 +32,7 @@
 class DSAFFT : public CObject
 {
 public:
-    enum COMMANDs { CAVG=0, CDCSUP, CFORMAT, CPHASE, CWINDOW, CFILTER};
+    enum COMMANDs { kCAVG=0, kCDCSUP, kCFORMAT, kCPHASE, kCWINDOW, kCFILTER};
 
     DSAFFT(const char *val=NULL);
     ~DSAFFT();

@@ -454,6 +454,10 @@ size_t DSA602::Curve(int trace, double **X, double **Y)
     SET_DEBUG_STACK;
     return count;
 }
+void DSA602::SetDisplayTrace(unsigned char n, bool t)
+{
+    cout << "FIXME!!" << endl;
+}
 
 
 /**

@@ -21,6 +21,7 @@
 #ifndef __SYSTEM_hh_
 #define __SYSTEM_hh_
 #  include "CObject.hh"
+#  include "DSA602_Types.hh"
 
 /// System documentation here.
  

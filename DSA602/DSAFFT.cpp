@@ -312,11 +312,11 @@ bool DSAFFT::SendCommand(COMMANDs c, bool t)
     DSA602 *pDSA602 = DSA602::GetThis();
 
 
-    if (c==CPHASE)
+    if (c==kCPHASE)
     {
 	return SetPhase(t);
     }
-    else if (c==CFILTER)
+    else if (c==kCFILTER)
     {
 	return SetFilter(t);
     }
@@ -430,7 +430,7 @@ bool DSAFFT::Update(void)
     if (rc)
     {
 	DecodeString(Response);
-#if 0
+#ifdef DEBUG
 	cout << "DSAFFTGPIB:" << Response << endl
 	     << *this << endl;
 #endif

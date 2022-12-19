@@ -140,8 +140,8 @@ public:
     /*                     Waveform FUNCTIONS                   */ 
     /* ======================================================== */
 
-    inline bool GetWaveformHeader(void) {return fWFMPRE->Update();};
-    
+    inline bool UpdateWaveformHeader(void) {return fWFMPRE->Update();};
+    inline WFMPRE* GetWFMPRE(void) {return fWFMPRE;};
 
     /*!
      * Description: 
@@ -214,7 +214,7 @@ public:
      * returns:
      *    
      */
-    inline double  RMS()      {return DQuery("RMS");};
+    inline double  RMS(void)      {return DQuery("RMS");};
     /*!
      * Description: 
      *   
@@ -225,7 +225,7 @@ public:
      * returns:
      *    
      */
-    inline double  Gain()     {return DQuery("GAIN");};
+    inline double  Gain(void)     {return DQuery("GAIN");};
     /*!
      * Description: 
      *   
@@ -236,7 +236,7 @@ public:
      * returns:
      *    
      */
-    inline double  Max()      {return DQuery("MAX");};
+    inline double  Max(void)      {return DQuery("MAX");};
     /*!
      * Description: 
      *   
@@ -247,7 +247,7 @@ public:
      * returns:
      *    
      */
-    inline double  Mean()     {return DQuery("MEAN");};
+    inline double  Mean(void)     {return DQuery("MEAN");};
     /*!
      * Description: 
      *   
@@ -258,7 +258,7 @@ public:
      * returns:
      *    
      */
-    inline double  Mid()      {return DQuery("MID");};
+    inline double  Mid(void)      {return DQuery("MID");};
     /*!
      * Description: 
      *   
@@ -269,7 +269,7 @@ public:
      * returns:
      *    
      */
-    inline double  Min()      {return DQuery("MIN");};
+    inline double  Min(void)      {return DQuery("MIN");};
 
 
     // Trace manipulation ========================================
@@ -296,8 +296,11 @@ public:
      * returns:
      *    
      */
-//     inline bool GetDisplayTrace(unsigned char n) 
-// 	{if(n<8) return fTrace[n]; else return false;};
+    inline Trace* GetTrace(void) {return fTrace;};
+
+    // FIXME
+    inline bool GetDisplayTrace(unsigned char n) 
+ 	{if(n<8) return fTrace; else return false;};
 
 
     /*!

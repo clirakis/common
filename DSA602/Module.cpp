@@ -137,7 +137,7 @@ Module::Module(const char *val) : CObject()
     ClearError(__LINE__);
 
     fSlot       = kSLOT_NONE;
-    fType       = TYPE_NONE;
+    fType       = kTYPE_NONE;
     fNChannel   = 0;
     fChannel[0] = NULL;
     fChannel[1] = NULL;
@@ -222,13 +222,13 @@ ostream& operator<<(ostream& output, const Module &n)
     output << "Serial: " << n.fUnitSerial << " Type: ";
     switch (n.fType)
     {
-    case Module::TYPE_NONE:
+    case Module::kTYPE_NONE:
 	output << "NONE";
 	break;
-    case Module::TYPE_11A32:
+    case Module::kTYPE_11A32:
 	output << "11A32";
 	break;
-    case Module::TYPE_11A33:
+    case Module::kTYPE_11A33:
 	output << "11A33";
 	break;
     }
@@ -299,13 +299,13 @@ void Module::Type(const string &in)
     ClearError(__LINE__);
     if (in.find("11A32") != string::npos)
     {
-	fType = TYPE_11A32;
+	fType = kTYPE_11A32;
 	fNChannel = 2; 
 	fDifferential = false;
     } 
     else if (in.find("11A33") != string::npos)
     {
-	fType = TYPE_11A33;
+	fType = kTYPE_11A33;
 	fNChannel = 1;
 	fDifferential = true;
     }

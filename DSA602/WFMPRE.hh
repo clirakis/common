@@ -119,7 +119,7 @@ public:
      * returns:
      *    true = 16 bits, false = 8 bits
      */
-    inline bool BIT(bool q=false) {if(q) Query(kBIT);return fBIT;};
+    inline bool BITS(bool q=false) {if(q) Query(kBIT);return fBIT;};
 
     /*!
      * Description: 

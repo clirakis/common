@@ -37,7 +37,7 @@
 class Module : public CObject
 {
 public:
-    enum TYPES    {TYPE_11A32=0, TYPE_11A33, TYPE_NONE};
+    enum TYPES    {kTYPE_11A32=0, kTYPE_11A33, kTYPE_NONE};
 
     /*!
      * Description: 
@@ -100,7 +100,6 @@ public:
      *    
      */
     inline TYPES Type(void) const {return fType;};
-
 
     /*!
      * Description: 

@@ -95,8 +95,6 @@ public:
      */
     unsigned int  GetNTrace(void);
 
-
-
     /*!
      * Description: 
      *   print out the entire data about this class. 
