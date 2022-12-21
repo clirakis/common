@@ -252,6 +252,8 @@ public:
      */
     uint32_t IndexFromTime(double);
 
+     
+
     /*!
      * Description: 
      *   print out the entire data about this class. 
@@ -266,6 +268,21 @@ public:
 
     /* ======================================================== */
 private:
+
+  /*!
+     * Description: 
+     *   Given the time index from the enum PERIOD above 
+     *   setup the array of possible sample lenghts possible for 
+     *   that period. 
+     * 
+     * Arguments:
+     *   PERIOD index. 
+     *
+     * returns:
+     *    none
+     */
+    bool SampleLengthsFromTimeIndex(PERIOD index);
+
     /*!
      * Description: 
      *   Query general query function. 

@@ -439,6 +439,316 @@ ostream& operator<<(ostream& output, const TimeBase &n)
 /**
  ******************************************************************
  *
+ * Function Name : 
+ *
+ * Description :
+ * Look at page 273 for details. 
+ *
+ * Inputs :
+ *
+ * Returns :
+ *
+ * Error Conditions :
+ * 
+ * Unit Tested on: 
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+bool TimeBase::SampleLengthsFromTimeIndex(PERIOD index)
+{
+    SET_DEBUG_STACK;
+    bool rc = true;
+    switch (index)
+    {
+    case k50ps: 
+	fNPossibleLengths = 1; 
+	PossibleLengths[0].valid = true;
+	break;
+    case k100ps: 
+	fNPossibleLengths = 2; 
+	PossibleLengths[0].valid = true;
+	PossibleLengths[1].valid = true;
+	break;
+    case k200ps: 
+	fNPossibleLengths = 3; 
+	PossibleLengths[0].valid = true;
+	PossibleLengths[1].valid = true;
+	PossibleLengths[2].valid = true;
+	break;
+    case k400ps: 
+	fNPossibleLengths = 1; 
+	PossibleLengths[2].valid = true;
+	break;
+    case k500ps: 
+	fNPossibleLengths = 4; 
+	PossibleLengths[0].valid = true;
+	PossibleLengths[1].valid = true;
+	PossibleLengths[3].valid = true;
+	PossibleLengths[4].valid = true;
+	break;
+    case k1ns: 
+	fNPossibleLengths = 6; 
+	PossibleLengths[0].valid = true;
+	PossibleLengths[1].valid = true;
+	PossibleLengths[2].valid = true;
+	PossibleLengths[3].valid = true;
+	PossibleLengths[4].valid = true;
+	PossibleLengths[5].valid = true;
+	PossibleLengths[6].valid = true;
+	break;
+    case k2ns: 
+	fNPossibleLengths = 8; 
+	PossibleLengths[0].valid = true;
+	PossibleLengths[1].valid = true;
+	PossibleLengths[2].valid = true;
+	PossibleLengths[3].valid = true;
+	PossibleLengths[4].valid = true;
+	PossibleLengths[5].valid = true;
+	PossibleLengths[6].valid = true;
+	PossibleLengths[7].valid = true;
+	break;
+    case k4ns: 
+	fNPossibleLengths = 2; 
+	PossibleLengths[7].valid = true;
+	PossibleLengths[8].valid = true;
+	break; 
+    case k5ns:
+	fNPossibleLengths = 8; 
+	PossibleLengths[0].valid = true;
+	PossibleLengths[1].valid = true;
+	PossibleLengths[2].valid = true;
+	PossibleLengths[3].valid = true;
+	PossibleLengths[4].valid = true;
+	PossibleLengths[5].valid = true;
+	PossibleLengths[6].valid = true;
+	PossibleLengths[9].valid = true;
+	break;
+    case k10ns: 
+	fNPossibleLengths = 10; 
+	PossibleLengths[0].valid = true;
+	PossibleLengths[1].valid = true;
+	PossibleLengths[2].valid = true;
+	PossibleLengths[3].valid = true;
+	PossibleLengths[4].valid = true;
+	PossibleLengths[5].valid = true;
+	PossibleLengths[6].valid = true;
+	PossibleLengths[7].valid = true;
+	PossibleLengths[8].valid = true;
+	PossibleLengths[9].valid = true;
+	break; 
+    case k20ns: 
+	fNPossibleLengths = 9; 
+	PossibleLengths[1].valid = true;
+	PossibleLengths[2].valid = true;
+	PossibleLengths[3].valid = true;
+	PossibleLengths[4].valid = true;
+	PossibleLengths[5].valid = true;
+	PossibleLengths[6].valid = true;
+	PossibleLengths[7].valid = true;
+	PossibleLengths[8].valid = true;
+	PossibleLengths[9].valid = true;
+	break; 
+    case k25ns: 
+	fNPossibleLengths = 1; 
+	PossibleLengths[0].valid = true;
+	break; 
+    case k50ns: 
+	fNPossibleLengths = 10; 
+	PossibleLengths[0].valid = true;
+	PossibleLengths[1].valid = true;
+	PossibleLengths[2].valid = true;
+	PossibleLengths[3].valid = true;
+	PossibleLengths[4].valid = true;
+	PossibleLengths[5].valid = true;
+	PossibleLengths[6].valid = true;
+	PossibleLengths[7].valid = true;
+	PossibleLengths[8].valid = true;
+	PossibleLengths[9].valid = true;
+	break; 
+    case k100ns:
+	fNPossibleLengths = 10; 
+	PossibleLengths[0].valid = true;
+	PossibleLengths[1].valid = true;
+	PossibleLengths[2].valid = true;
+	PossibleLengths[3].valid = true;
+	PossibleLengths[4].valid = true;
+	PossibleLengths[5].valid = true;
+	PossibleLengths[6].valid = true;
+	PossibleLengths[7].valid = true;
+	PossibleLengths[8].valid = true;
+	PossibleLengths[9].valid = true;
+	break; 
+    case k200ns: 
+	fNPossibleLengths = 7; 
+
+	PossibleLengths[1].valid = true;
+	PossibleLengths[2].valid = true;
+	PossibleLengths[5].valid = true;
+	PossibleLengths[6].valid = true;
+	PossibleLengths[7].valid = true;
+	PossibleLengths[8].valid = true;
+	PossibleLengths[9].valid = true;
+	break; 
+    case k250ns: 
+	fNPossibleLengths = 2; 
+	PossibleLengths[3].valid = true;
+	PossibleLengths[4].valid = true;
+	break; 
+    case k400ns: 
+	fNPossibleLengths = 2; 
+	PossibleLengths[1].valid = true;
+	PossibleLengths[2].valid = true;
+	break; 
+    case k500ns: 
+	fNPossibleLengths = 8; 
+	PossibleLengths[0].valid = true;
+	PossibleLengths[3].valid = true;
+	PossibleLengths[4].valid = true;
+	PossibleLengths[5].valid = true;
+	PossibleLengths[6].valid = true;
+	PossibleLengths[7].valid = true;
+	PossibleLengths[8].valid = true;
+	PossibleLengths[9].valid = true;
+	break; 
+    case k800ns: 
+	fNPossibleLengths = 1; 
+	PossibleLengths[2].valid = true;
+	break; 
+    case k1us: 
+	fNPossibleLengths = 9; 
+	PossibleLengths[0].valid = true;
+	PossibleLengths[1].valid = true;
+	PossibleLengths[3].valid = true;
+	PossibleLengths[4].valid = true;
+	PossibleLengths[5].valid = true;
+	PossibleLengths[6].valid = true;
+	PossibleLengths[7].valid = true;
+	PossibleLengths[8].valid = true;
+	PossibleLengths[9].valid = true;
+	break; 
+    case k2us: 
+	fNPossibleLengths = 9; 
+	PossibleLengths[0].valid = true;
+	PossibleLengths[1].valid = true;
+	PossibleLengths[2].valid = true;
+	PossibleLengths[3].valid = true;
+	PossibleLengths[4].valid = true;
+	PossibleLengths[5].valid = true;
+	PossibleLengths[6].valid = true;
+	PossibleLengths[7].valid = true;
+	PossibleLengths[8].valid = true;
+	break; 
+    case k2p5us: 
+	fNPossibleLengths = 1; 
+	PossibleLengths[9].valid = true;
+	break; 
+    case k4us:
+	fNPossibleLengths = 5; 
+	PossibleLengths[2].valid = true;
+	PossibleLengths[5].valid = true;
+	PossibleLengths[6].valid = true;
+	PossibleLengths[7].valid = true;
+	PossibleLengths[8].valid = true;
+	break; 
+    case k5us: 
+	fNPossibleLengths = 5; 
+	PossibleLengths[0].valid = true;
+	PossibleLengths[1].valid = true;
+	PossibleLengths[3].valid = true;
+	PossibleLengths[4].valid = true;
+	PossibleLengths[9].valid = true;
+	break; 
+    case k8us:
+	fNPossibleLengths = 2; 
+	PossibleLengths[7].valid = true;
+	PossibleLengths[8].valid = true;
+	break; 
+    case k10us:
+	fNPossibleLengths = 8; 
+	PossibleLengths[0].valid = true;
+	PossibleLengths[1].valid = true;
+	PossibleLengths[2].valid = true;
+	PossibleLengths[3].valid = true;
+	PossibleLengths[4].valid = true;
+	PossibleLengths[5].valid = true;
+	PossibleLengths[6].valid = true;
+	PossibleLengths[7].valid = true;
+	break; 
+    case k20us:
+	fNPossibleLengths = 10; 
+	PossibleLengths[0].valid = true;
+	PossibleLengths[1].valid = true;
+	PossibleLengths[2].valid = true;
+	PossibleLengths[3].valid = true;
+	PossibleLengths[4].valid = true;
+	PossibleLengths[5].valid = true;
+	PossibleLengths[6].valid = true;
+	PossibleLengths[7].valid = true;
+	PossibleLengths[8].valid = true;
+	PossibleLengths[9].valid = true;
+	break;
+    case k40us:
+	fNPossibleLengths = 2; 
+	PossibleLengths[7].valid = true;
+	PossibleLengths[8].valid = true;
+	break;
+    case k50us:
+	fNPossibleLengths = 8; 
+	PossibleLengths[0].valid = true;
+	PossibleLengths[1].valid = true;
+	PossibleLengths[2].valid = true;
+	PossibleLengths[3].valid = true;
+	PossibleLengths[4].valid = true;
+	PossibleLengths[5].valid = true;
+	PossibleLengths[6].valid = true;
+	PossibleLengths[9].valid = true;
+	break; 
+    case k100us:
+    case k200us:
+    case k500us:
+    case k1ms: 
+    case k2ms: 
+    case k5ms: 
+    case k10ms: 
+    case k20ms: 
+    case k50ms: 
+    case k100ms: 
+    case k200ms: 
+    case k500ms:
+    case k1s:
+    case k2s: 
+    case k5s: 
+    case k10s: 
+    case k20s: 
+    case k50s:
+    case k100s:
+	fNPossibleLengths = 10; 
+	PossibleLengths[0].valid = true;
+	PossibleLengths[1].valid = true;
+	PossibleLengths[2].valid = true;
+	PossibleLengths[3].valid = true;
+	PossibleLengths[4].valid = true;
+	PossibleLengths[5].valid = true;
+	PossibleLengths[6].valid = true;
+	PossibleLengths[7].valid = true;
+	PossibleLengths[8].valid = true;
+	PossibleLengths[9].valid = true;
+	break;
+    default:
+	rc = false;
+	    break;
+    }
+    SET_DEBUG_STACK;
+    return rc;
+}
+
+
+/**
+ ******************************************************************
+ *
  * Function Name : CheckLength
  *
  * Description :
@@ -460,8 +770,7 @@ ostream& operator<<(ostream& output, const TimeBase &n)
 double TimeBase::CheckLength(double Time)
 {
     SET_DEBUG_STACK;
-    SET_DEBUG_STACK;
-    size_t index = 0;
+    uint32_t index = k50ps;
     double T = -1.0;  // period
 
     // Nothing permitted. 
@@ -477,7 +786,6 @@ double TimeBase::CheckLength(double Time)
 	return Time;
     }
 
-
     /* 
      * Deterimine what is the closed value in the array to the 
      * specified time. 
@@ -486,298 +794,16 @@ double TimeBase::CheckLength(double Time)
     {
 	index++;
     }
-    if (index<kTB_END) 
-    {
-	/*
-	 * we are in the discrete end of things. Which index is it
-	 * closer to. 
-	 * 
-	 * index is just above the Time value. 
-	 */
-	T = Period[index].DT;
-	switch (index)
-	{
-	case k50ps: 
-	    fNPossibleLengths = 1; 
-	    PossibleLengths[0].valid = true;
-	    break;
-	case k100ps: 
-	    fNPossibleLengths = 2; 
-	    PossibleLengths[0].valid = true;
-	    PossibleLengths[1].valid = true;
-	    break;
-	case k200ps: 
-	    fNPossibleLengths = 3; 
-	    PossibleLengths[0].valid = true;
-	    PossibleLengths[1].valid = true;
-	    PossibleLengths[2].valid = true;
-	    break;
- 	case k400ps: 
- 	    fNPossibleLengths = 1; 
- 	    PossibleLengths[2].valid = true;
- 	    break;
-	case k500ps: 
-	    fNPossibleLengths = 4; 
-	    PossibleLengths[0].valid = true;
-	    PossibleLengths[1].valid = true;
-	    PossibleLengths[3].valid = true;
-	    PossibleLengths[4].valid = true;
-	    break;
-	case k1ns: 
-	    fNPossibleLengths = 6; 
-	    PossibleLengths[0].valid = true;
-	    PossibleLengths[1].valid = true;
-	    PossibleLengths[2].valid = true;
-	    PossibleLengths[3].valid = true;
-	    PossibleLengths[4].valid = true;
-	    PossibleLengths[5].valid = true;
-	    PossibleLengths[6].valid = true;
-	    break;
-	case k2ns: 
-	    fNPossibleLengths = 8; 
-	    PossibleLengths[0].valid = true;
-	    PossibleLengths[1].valid = true;
-	    PossibleLengths[2].valid = true;
-	    PossibleLengths[3].valid = true;
-	    PossibleLengths[4].valid = true;
-	    PossibleLengths[5].valid = true;
-	    PossibleLengths[6].valid = true;
-	    PossibleLengths[7].valid = true;
-	    break;
-	case k4ns: 
-	    fNPossibleLengths = 2; 
-	    PossibleLengths[7].valid = true;
-	    PossibleLengths[8].valid = true;
-	    break; 
-	case k5ns:
-	    fNPossibleLengths = 8; 
-	    PossibleLengths[0].valid = true;
-	    PossibleLengths[1].valid = true;
-	    PossibleLengths[2].valid = true;
-	    PossibleLengths[3].valid = true;
-	    PossibleLengths[4].valid = true;
-	    PossibleLengths[5].valid = true;
-	    PossibleLengths[6].valid = true;
-	    PossibleLengths[9].valid = true;
-	    break;
-	case k10ns: 
-	    fNPossibleLengths = 10; 
-	    PossibleLengths[0].valid = true;
-	    PossibleLengths[1].valid = true;
-	    PossibleLengths[2].valid = true;
-	    PossibleLengths[3].valid = true;
-	    PossibleLengths[4].valid = true;
-	    PossibleLengths[5].valid = true;
-	    PossibleLengths[6].valid = true;
-	    PossibleLengths[7].valid = true;
-	    PossibleLengths[8].valid = true;
-	    PossibleLengths[9].valid = true;
-	    break; 
-	case k20ns: 
-	    fNPossibleLengths = 9; 
-	    PossibleLengths[1].valid = true;
-	    PossibleLengths[2].valid = true;
-	    PossibleLengths[3].valid = true;
-	    PossibleLengths[4].valid = true;
-	    PossibleLengths[5].valid = true;
-	    PossibleLengths[6].valid = true;
-	    PossibleLengths[7].valid = true;
-	    PossibleLengths[8].valid = true;
-	    PossibleLengths[9].valid = true;
-	    break; 
-	case k25ns: 
-	    fNPossibleLengths = 1; 
-	    PossibleLengths[0].valid = true;
-	    break; 
-	case k50ns: 
-	    fNPossibleLengths = 10; 
-	    PossibleLengths[0].valid = true;
-	    PossibleLengths[1].valid = true;
-	    PossibleLengths[2].valid = true;
-	    PossibleLengths[3].valid = true;
-	    PossibleLengths[4].valid = true;
-	    PossibleLengths[5].valid = true;
-	    PossibleLengths[6].valid = true;
-	    PossibleLengths[7].valid = true;
-	    PossibleLengths[8].valid = true;
-	    PossibleLengths[9].valid = true;
-	    break; 
-	case k100ns:
-	    fNPossibleLengths = 10; 
-	    PossibleLengths[0].valid = true;
-	    PossibleLengths[1].valid = true;
-	    PossibleLengths[2].valid = true;
-	    PossibleLengths[3].valid = true;
-	    PossibleLengths[4].valid = true;
-	    PossibleLengths[5].valid = true;
-	    PossibleLengths[6].valid = true;
-	    PossibleLengths[7].valid = true;
-	    PossibleLengths[8].valid = true;
-	    PossibleLengths[9].valid = true;
-	    break; 
-	case k200ns: 
-	    fNPossibleLengths = 7; 
 
-	    PossibleLengths[1].valid = true;
-	    PossibleLengths[2].valid = true;
-	    PossibleLengths[5].valid = true;
-	    PossibleLengths[6].valid = true;
-	    PossibleLengths[7].valid = true;
-	    PossibleLengths[8].valid = true;
-	    PossibleLengths[9].valid = true;
-	    break; 
-	case k250ns: 
-	    fNPossibleLengths = 2; 
-	    PossibleLengths[3].valid = true;
-	    PossibleLengths[4].valid = true;
-	    break; 
-	case k400ns: 
-	    fNPossibleLengths = 2; 
-	    PossibleLengths[1].valid = true;
-	    PossibleLengths[2].valid = true;
-	    break; 
-	case k500ns: 
-	    fNPossibleLengths = 8; 
-	    PossibleLengths[0].valid = true;
-	    PossibleLengths[3].valid = true;
-	    PossibleLengths[4].valid = true;
-	    PossibleLengths[5].valid = true;
-	    PossibleLengths[6].valid = true;
-	    PossibleLengths[7].valid = true;
-	    PossibleLengths[8].valid = true;
-	    PossibleLengths[9].valid = true;
-	    break; 
-	case k800ns: 
-	    fNPossibleLengths = 1; 
-	    PossibleLengths[2].valid = true;
-	    break; 
-	case k1us: 
-	    fNPossibleLengths = 9; 
-	    PossibleLengths[0].valid = true;
-	    PossibleLengths[1].valid = true;
-	    PossibleLengths[3].valid = true;
-	    PossibleLengths[4].valid = true;
-	    PossibleLengths[5].valid = true;
-	    PossibleLengths[6].valid = true;
-	    PossibleLengths[7].valid = true;
-	    PossibleLengths[8].valid = true;
-	    PossibleLengths[9].valid = true;
-	    break; 
-	case k2us: 
-	    fNPossibleLengths = 9; 
-	    PossibleLengths[0].valid = true;
-	    PossibleLengths[1].valid = true;
-	    PossibleLengths[2].valid = true;
-	    PossibleLengths[3].valid = true;
-	    PossibleLengths[4].valid = true;
-	    PossibleLengths[5].valid = true;
-	    PossibleLengths[6].valid = true;
-	    PossibleLengths[7].valid = true;
-	    PossibleLengths[8].valid = true;
-	    break; 
-	case k2p5us: 
-	    fNPossibleLengths = 1; 
-	    PossibleLengths[9].valid = true;
-	    break; 
-	case k4us:
-	    fNPossibleLengths = 5; 
-	    PossibleLengths[2].valid = true;
-	    PossibleLengths[5].valid = true;
-	    PossibleLengths[6].valid = true;
-	    PossibleLengths[7].valid = true;
-	    PossibleLengths[8].valid = true;
-	    break; 
-	case k5us: 
-	    fNPossibleLengths = 5; 
-	    PossibleLengths[0].valid = true;
-	    PossibleLengths[1].valid = true;
-	    PossibleLengths[3].valid = true;
-	    PossibleLengths[4].valid = true;
-	    PossibleLengths[9].valid = true;
-	    break; 
-	case k8us:
-	    fNPossibleLengths = 2; 
-	    PossibleLengths[7].valid = true;
-	    PossibleLengths[8].valid = true;
-	    break; 
-	case k10us:
-	    fNPossibleLengths = 8; 
-	    PossibleLengths[0].valid = true;
-	    PossibleLengths[1].valid = true;
-	    PossibleLengths[2].valid = true;
-	    PossibleLengths[3].valid = true;
-	    PossibleLengths[4].valid = true;
-	    PossibleLengths[5].valid = true;
-	    PossibleLengths[6].valid = true;
-	    PossibleLengths[7].valid = true;
-	    break; 
-	case k20us:
-	    fNPossibleLengths = 10; 
-	    PossibleLengths[0].valid = true;
-	    PossibleLengths[1].valid = true;
-	    PossibleLengths[2].valid = true;
-	    PossibleLengths[3].valid = true;
-	    PossibleLengths[4].valid = true;
-	    PossibleLengths[5].valid = true;
-	    PossibleLengths[6].valid = true;
-	    PossibleLengths[7].valid = true;
-	    PossibleLengths[8].valid = true;
-	    PossibleLengths[9].valid = true;
-	    break;
-	case k40us:
-	    fNPossibleLengths = 2; 
-	    PossibleLengths[7].valid = true;
-	    PossibleLengths[8].valid = true;
-	    break;
-	case k50us:
-	    fNPossibleLengths = 8; 
-	    PossibleLengths[0].valid = true;
-	    PossibleLengths[1].valid = true;
-	    PossibleLengths[2].valid = true;
-	    PossibleLengths[3].valid = true;
-	    PossibleLengths[4].valid = true;
-	    PossibleLengths[5].valid = true;
-	    PossibleLengths[6].valid = true;
-	    PossibleLengths[9].valid = true;
+    /*
+     * we are in the discrete end of things. Which index is it
+     * closer to. 
+     * 
+     * index is just above the Time value. 
+     */
+    T = Period[index].DT;
 
-	    break; 
-	case k100us:
-	case k200us:
-	case k500us:
-	case k1ms: 
-	case k2ms: 
-	case k5ms: 
-	case k10ms: 
-	case k20ms: 
-	case k50ms: 
-	case k100ms: 
-	case k200ms: 
-	case k500ms:
-	case k1s:
-	case k2s: 
-	case k5s: 
-	case k10s: 
-	case k20s: 
-	case k50s:
-	case k100s:
-	    fNPossibleLengths = 10; 
-	    PossibleLengths[0].valid = true;
-	    PossibleLengths[1].valid = true;
-	    PossibleLengths[2].valid = true;
-	    PossibleLengths[3].valid = true;
-	    PossibleLengths[4].valid = true;
-	    PossibleLengths[5].valid = true;
-	    PossibleLengths[6].valid = true;
-	    PossibleLengths[7].valid = true;
-	    PossibleLengths[8].valid = true;
-	    PossibleLengths[9].valid = true;
-	    break;
-	default:
-	    return false;
-	    break;
-	}
-    }
-    else
+    if(!SampleLengthsFromTimeIndex((PERIOD)index))
     {
 	// We really should not end up here.
 	SET_DEBUG_STACK; 
@@ -840,6 +866,10 @@ bool TimeBase::SetPeriod(PERIOD Time, bool Main)
 	SET_DEBUG_STACK;
 	return false;
     }
+
+    // Go ahead and setup the allowable sample rate values too. 
+    SampleLengthsFromTimeIndex(Time);
+
     SET_DEBUG_STACK;
     return true;
 }
