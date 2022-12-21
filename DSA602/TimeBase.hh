@@ -62,13 +62,16 @@ public:
 		 k1ns, k2ns, k4ns, k5ns, k10ns, k20ns, k25ns, k50ns, k100ns,
 		 k200ns, k250ns, k400ns, k500ns, k800ns, 
 		 k1us, k2us, k2p5us, k4us, k5us, k8us, k10us, k20us,
-		 k40us, k50us, k100us, kTB_END}; 
+		 k40us, k50us, k100us, k200us, k500us, k1ms, k2ms, 
+		 k5ms, k10ms, k20ms, k50ms, k100ms, k200ms, k500ms,
+		 k1s, k2s, k5s, k10s, k20s, k50s, k100s,
+		 kTB_END}; 
     // Time base will apparently support from 100us to 100s to be shown. 
 
 
     static const struct t_Commands TBCommands[kEND_LIST+1];
     static struct t_TBLength PossibleLengths[10];
-    static const double Period[kTB_END];
+    static const struct t_Period Period[kTB_END];
 
     /* ======================================================== */
     /*             Private Data Access Functions                */ 

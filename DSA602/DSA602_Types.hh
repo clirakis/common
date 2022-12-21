@@ -61,5 +61,10 @@ struct t_TBLength
     bool valid;
 };
 
-
+struct t_Period
+{
+    double         DT;
+    unsigned short AllowedLengths;
+    const char*    label;
+};
 #endif
