@@ -874,6 +874,25 @@ bool TimeBase::SetLength(LENGTH Lindex, bool Main)
     SET_DEBUG_STACK;
     return true;
 }
+uint32_t TimeBase::IndexFromTime(double Time)
+{
+    SET_DEBUG_STACK;
+    uint32_t TimeIndex = 0;
+
+    while (TimeIndex<kTB_END)
+    {
+	if (Time == Period[TimeIndex].DT)
+	{
+	    break;
+	}
+	TimeIndex++;
+    }
+    
+    SET_DEBUG_STACK;
+    return TimeIndex;
+}
+
+
 #ifdef DEBUG_TB
 void TimeBase::Test(void)
 {

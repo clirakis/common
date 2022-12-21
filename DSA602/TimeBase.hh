@@ -224,6 +224,20 @@ public:
      inline double WindowXIncrement(bool q=false) 
 	{if(q) Query(kXINCREMENT, false); return fXIncrement[kWINDOW];};
 
+
+    /*!
+     * Description: 
+     *   Given a retrieved time value, determine what the index into
+     *   the array of values is. 
+     * 
+     * Arguments:
+     *   t - value to return index on. 
+     *
+     * returns:
+     *    index
+     */
+    uint32_t IndexFromTime(double);
+
     /*!
      * Description: 
      *   print out the entire data about this class. 
