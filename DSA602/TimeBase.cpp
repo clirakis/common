@@ -32,6 +32,8 @@ using namespace std;
 #include "GParse.hh"
 
 
+TimeBase* TimeBase::fTimeBase;
+
 /* Command, type, upper bound, lower bound */
 const struct t_Commands TimeBase::TBCommands[kEND_LIST+1]= {
     {"LEN",        kCT_FLOAT, 32768.0,   512.0},  // Amplifier offset
@@ -183,6 +185,7 @@ TimeBase::TimeBase (void) : CObject()
     ClearError(__LINE__);
     SetName("TimeBase");
 
+    fTimeBase = this;
     // Set to no values
     fNPossibleLengths        = 0; 
 

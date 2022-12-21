@@ -52,6 +52,20 @@ public:
      */
     ~TimeBase(void);
 
+    /*!
+     * Description: 
+     *   static member such that other areas in a parent program
+     *   can gain access. 
+     *
+     * Arguments:
+     *     NONE
+     *
+     * returns:
+     *    pointer to this.
+     */
+    static TimeBase* GetThis()    {return fTimeBase;};
+
+
     enum COMMANDs { kLENGTH=0, kTIME, kXINCREMENT, kEND_LIST};
     enum FRAME    {kMAIN=0, kWINDOW, kEND_FRAME};
     /* Possibl length enums. */
@@ -341,5 +355,8 @@ private:
     // Given a time in the CheckTimeLength, return the values for
     // possible lengths and number of lengths in the index here. 
     size_t fNPossibleLengths; 
+
+    static TimeBase* fTimeBase;         // This pointer
+
 };
 #endif
