@@ -53,55 +53,61 @@ const double TimeBase::Period[kTB_END] =
  1.0e-6, 2.0e-6, 2.5e-6, 4.0e-6, 5.0e-6, 8.0e-6, 10.0e-6,
  20.0e-6, 40.0e-6, 50.0e-6, 100.0e-6};
 #else
+/*
+ * These are the possible time base values to set the scope to. 
+ * They also have a label associated with them for ease of reference. 
+ * The number of samples per setting is shown in the table below. 
+ * To determine if a sample size is valid call CheckLength below. 
+ */
 const struct t_Period TimeBase::Period[kTB_END] = {
-    { 50.0e-12, 0x0001," 50ps"}, 
-    {100.0e-12, 0x0003,"100ps"}, 
-    {200.0e-12, 0x0007,"200ps"}, 
-    {400.0e-12, 0x0004,"400ps"}, 
-    {500.0e-12, 0x001B,"500ps"}, 
-    {  1.0e-9,  0x007F,"  1ns"}, 
-    {  2.0e-9,  0x01FF,"  2ns"}, 
-    {  4.0e-9,  0x0180,"  4ns"}, 
-    {  5.0e-9,  0x027F,"  5ns"}, 
-    { 10.0e-9,  0x03FF," 10ns"}, 
-    { 20.0e-9,  0x03FE," 20ns"},
-    { 25.0e-9,  0x0001," 25ns"}, 
-    { 50.0e-9,  0x03FF," 50ns"}, 
-    {100.0e-9,  0x03FF,"100ns"}, 
-    {200.0e-9,  0x03E6,"200ns"}, 
-    {250.0e-9,  0x0018,"250ns"}, 
-    {400.0e-9,  0x0006,"400ns"}, 
-    {500.0e-9,  0x03F9,"500ns"}, 
-    {800.0e-9,  0x03F9,"800ns"}, // CHECK 
-    {  1.0e-6,  0x03FB,"  1us"}, 
-    {  2.0e-6,  0x01FF,"  2us"}, 
-    {  2.5e-6,  0x0200,"2.5us"}, 
-    {  4.0e-6,  0x01E4,"  4us"}, 
-    {  5.0e-6,  0x001B,"  5us"}, 
-    {  8.0e-6,  0x0180,"  8us"}, 
-    { 10.0e-6,  0x027F," 10us"}, 
-    { 20.0e-6,  0x03FF," 20us"}, 
-    { 40.0e-6,  0x0180," 40us"}, 
-    { 50.0e-6,  0x027F," 50us"},
-    {100.0e-6,  0x03FF,"100us"},
-    {200.0e-6,  0x03FF,"200us"},
-    {500.0e-6,  0x03FF,"500us"},
-    {  1.0e-3,  0x03FF,"  1ms"},
-    {  2.0e-3,  0x03FF,"  2ms"},
-    {  5.0e-3,  0x03FF,"  5ms"},
-    { 10.0e-3,  0x03FF," 10ms"},
-    { 20.0e-3,  0x03FF," 20ms"},
-    { 50.0e-3,  0x03FF," 50ms"},
-    {100.0e-3,  0x03FF,"100ms"},
-    {200.0e-3,  0x03FF,"200ms"},
-    {500.0e-3,  0x03FF,"500ms"},
-    {  1.0   ,  0x03FF,"  1s"},
-    {  2.0   ,  0x03FF,"  2s"},
-    {  5.0   ,  0x03FF,"  5s"},
-    { 10.0   ,  0x03FF," 10s"},
-    { 20.0   ,  0x03FF," 20s"},
-    { 50.0   ,  0x03FF," 50s"},
-    {100.0   ,  0x03FF,"100s"}};
+    { 50.0e-12, " 50ps"}, 
+    {100.0e-12, "100ps"}, 
+    {200.0e-12, "200ps"}, 
+    {400.0e-12, "400ps"}, 
+    {500.0e-12, "500ps"}, 
+    {  1.0e-9,  "  1ns"}, 
+    {  2.0e-9,  "  2ns"}, 
+    {  4.0e-9,  "  4ns"}, 
+    {  5.0e-9,  "  5ns"}, 
+    { 10.0e-9,  " 10ns"}, 
+    { 20.0e-9,  " 20ns"},
+    { 25.0e-9,  " 25ns"}, 
+    { 50.0e-9,  " 50ns"}, 
+    {100.0e-9,  "100ns"}, 
+    {200.0e-9,  "200ns"}, 
+    {250.0e-9,  "250ns"}, 
+    {400.0e-9,  "400ns"}, 
+    {500.0e-9,  "500ns"}, 
+    {800.0e-9,  "800ns"}, // CHECK 
+    {  1.0e-6,  "  1us"}, 
+    {  2.0e-6,  "  2us"}, 
+    {  2.5e-6,  "2.5us"}, 
+    {  4.0e-6,  "  4us"}, 
+    {  5.0e-6,  "  5us"}, 
+    {  8.0e-6,  "  8us"}, 
+    { 10.0e-6,  " 10us"}, 
+    { 20.0e-6,  " 20us"}, 
+    { 40.0e-6,  " 40us"}, 
+    { 50.0e-6,  " 50us"},
+    {100.0e-6,  "100us"},
+    {200.0e-6,  "200us"},
+    {500.0e-6,  "500us"},
+    {  1.0e-3,  "  1ms"},
+    {  2.0e-3,  "  2ms"},
+    {  5.0e-3,  "  5ms"},
+    { 10.0e-3,  " 10ms"},
+    { 20.0e-3,  " 20ms"},
+    { 50.0e-3,  " 50ms"},
+    {100.0e-3,  "100ms"},
+    {200.0e-3,  "200ms"},
+    {500.0e-3,  "500ms"},
+    {  1.0   ,  "  1s"},
+    {  2.0   ,  "  2s"},
+    {  5.0   ,  "  5s"},
+    { 10.0   ,  " 10s"},
+    { 20.0   ,  " 20s"},
+    { 50.0   ,  " 50s"},
+    {100.0   ,  "100s"}};
 
 #endif
 struct t_TBLength TimeBase::PossibleLengths[10] = {
@@ -736,6 +742,24 @@ double TimeBase::CheckLength(double Time)
 
 	    break; 
 	case k100us:
+	case k200us:
+	case k500us:
+	case k1ms: 
+	case k2ms: 
+	case k5ms: 
+	case k10ms: 
+	case k20ms: 
+	case k50ms: 
+	case k100ms: 
+	case k200ms: 
+	case k500ms:
+	case k1s:
+	case k2s: 
+	case k5s: 
+	case k10s: 
+	case k20s: 
+	case k50s:
+	case k100s:
 	    fNPossibleLengths = 10; 
 	    PossibleLengths[0].valid = true;
 	    PossibleLengths[1].valid = true;
