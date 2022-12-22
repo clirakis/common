@@ -186,7 +186,7 @@ public:
 
     /*!
      * Description: 
-     *   Set
+     *   Set the number of samples in the window based on index above.
      *
      * Arguments:
      *   
@@ -251,6 +251,31 @@ public:
      *    index
      */
     uint32_t IndexFromTime(double);
+
+    /*!
+     * Description: 
+     *   How many possible sample lengths are possible. 
+     *
+     * Arguments:
+     *   NONE
+     *
+     * returns:
+     *   number of entries in table. 
+     */
+    inline uint32_t NumberEntries(void) const {return  fNPossibleLengths;};
+
+    /*!
+     * Description: 
+     *   Access the lengths based on index. 
+     *
+     * Arguments:
+     *   index
+     *
+     * returns:
+     *   number of available samples for the selected period. 
+     */
+    inline struct t_TBLength SampleLengthByIndex(uint32_t i) const 
+	{if (i<10) return PossibleLengths[i]; else return PossibleLengths[0];};
 
      
 
@@ -348,7 +373,8 @@ private:
 
     /*!
      * Description: 
-     *   Set Time period based on the enum PERIOD value and WINDOW selected. 
+     *   Set Time period based on the enum PERIOD value and WINDOW 
+     *   selected. 
      * Arguments:
      *   enum for one of the permissible values. 
      *   main   - if set to true, then it is a main window result. 
@@ -357,6 +383,8 @@ private:
      *   true on success. 
      */
     bool SetPeriod(PERIOD Time, bool main);
+
+    
 #ifdef DEBUG_TB
     void Test(void);
 #endif
