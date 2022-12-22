@@ -461,6 +461,8 @@ bool TimeBase::SampleLengthsFromTimeIndex(PERIOD index)
 {
     SET_DEBUG_STACK;
     bool rc = true;
+
+    //cout << __FUNCTION__ << " index " << index << endl;
     switch (index)
     {
     case k50ps: 
@@ -931,6 +933,28 @@ bool TimeBase::SetLength(LENGTH Lindex, bool Main)
     SET_DEBUG_STACK;
     return true;
 }
+
+
+/**
+ ******************************************************************
+ *
+ * Function Name : 
+ *
+ * Description : 
+ *
+ * Inputs : None
+ *
+ * Returns : None
+ *
+ * Error Conditions :
+ *
+ * Unit Tested on:
+ *
+ * Unit Tested by:
+ *
+ *
+ *******************************************************************
+ */
 uint32_t TimeBase::IndexFromTime(double Time)
 {
     SET_DEBUG_STACK;
@@ -949,6 +973,54 @@ uint32_t TimeBase::IndexFromTime(double Time)
     return TimeIndex;
 }
 
+/**
+ ******************************************************************
+ *
+ * Function Name : 
+ *
+ * Description : 
+ *
+ * Inputs : None
+ *
+ * Returns : None
+ *
+ * Error Conditions :
+ *
+ * Unit Tested on: 14-Dec-14
+ *
+ * Unit Tested by:
+ *
+ *
+ *******************************************************************
+ */
+uint32_t TimeBase::IndexFromLength(double Length)
+{
+    SET_DEBUG_STACK;
+    uint32_t LengthIndex = 0;
+
+    if (Length<=512)
+	LengthIndex = k512;
+    else if (Length<=1024)
+	LengthIndex = k1024;
+    else if (Length<=k2048)
+	LengthIndex = k2048;
+    else if (Length<=k4096)
+	LengthIndex = k4096;
+    else if (Length<=k5120)
+	LengthIndex = k5120;
+    else if (Length<=k8192)
+	LengthIndex = k8192;
+    else if (Length<=k16384)
+	LengthIndex = k16384;
+    else if (Length<=k20464)
+	LengthIndex = k20464;
+    else if (Length<=k32768)
+	LengthIndex = k32768;
+    else
+	LengthIndex = kTB_END;
+    SET_DEBUG_STACK;
+    return LengthIndex;
+}
 
 #ifdef DEBUG_TB
 void TimeBase::Test(void)

@@ -254,6 +254,33 @@ public:
 
     /*!
      * Description: 
+     *   Given a retrieved length value, determine what the index into
+     *   the array of values is. 
+     * 
+     * Arguments:
+     *   t - value to return index on. 
+     *
+     * returns:
+     *    index
+     */
+    uint32_t IndexFromLength(double);
+
+  /*!
+     * Description: 
+     *   Given the time index from the enum PERIOD above 
+     *   setup the array of possible sample lenghts possible for 
+     *   that period. 
+     * 
+     * Arguments:
+     *   PERIOD index. 
+     *
+     * returns:
+     *    none
+     */
+    bool SampleLengthsFromTimeIndex(PERIOD index);
+
+    /*!
+     * Description: 
      *   How many possible sample lengths are possible. 
      *
      * Arguments:
@@ -273,11 +300,10 @@ public:
      *
      * returns:
      *   number of available samples for the selected period. 
+     * THIS COULD ENCOUNTER AN OVERFLOW. 
      */
     inline struct t_TBLength SampleLengthByIndex(uint32_t i) const 
-	{if (i<10) return PossibleLengths[i]; else return PossibleLengths[0];};
-
-     
+	{return PossibleLengths[i];};
 
     /*!
      * Description: 
@@ -293,20 +319,6 @@ public:
 
     /* ======================================================== */
 private:
-
-  /*!
-     * Description: 
-     *   Given the time index from the enum PERIOD above 
-     *   setup the array of possible sample lenghts possible for 
-     *   that period. 
-     * 
-     * Arguments:
-     *   PERIOD index. 
-     *
-     * returns:
-     *    none
-     */
-    bool SampleLengthsFromTimeIndex(PERIOD index);
 
     /*!
      * Description: 
