@@ -358,6 +358,9 @@ size_t DSA602::Curve(int trace, double **X, double **Y)
     double *xtmp, *ytmp;
     size_t nbytes = 0;
 
+    /*
+     * Set which trace to read out. 
+     */
     xtmp = NULL;
     sprintf(msg, "OUT TRA%d",trace);   // page 221
     // Setup to read trace. 
@@ -365,7 +368,7 @@ size_t DSA602::Curve(int trace, double **X, double **Y)
 
     // Query all the data about the current waveforms. 
     fWFMPRE->Update();
-#if 1
+#if 0
     // Dump WFMPRE values. 
     cout << *fWFMPRE << endl;
 #endif
@@ -418,12 +421,17 @@ size_t DSA602::Curve(int trace, double **X, double **Y)
 	    }
 	    p++; // Skip over byte count. 
 
+	    // Take the point format query out of the loop. 
+	    // Otherwise this takes a huge amount of time since 
+	    // it does a gpib read each time. 
+	    //
+	    PT_TYPES ptfmt = fWFMPRE->PointFormat(true);
 	    // iterate to convert.
 	    for(i=0;i<count;i++)
 	    {
 		// Check on the point format, do this with an
                 // actual query
-		switch (fWFMPRE->PointFormat(true))
+		switch (ptfmt)
 		{
 		case kPT_Y:   // Y
 		    iy = i;
