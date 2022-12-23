@@ -365,13 +365,12 @@ size_t DSA602::Curve(int trace, double **X, double **Y)
 
     // Query all the data about the current waveforms. 
     fWFMPRE->Update();
+#if 1
+    // Dump WFMPRE values. 
+    cout << *fWFMPRE << endl;
+#endif
 
     count = fWFMPRE->NumberPoints();
-#if 0
-    //cout << "Expect: " << count << " points expected." 
-//	 << " of format: " << (int) fWFMPRE->fPTfmt << endl;
-    cout << *fWFMPRE;
-#endif
     if (count>0)
     {
 	// Allocate the necessary space to hold this data. 
@@ -450,13 +449,33 @@ size_t DSA602::Curve(int trace, double **X, double **Y)
 	}
 	free(val);
     }
-    //cout << "COUNT: " << count << endl;
+    cout << __FUNCTION__ << " COUNT: " << count << endl;
     SET_DEBUG_STACK;
     return count;
 }
+/**
+ ******************************************************************
+ *
+ * Function Name : 
+ *
+ * Description :
+ *
+ * Inputs :
+ *
+ * Returns :
+ *
+ * Error Conditions :
+ * 
+ * Unit Tested on: 
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
 void DSA602::SetDisplayTrace(unsigned char n, bool t)
 {
-    cout << "FIXME!!" << endl;
+    cout << __FILE__<< " " << __FUNCTION__ << " FIXME!!" << endl;
 }
 
 

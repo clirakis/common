@@ -288,7 +288,8 @@ public:
     void SetDisplayTrace(unsigned char n, bool t);
     /*!
      * Description: 
-     *   
+     *  FIXME, this looks dangerous. 
+     *  What was I trying to do here??
      *
      * Arguments:
      *   
@@ -372,7 +373,6 @@ public:
 private:
     static DSA602* fDSA602;         // This pointer
 
-    //bool            fTrace[8];      // Is trace displayed on screen?
     System*         fSystem;        // Handle to all the System calls
     StatusAndEvent* fpSE;           // Handle to status and event calls.
     Measurement*    fMeasurement;   // Handle to measurement calls. 
