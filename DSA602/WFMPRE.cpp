@@ -23,8 +23,6 @@ using namespace std;
 #include <cmath>
 #include <string.h>
 #include <stdlib.h>
-#include <arpa/inet.h>
-#include <ctime>
 
 // Local Includes.
 #include "debug.h"
@@ -33,6 +31,7 @@ using namespace std;
 #include "WFMPRE.hh"
 #include "Units.hh"
 #include "GParse.hh"
+#include "CLogger.hh"
 
 /* Command, type, upper bound, lower bound */
 const struct t_Commands WFMPRE::WFMPRECommands[kENDCOUNT+1]= {
@@ -67,7 +66,7 @@ const struct t_Commands WFMPRE::WFMPRECommands[kENDCOUNT+1]= {
  *
  * Description : Decode the waveform prefix data. 
  *
- * Inputs :
+ * Inputs : A string that is returned from a WFMPRE? command. 
  *
  * Returns :
  *
@@ -103,7 +102,7 @@ WFMPRE::WFMPRE(const char *val) : CObject()
  *
  * Error Conditions : none
  * 
- * Unit Tested on: 
+ * Unit Tested on: 24-Dec-22
  *
  * Unit Tested by: CBL
  *
@@ -142,7 +141,7 @@ void WFMPRE::Reset(void)
  *
  * Description : Decode the waveform prefix data. 
  *
- * Inputs :
+ * Inputs : A string that is returned from a WFMPRE? command. 
  *
  * Returns :
  *
@@ -610,10 +609,12 @@ double WFMPRE::ScaleXY( int i, short *DataIn, double &y)
  */
 bool WFMPRE::Update(void)
 {
-    DSA602 *pDSA602 = DSA602::GetThis();
+    SET_DEBUG_STACK;
+    DSA602  *pDSA602 = DSA602::GetThis();
+    CLogger *log     = CLogger::GetThis();
     ClearError(__LINE__);
-    bool rc = false;
-    char Response[512];
+    bool rc         = false;
+    char Response[1024];
 
     // Send command
     rc = pDSA602->Command("WFMPRE?", Response, sizeof(Response));
@@ -621,11 +622,16 @@ bool WFMPRE::Update(void)
     {
 	// Decode the response. 
 	Decode(Response);
+	if(log->CheckVerbose(1))
+	{
+	    log->Log("# WFMPRE Update Response: %s\n", Response);
+	}
 #if 0
 	cout << "WFMPRE_GPIB:" << Response << endl
 	     << *this << endl;
 #endif
     }
+    SET_DEBUG_STACK;
     return rc;
 }
 /**
@@ -656,10 +662,11 @@ bool WFMPRE::Update(void)
  */
 bool WFMPRE::Query(COMMANDs c)
 {
-    char   cstring[32], Response[64];
-    DSA602 *pDSA602 = DSA602::GetThis();
     SET_DEBUG_STACK;
     ClearError(__LINE__);
+    char   cstring[32], Response[64];
+    DSA602 *pDSA602 = DSA602::GetThis();
+    CLogger *log    = CLogger::GetThis();
 
     // Query for specific data.
     sprintf( cstring, "WFM? %s", WFMPRECommands[c].Command);
@@ -667,7 +674,10 @@ bool WFMPRE::Query(COMMANDs c)
 
     if(pDSA602->Command(cstring, Response, sizeof(Response)))
     {
-	//cout << " RESPONSE: " << Response << endl;
+	if(log->CheckVerbose(1))
+	{
+	    log->Log("# WFMPRE Query Response: %s\n", Response);
+	}
  	Decode(Response);
     }
     else
