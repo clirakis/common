@@ -29,22 +29,32 @@ public:
     ~CLogger();
     /*! Return the pointer assocated with the log stream */
     ofstream*   LogPtr(void) {return fLogptr;};
+
     /*! Control logging */
     inline void Toggle(bool onoff=true) {fOnOff = onoff;};
+
     /*! Insert CR/LF */
     inline void CR(void)     {if(fOnOff) *fLogptr << endl;};
+
     /*! Insert space in stream. */
     inline void Space(void)  {if(fOnOff) *fLogptr << " ";};
+
     /*! Set the verbosity level for the logging. */
     void SetVerbose(unsigned int i);
+
     /*! Access the current verbosity level */
     inline unsigned int  GetVerbose(void) const {return fVerbose;};
 
+    /*! Check to see if I want to log something based on verbose level. */
+    inline bool CheckVerbose(int val) const {return (fVerbose>val);};
+
     /*! Log a string, kinda raw. */
     void LogData(const char *msg);
+
     /*! Log a double, just puts the number in the stream, no endl. 
      * this does flush the stream. */ 
     void LogData(double );
+
     /*! Log a float, just puts the number in the stream, no endl. 
      * this does flush the stream. */ 
     void LogData(float );
@@ -60,8 +70,10 @@ public:
 
     /*! Log data using a variable argument list. flush but no endl. */
     void Log( const char *fmt, ...);
+
     /*! Log a variable format with a timestamp, no endl. */
     void LogTime(const char *fmt, ...);
+
     /*! Full up log error. Includes endl. */
     void LogError( const char *File, int Line, char Level, const char *text);
 
@@ -71,11 +83,11 @@ public:
 private:
 
     /*! Control ther verbosity level of output. */
-    unsigned int       fVerbose;
+    int    fVerbose;
     /*! Turn logging on/off, this isn't used everywhere. */
-    bool      fOnOff;
+    bool            fOnOff;
     /*! Maintain a copy of the stream pointer */
-    ofstream* fLogptr;
+    ofstream*       fLogptr;
 
     /*! The static 'this' pointer. */
     static CLogger *fLogger;
