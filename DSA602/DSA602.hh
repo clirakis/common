@@ -393,7 +393,7 @@ private:
      * returns:
      *    true on success
      */
-    bool        Init();
+    bool        Init(void);
 
     /*!
      * Description: 

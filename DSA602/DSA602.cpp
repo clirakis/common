@@ -66,6 +66,7 @@ DSA602::DSA602 (unsigned int gpib_address): GPIB(gpib_address)
     SET_DEBUG_STACK;
     SetName("DSA602");
     CLogger::GetThis()->Log("# DSA602 library revision info: %s\n", Version());
+    fDSA602 = this;
 
     fWFMPRE      = NULL;
     fSystem      = NULL;
@@ -79,7 +80,6 @@ DSA602::DSA602 (unsigned int gpib_address): GPIB(gpib_address)
 	SetError(-1, __LINE__);
 	return;
     }
-    fDSA602 = this;
 
     fWFMPRE      = new WFMPRE();
     fSystem      = new System();
@@ -213,6 +213,8 @@ bool DSA602::Init(void)
 {
     SET_DEBUG_STACK;
     bool rc;
+    CLogger *log = CLogger::GetThis();
+
     // My desired setup.
     const char *Commands[] = {
 	"DISP GRA:SIN",    // Single graticule
@@ -233,6 +235,7 @@ bool DSA602::Init(void)
 	"AUTOSET HORIZ:PERIOD", // page 56, how horiz behaves in autoset
 	"AUTOSET VERT:PP", // ECL, OFF, PP, TTL
 	"AVG OFF",         
+	"WFM PT.FMT:Y",        // default Y and time. 
 	NULL};
     /* AVGTYPE {BACKWeight| SUMMATION} page 60
      * BASELINE NRx
@@ -304,6 +307,10 @@ bool DSA602::Init(void)
     while(Commands[index] != NULL)
     {
 	rc = Command( Commands[index], NULL, 0);
+	if(log->CheckVerbose(1))
+	{
+	    log->Log("# DSA602::Init() Init: %d %s\n", index, Commands[index]);
+	}
 	if (rc)
 	{
 	    index++;
@@ -314,7 +321,7 @@ bool DSA602::Init(void)
 	    return false;
 	}
     }
-    //cout << "Initialize, sent " << index << " Commands." << endl;
+    log->Log("# DSA602::Init() Initialize, sent %d Commands.\n", index);
     SET_DEBUG_STACK;
     return true;
 }
@@ -350,14 +357,15 @@ size_t DSA602::Curve(int trace, double **X, double **Y)
     const char Return[] = "CURVE %";  
     const int  nn = sizeof(Return)-1;
     char   msg[256];
-    size_t nexpect;    // Number of expected bytes
-    size_t count;      // 
-    size_t i, ix, iy;  // Count variable. 
-    char   *val;       // Pointer to allocate space to for acquisition.
-    short  *p;         // Pointer to access the data as shorts.
+    size_t nexpect = 0; // Number of expected bytes
+    size_t count;       // 
+    size_t i, ix, iy;   // Count variable. 
+    char   *val;        // Pointer to allocate space to for acquisition.
+    short  *p;          // Pointer to access the data as shorts.
     double *xtmp, *ytmp;
     size_t nbytes = 0;
 
+    val = NULL;
     /*
      * Set which trace to read out. 
      */
@@ -391,10 +399,18 @@ size_t DSA602::Curve(int trace, double **X, double **Y)
 	    nexpect = nbytes * 2 * (count+1) + nn;
 	    break;
 	case kPT_ENV:
+	    cout << __FILE__ << " " << __FUNCTION__ << " " 
+		 << "FIXME - kPT_ENV"
+		 << endl;
 	    // Not currently covered.
+	    return 0;
 	    break;
 	case kPT_NONE:
 	    // Do nothing
+	    CLogger::GetThis()->Log("# %s %s This is odd.\n", __FILE__, 
+				    __FUNCTION__);
+	    SET_DEBUG_STACK; 
+	    return 0;
 	    break;
 	}
 
