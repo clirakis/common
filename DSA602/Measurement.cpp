@@ -26,6 +26,7 @@ using namespace std;
 
 // Local Includes.
 #include "debug.h"
+#include "CLogger.hh"
 #include "DSA602.hh"
 #include "Measurement.hh"
 
@@ -49,10 +50,11 @@ using namespace std;
  *
  *******************************************************************
  */
-Measurement::Measurement () : CObject()
+Measurement::Measurement (void) : CObject()
 {
     SetName("Measurement");
     ClearError(__LINE__);
+    memset(fActive, 0, 6*sizeof(uint8_t));
 }
 
 /**
@@ -75,10 +77,251 @@ Measurement::Measurement () : CObject()
  *
  *******************************************************************
  */
-Measurement::~Measurement ()
+Measurement::~Measurement (void)
 {
 }
+/**
+ ******************************************************************
+ *
+ * Function Name : Update
+ *
+ * Description : Update all in the measurement of the waveform.
+ *
+ * Inputs : NONE
+ *
+ * Returns : true on success
+ *
+ * Error Conditions : On GPIB read
+ * 
+ * Unit Tested on: 
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+bool Measurement::Update(void) 
+{
+    SET_DEBUG_STACK;
+    bool rv = Query("MEAS");
+    //cout << *this << endl;
+    SET_DEBUG_STACK;
+    return rv;
+}
 
+/**
+ ******************************************************************
+ *
+ * Function Name : NList
+ *
+ * Description : Return number of measurements that are currently 
+ *               checked in the list. 
+ *
+ * Inputs : NONE
+ *
+ * Returns : Number of measurements available. 
+ *
+ * Error Conditions : On GPIB read
+ * 
+ * Unit Tested on: 25-Dec-22
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+uint32_t Measurement::NList(void)
+{
+    SET_DEBUG_STACK;
+    DSA602  *pDSA602 = DSA602::GetThis();
+    CLogger *log     = CLogger::GetThis();
+    uint32_t rv = 0;
+    char     Response[32];
+    char    *p;
+    ClearError(__LINE__);
+    
+    /*
+     * Looking for something like: MSNUM 2
+     */
+    memset(Response, 0, sizeof(Response));
+    if (pDSA602->Command( "MSN?", Response, sizeof(Response)))
+    {
+	if(log->CheckVerbose(1))
+	{
+	    log->Log("# Measurement::NList() %s\n", Response);
+	}
+	p = strchr(Response,' ');
+	rv = atoi(p);
+    }
+    SET_DEBUG_STACK;
+    return rv;
+}
+
+/**
+ ******************************************************************
+ *
+ * Function Name : ActiveList
+ *
+ * Description : Get the list of active elements to measure. 
+ *
+ * Inputs : NONE
+ *
+ * Returns : Number of measurements available. 
+ *
+ * Error Conditions : On GPIB read
+ * 
+ * Unit Tested on: 
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+uint32_t Measurement::ActiveList(void)
+{
+    SET_DEBUG_STACK;
+    const char *tok = ",";
+    DSA602  *pDSA602 = DSA602::GetThis();
+    CLogger *log     = CLogger::GetThis();
+    uint32_t rv = 0;
+    char     Response[256];
+    char     *p, *q;
+
+    ClearError(__LINE__);
+
+    memset(fActive, 0, 6*sizeof(uint8_t));
+    
+    /*
+     * Looking for something like: MSLIST SFREQUENCY,SMAGNITUDE
+     */
+    memset(Response, 0, sizeof(Response));
+    if (pDSA602->Command( "MSLIST?", Response, sizeof(Response)))
+    {
+	if(log->CheckVerbose(1))
+	{
+	    log->Log("# Measurement::ActiveList() %s\n", Response);
+	}
+	uint8_t count = 0;          // Measurement list count. 
+	p = strchr(Response, ' ');  // Skip MSLIST response. 
+	q = strtok( p, tok);        // Start the tokenization. 
+	while (q!=NULL)
+	{
+	    if (strstr(q, "GAI") != NULL)
+	    {
+		fActive[count] = Measurement::kGAIN;
+	    }
+	    else if (strstr(q, "MAX") != NULL)
+	    {
+		fActive[count] = Measurement::kMAX;
+	    }
+	    else if (strstr(q, "MEA") != NULL)
+	    {
+		fActive[count] = Measurement::kMEAN;
+	    }
+	    else if (strstr(q, "MID") != NULL)
+	    {
+		fActive[count] = Measurement::kMID;
+	    }
+	    else if (strstr(q, "MIN") != NULL)
+	    {
+		fActive[count] = Measurement::kMIN;
+	    }
+	    else if (strstr(q, "OVE") != NULL)
+	    {
+		fActive[count] = Measurement::kOVERSHOOT;
+	    }
+	    else if (strstr(q, "PP") != NULL)
+	    {
+		fActive[count] = Measurement::kPP;
+	    }
+	    else if (strstr(q, "RMS") != NULL)
+	    {
+		fActive[count] = Measurement::kRMS;
+	    }
+	    else if (strstr(q, "UND") != NULL)
+	    {
+		fActive[count] = Measurement::kUNDERSHOOT;
+	    }
+	    else if (strstr(q, "YTE") != NULL)
+	    {
+		fActive[count] = Measurement::kYTENERGY;
+	    }
+	    else if (strstr(q, "YTM") != NULL)
+	    {
+		fActive[count] = Measurement::kYTMNS_AREA;
+	    }
+	    else if (strstr(q, "YTPL") != NULL)
+	    {
+		fActive[count] = Measurement::kYTPLS_AREA;
+	    }
+	    else if (strstr(q, "SFR") != NULL)
+	    {
+		fActive[count] = Measurement::kSFREQ;
+	    }
+	    else if (strstr(q, "SMA") != NULL)
+	    {
+		fActive[count] = Measurement::kSMAG;
+	    }
+	    else if (strstr(q, "THD") != NULL)
+	    {
+		fActive[count] = Measurement::kTHD;
+	    }
+	    else if (strstr(q, "CRO") != NULL)
+	    {
+		fActive[count] = Measurement::kCROSS;
+	    }
+	    else if (strstr(q, "DEL") != NULL)
+	    {
+		fActive[count] = Measurement::kDELAY;
+	    }
+	    else if (strstr(q, "DUT") != NULL)
+	    {
+		fActive[count] = Measurement::kDUTY;
+	    }
+	    else if (strstr(q, "FAL") != NULL)
+	    {
+		fActive[count] = Measurement::kFALLTIME;
+	    }
+	    else if (strstr(q, "FRE") != NULL)
+	    {
+		fActive[count] = Measurement::kFREQ;
+	    }
+	    else if (strstr(q, "PDE") != NULL)
+	    {
+		fActive[count] = Measurement::kPDELAY;
+	    }
+	    else if (strstr(q, "PER") != NULL)
+	    {
+		fActive[count] = Measurement::kPERIOD;
+	    }
+	    else if (strstr(q, "PHA") != NULL)
+	    {
+		fActive[count] = Measurement::kPHASE;
+	    }
+	    else if (strstr(q, "RIS") != NULL)
+	    {
+		fActive[count] = Measurement::kRISETIME;
+	    }
+	    else if (strstr(q, "SKE") != NULL)
+	    {
+		fActive[count] = Measurement::kSKEW;
+	    }
+	    else if (strstr(q, "TT") != NULL)
+	    {
+		fActive[count] = Measurement::kTTRIG;
+	    }
+	    else if (strstr(q, "WID") != NULL)
+	    {
+		fActive[count] = Measurement::kWIDTH;
+	    }
+	    count++;
+	    q = strtok(NULL, tok);
+	}
+	rv = count;
+    }
+    SET_DEBUG_STACK;
+    return rv;
+}
 
 /**
  ******************************************************************
@@ -100,13 +343,14 @@ Measurement::~Measurement ()
  *
  *
  *******************************************************************
- */
+\\ */
 bool Measurement::Query(const char *Command)
 {
     SET_DEBUG_STACK;
+    DSA602  *pDSA602 = DSA602::GetThis();
+    CLogger *log     = CLogger::GetThis();
     char Response[128];
     char Interogate[16];
-    DSA602 *pDSA602 = DSA602::GetThis();
     ClearError(__LINE__);
     
     memset(Response, 0, sizeof(Response));
@@ -114,6 +358,11 @@ bool Measurement::Query(const char *Command)
 
     if (pDSA602->Command( Interogate, Response, sizeof(Response)))
     {
+	if(log->CheckVerbose(1))
+	{
+	    log->Log("# Measurement::Query() %s\n", Response);
+	}
+
 	// Make string of the response. 
 	string res(Response);
 
@@ -348,6 +597,7 @@ void Measurement::Decode(const char *Command, const char *Result)
  */
 ostream& operator<<(ostream& output, const Measurement &n)
 {
+    SET_DEBUG_STACK;
     output << "============================================" << endl
 	   << "Measurement:  " << endl ;
     output << "CROSS:        " << n.fCross << endl;
@@ -378,6 +628,7 @@ ostream& operator<<(ostream& output, const Measurement &n)
     output << "YT MNS Area:   " << n.fYTMNS_Area << endl;
     output << "YT PLS Area:   " << n.fYTPLS_Area << endl;
     output << "============================================" << endl;
+    SET_DEBUG_STACK;
     return output;
 }
 

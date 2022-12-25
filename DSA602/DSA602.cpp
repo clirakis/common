@@ -16,7 +16,6 @@
  *     DSA602A Programming Reference Manual
  ********************************************************************/
 // System includes.
-
 #include <iostream>
 using namespace std;
 #include <string>
@@ -382,13 +381,15 @@ size_t DSA602::Curve(int trace, double **X, double **Y)
 #endif
 
     count = fWFMPRE->NumberPoints();
+    PT_TYPES ptfmt = fWFMPRE->PointFormat(true);
+
     if (count>0)
     {
 	// Allocate the necessary space to hold this data. 
 	nbytes = fWFMPRE->Bytes();
 
 
-	switch (fWFMPRE->PointFormat())
+	switch (ptfmt)
 	{
 	case kPT_Y:   // Y
 	    val = (char *) calloc(count+nn, nbytes*sizeof(char));
@@ -437,11 +438,6 @@ size_t DSA602::Curve(int trace, double **X, double **Y)
 	    }
 	    p++; // Skip over byte count. 
 
-	    // Take the point format query out of the loop. 
-	    // Otherwise this takes a huge amount of time since 
-	    // it does a gpib read each time. 
-	    //
-	    PT_TYPES ptfmt = fWFMPRE->PointFormat(true);
 	    // iterate to convert.
 	    for(i=0;i<count;i++)
 	    {
@@ -473,7 +469,7 @@ size_t DSA602::Curve(int trace, double **X, double **Y)
 	}
 	free(val);
     }
-    cout << __FUNCTION__ << " COUNT: " << count << endl;
+    //cout << __FUNCTION__ << " COUNT: " << count << endl;
     SET_DEBUG_STACK;
     return count;
 }

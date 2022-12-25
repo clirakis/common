@@ -359,7 +359,7 @@ ostream& operator<<(ostream& output, const Trace &n)
 	   << "Trace data: " << endl 
 	   << "  NTrace:   " << n.fNTrace 
 	   << endl;
-    for (size_t i=0; i<n.fNTrace;i++)
+    for (int i=0; i<n.fNTrace;i++)
     { 
 	output << "    Trace:    " << i << endl << *n.fAdjTrace[i];
     }

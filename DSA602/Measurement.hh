@@ -3,7 +3,7 @@
  *
  * Module Name : Measurement.hh
  *
- * Author/Date : C.B. Lirakis / 11-Jan-01
+ * Author/Date : C.B. Lirakis / 24-Dec-22
  *
  * Description : 
  *
@@ -26,6 +26,19 @@
 class Measurement : public CObject
 {
 public:
+    static const uint32_t kNMeasurements = 27;
+    enum MTYPES {
+	// Amplitude
+	kGAIN=0, kMAX, kMEAN, kMID, kMIN, kOVERSHOOT, kPP, kRMS, kUNDERSHOOT,
+	// Area/Energy
+	kYTENERGY, kYTMNS_AREA, kYTPLS_AREA, 
+	// Frequency Domain
+	kSFREQ, kSMAG, kTHD, 
+	// Timing/Frequency
+	kCROSS, kDELAY, kDUTY, kFALLTIME, kFREQ, kPDELAY, kPERIOD, 
+	kPHASE, kRISETIME, kSKEW, kTTRIG, kWIDTH
+    };
+
     /*!
      * Description: 
      *   Default Constructor for measurements. 
@@ -65,8 +78,7 @@ public:
      * returns:
      *    
      */
-    inline bool Update(void) {return Query("MEAS");};
-
+    bool Update(void);
 
     /*!
      * Description: 
@@ -451,6 +463,33 @@ public:
     inline const MValue& YTPLS_Area(bool q=false) 
 	{if(q) Query("YTP"); return fYTPLS_Area;};
 
+
+    /*!
+     * Description: 
+     *   Query how many of the measurements are currently active, 
+     *
+     * Arguments:
+     *   NONE
+     *
+     * returns:
+     *    number of available measurements. 
+     */
+    uint32_t NList(void);
+
+    /*!
+     * Description: 
+     *   Query which of the measurements are currently active, 
+     *
+     * Arguments:
+     *   NONE
+     *
+     * returns:
+     *    number of available measurements. 
+     */
+    uint32_t ActiveList(void);
+
+    inline const uint8_t ActiveIndex(int8_t i) {return fActive[i];};
+
     /*!
      * Description: 
      *   print out the entire data about this class. 
@@ -463,41 +502,65 @@ public:
      */
     friend ostream& operator<<(ostream& output, const Measurement &n); 
 
-
 private:
 
     bool Query(const char *Command);
 
     void Decode(const char *Command, const char* Response);
 
-    char fResponse[64];   // Response to the Query. Parse above. 
+    //char fResponse[64];   // Response to the Query. Parse above. 
 
-    MValue fCross;
-    MValue fDelay;
-    MValue fDuty;
-    MValue fFalltime;
-    MValue fFreq;        // 
+    /*!
+     * Which measurements are active?
+     */
+    uint8_t fActive[6];
+
+    /*!
+     * How many of these are there? 
+     * Group by what they do. 27 total values, see enum above. 
+     */
+    /*!
+     * Amplitude (9 total values) 
+     */
     MValue fGain;
     MValue fMax;
     MValue fMean;
     MValue fMidpoint;
     MValue fMin;
     MValue fOvershoot;
-    MValue fPDelay;
-    MValue fPeriod;
-    MValue fPhase;
     MValue fPeakToPeak;
-    MValue fRisetime;
     MValue fRMS;
-    MValue fSpectralFrequency;
-    MValue fSkew;
-    MValue fSpectralMagnitude;
-    MValue fTotalHarmonicDistortion;
-    MValue fTimeToTrigger;
     MValue fUndershoot;
-    MValue fWidth;
+
+    /*!
+     * Area/Energy (3 total values)
+     */
     MValue fYTEnergy;
     MValue fYTMNS_Area;
     MValue fYTPLS_Area;
+
+    /*!
+     * Frequency Domain (3 total values)
+     */
+    MValue fSpectralFrequency;
+    MValue fSpectralMagnitude;
+    // ? THD?
+    MValue fTotalHarmonicDistortion;
+
+    /*!
+     * Timing/Freuqncy (12 total values)
+     */ 
+    MValue fCross;
+    MValue fDelay;
+    MValue fDuty;
+    MValue fFalltime;
+    MValue fFreq;    
+    MValue fPDelay;
+    MValue fPeriod;
+    MValue fPhase;
+    MValue fRisetime;
+    MValue fSkew;
+    MValue fTimeToTrigger;
+    MValue fWidth;
 };
 #endif

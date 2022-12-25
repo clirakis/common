@@ -97,6 +97,19 @@ public:
 
     /*!
      * Description: 
+     *   get the specified trace if available. 
+     *
+     * Arguments:
+     *   Trace number
+     *
+     * returns:
+     *    Class AdjTrace
+     */
+    inline AdjTrace* GetData(int n) {if (n<fNTrace) return fAdjTrace[n]; else
+					 return NULL;};
+
+    /*!
+     * Description: 
      *   print out the entire data about this class. 
      *
      * Arguments:
@@ -155,7 +168,7 @@ private:
     void Test(void);
 #endif
 
-    size_t    fNTrace;           // number of traces detected. 
+    int    fNTrace;           // number of traces detected. 
     vector<AdjTrace*> fAdjTrace; // Maximum number of traces.
 };
 #endif
