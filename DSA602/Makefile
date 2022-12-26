@@ -7,7 +7,7 @@
 # 	--------	--	------
 #	23-Jan-21       CBL     Original
 #       18-Dec-22       CBL     Making a library. 
-#
+#       26-Dec-22       CBL     Moved MSLIST here
 #
 ######################################################################
 # Machine specific stuff
@@ -29,22 +29,20 @@ INCLUDE =  -I$(COMMON)/GPIB -I$(COMMON)/utility \
 SRC     = 
 SRCCPP  = DSA602.cpp DSA602_Utility.cpp WFMPRE.cpp \
 	Channel.cpp DSAFFT.cpp Module.cpp System.cpp \
-	StatusAndEvent.cpp Measurement.cpp MValue.cpp \
+	StatusAndEvent.cpp Measurement.cpp MeasurementA.cpp MValue.cpp \
 	TimeBase.cpp Trace.cpp AdjTrace.cpp Units.cpp GParse.cpp
 
 SRCS    = $(SRC) $(SRCCPP)
 
 HEADERS = Version.hh DSA602.hh WFMPRE.hh \
 	Module.hh Channel.hh DSA602_Types.hh System.hh StatusAndEvent.hh \
-	Measurement.hh DSAFFT.hh TimeBase.hh Trace.hh AdjTrace.hh MValue.hh \
-	Units.hh GParse.hh 
+	Measurement.hh MeasurementA.hh DSAFFT.hh TimeBase.hh Trace.hh \
+	AdjTrace.hh MValue.hh Units.hh GParse.hh 
 
 # When we build all, what do we build?
 all:      $(LIBRARY)
 
-
 include $(DRIVE)/common/makefiles/makefile.inc
-
 
 #dependencies
 include make.depend 

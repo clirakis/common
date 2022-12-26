@@ -21,7 +21,6 @@
 #define __MVALUE_hh_
 #  include "DSA602_Types.hh"
 
-/// MValue documentation here. 
 /*!
  * responses are setup such that they are a value with a qualifier. 
  * The qualifier is found in DSA602_Types.h

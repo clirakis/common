@@ -4,7 +4,9 @@
  *
  * Author/Date : C.B. Lirakis / 01-Feb-11
  *
- * Description : Generic module
+ * Description : This is the base class for the measurement grouping. 
+ * Measurement applies to all the potential measurements that could be
+ * made on a waveform. 
  *
  * Restrictions/Limitations :
  *
@@ -13,10 +15,20 @@
  * Classification : Unclassified
  *
  * References :
+ * DSA602 Programming manual, 
+ *  MS <meas>    page 203  Query only the measurement in question. 
+ *  MSLIST       page 201  Set up to 6 possible measurements to be performed 
+ *                         on the waveform. 
+ *  MEAS?        page 192  Executes the commands.  This is complex 
+ *  MSN          page 205  Number of measurements currently programmed into
+ *                         the unit. 
+ *
+ * Other files/classes. 
+ *  MValue - a way of storing measurements with a qualifier. 
+ * 
  *
  ********************************************************************/
 // System includes.
-
 #include <iostream>
 using namespace std;
 #include <string>
@@ -52,9 +64,20 @@ using namespace std;
  */
 Measurement::Measurement (void) : CObject()
 {
+    SET_DEBUG_STACK;
     SetName("Measurement");
     ClearError(__LINE__);
+
+    // Use the below instead. 
     memset(fActive, 0, 6*sizeof(uint8_t));
+    /*
+     * Initialize all the fMeasurementA values. 
+     */
+    for(uint32_t i=0;i<kNMeasurements;i++)
+    {
+	fMeasurements[i] = new MeasurementA(Available[i]);
+    }
+    SET_DEBUG_STACK;
 }
 
 /**
@@ -79,6 +102,12 @@ Measurement::Measurement (void) : CObject()
  */
 Measurement::~Measurement (void)
 {
+    SET_DEBUG_STACK;
+    for (uint32_t i=0;i<kNMeasurements; i++)
+    {
+	delete fMeasurements[i];
+    }
+    SET_DEBUG_STACK;
 }
 /**
  ******************************************************************
@@ -570,6 +599,69 @@ void Measurement::Decode(const char *Command, const char *Result)
     }
      SET_DEBUG_STACK;
 }
+
+
+/**
+ ******************************************************************
+ *
+ * Function Name : Find
+ *
+ * Description : Return the Measurement A associated with the input name
+ *
+ * Inputs : v - name to find in list. 
+ *
+ * Returns : MeasurementA if in list. NULL if not. 
+ *
+ * Error Conditions : NONE
+ * 
+ * Unit Tested on: 
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+MeasurementA*  Measurement::Find(const char *v)
+{
+    SET_DEBUG_STACK;
+    for (uint32_t i=0;i<kNMeasurements;i++)
+    {
+	if(fMeasurements[i]->Match(v))
+	    return fMeasurements[i];
+    }
+    SET_DEBUG_STACK;
+    return NULL;
+}
+/**
+ ******************************************************************
+ *
+ * Function Name : Clear
+ *
+ * Description : Reset the State of the measuement vector to all false
+ *
+ * Inputs :
+ *
+ * Returns :
+ *
+ * Error Conditions :
+ * 
+ * Unit Tested on: 
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+void Measurement::Clear(void)
+{
+    SET_DEBUG_STACK;
+    for (uint32_t i=0;i<kNMeasurements;i++)
+    {
+	fMeasurements[i]->SetState(false);
+    }
+    SET_DEBUG_STACK;
+}
+
 /**
  ******************************************************************
  *
@@ -627,6 +719,13 @@ ostream& operator<<(ostream& output, const Measurement &n)
     output << "Y Total Energy:" << n.fYTEnergy << endl;
     output << "YT MNS Area:   " << n.fYTMNS_Area << endl;
     output << "YT PLS Area:   " << n.fYTPLS_Area << endl;
+
+#if 0 // FIXME
+    for (uint32_t i=0;i<kNMeasurements;i++)
+    {
+	outut<< n.fMeasurements[i] << endl;
+    }
+#endif
     output << "============================================" << endl;
     SET_DEBUG_STACK;
     return output;

@@ -20,13 +20,35 @@
 #ifndef __MEASUREMENT_hh_
 #define __MEASUREMENT_hh_
 #  include "CObject.hh"
+#  include "MeasurementA.hh"
 #  include "MValue.hh"
 
-/// Measurement documentation here. 
+
+/*!
+ * Manage measurements that pertain to the trace on the screen. 
+ *
+ * DSA602 Programming manual, 
+ *  MS <meas>    page 203  Query only the measurement in question. 
+ *  MSLIST       page 201  Set up to 6 possible measurements to be performed 
+ *                         on the waveform. 
+ *  MEAS?        page 192  Executes the commands.  This is complex 
+ *  MSN          page 205  Number of measurements currently programmed into
+ *                         the unit. 
+ *
+ * Other files/classes. 
+ *  MValue - a way of storing measurements with a qualifier. 
+ *  GParse - A way to parse values. 
+ */
 class Measurement : public CObject
 {
 public:
+    /*!
+     * Number of possible measurements from a trace on the screen. 
+     */
     static const uint32_t kNMeasurements = 27;
+    /*!
+     * Pointers into those types. 
+     */
     enum MTYPES {
 	// Amplitude
 	kGAIN=0, kMAX, kMEAN, kMID, kMIN, kOVERSHOOT, kPP, kRMS, kUNDERSHOOT,
@@ -38,6 +60,17 @@ public:
 	kCROSS, kDELAY, kDUTY, kFALLTIME, kFREQ, kPDELAY, kPERIOD, 
 	kPHASE, kRISETIME, kSKEW, kTTRIG, kWIDTH
     };
+    /*
+     * List of avaible things to set and or read on any waveform. 
+     * Add +1 to be NULL terminated. 
+     */
+     const char *Available[kNMeasurements] = {
+	 "GAIN", "MAX", "MEAN", "MID", "MIN", "OVERSHOOT","PP", "RMS","UNDERSHOOT",
+	 "YTENERGY", "YTMNS_AREA", "YTPLS_AREA",
+	 "SFREQ","SMAG","THD",
+	 "CROSS", "DELAY", "DUTY", "FALLTIME", "FREQ", "PDELAY","PERIOD",
+	 "PHASE","RISETIME", "SKEW", "TTRIG","WIDTH"
+     };
 
     /*!
      * Description: 
@@ -492,6 +525,42 @@ public:
 
     /*!
      * Description: 
+     *   
+     *
+     * Arguments:
+     *   NONE
+     *
+     * returns:
+     *   NONE
+     */
+    MeasurementA*  Find(const char *v);
+
+    /*!
+     * Description: 
+     *   
+     *
+     * Arguments:
+     *   NONE
+     *
+     * returns:
+     *   NONE
+     */
+
+
+    /*!
+     * Description: 
+     *   Clear all the active elements in the measurement array. 
+     *
+     * Arguments:
+     *   NONE
+     *
+     * returns:
+     *   NONE
+     */
+    void  Clear(void);
+
+    /*!
+     * Description: 
      *   print out the entire data about this class. 
      *
      * Arguments:
@@ -508,7 +577,10 @@ private:
 
     void Decode(const char *Command, const char* Response);
 
-    //char fResponse[64];   // Response to the Query. Parse above. 
+    /*!
+     * Keep track of all possible measurements. 
+     */
+    MeasurementA* fMeasurements[kNMeasurements];
 
     /*!
      * Which measurements are active?
