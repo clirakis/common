@@ -73,7 +73,7 @@ Measurement::Measurement (void) : CObject()
      * but for the active measurements, it tells me where to look
      * using one of the enums. 
      */
-    memset(fActive, 0, 6*sizeof(uint8_t));
+    memset(fActive, -1, 6*sizeof(int8_t));
     /*
      * Initialize all the fMeasurementA values. 
      * I.E. Shove the names into the classes. 
@@ -127,7 +127,7 @@ Measurement::~Measurement (void)
  *
  * Error Conditions : On GPIB read
  * 
- * Unit Tested on: 
+ * Unit Tested on: 27-Dec-22 
  *
  * Unit Tested by: CBL
  *
@@ -139,6 +139,183 @@ bool Measurement::Update(void)
     SET_DEBUG_STACK;
     bool rv = Query("MEAS");
     //cout << *this << endl;
+    SET_DEBUG_STACK;
+    return rv;
+}
+/**
+ ******************************************************************
+ *
+ * Function Name : SetActiveIndex
+ *
+ * Description : Given an index see if 1) there are sufficent slots
+ *               to actually do this and if so 2) store it in the
+ *               fActive index array.
+ *
+ * Inputs : NONE
+ *
+ * Returns : true on success
+ *
+ * Error Conditions : NONE
+ * 
+ * Unit Tested on: 27-Dec-22 
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+bool Measurement::SetActiveIndex(uint8_t idx)
+{
+    SET_DEBUG_STACK;
+    bool rv = false;
+
+    if (fNActive<kMaxReadout)
+    {
+	// It's ok, lets try.  find the next empty slot.
+
+	uint8_t i=0;
+	do {
+	    i++;
+	} while(fActive[i]>-1);
+	fActive[i] = idx;
+	rv = true;
+    }
+    SET_DEBUG_STACK;
+    return rv;
+}
+/**
+ ******************************************************************
+ *
+ * Function Name : SetActive
+ *
+ * Description : Set the specific measurement to be done. 
+ *               Also, set the various arrays that to track this is active. 
+ *               NOTE: Should I do a query rather than set it?? FIXME
+ *
+ * Inputs : NONE
+ *
+ * Returns : true on success
+ *
+ * Error Conditions : On GPIB read
+ * 
+ * Unit Tested on: 27-Dec-22
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+bool Measurement::SetActive(MTYPES type) 
+{
+    SET_DEBUG_STACK;
+    DSA602  *pDSA602 = DSA602::GetThis();
+    bool rv = false;
+
+    /* 
+     * Note: here I have to send the current measurements as well as 
+     * the new one all in one message. Sooo, set that up. 
+     *
+     * First, can I add this measurement?
+     */
+    if (SetActiveIndex(type))
+    {
+	char command[128];
+	char tmp[32];
+	/*
+	 * Setup the command to send. 
+	 */
+	memset( command, 0, sizeof(command));
+	sprintf( command,"MSLI ");
+
+	/*
+	 * Now remake the list into a new master command by executing 
+	 * the loop again and seting the proper values. 
+	 */
+	int8_t id;
+	for (int8_t i=0;i<kMaxReadout;i++)
+	{
+	    id = fActive[i];
+	    if (id > -1)
+	    {
+		sprintf(tmp, "%s,", fMeasurements[id]->Text());
+		strcat( command, tmp);
+	    }
+	}
+
+	// Now we are ready to send the command. 
+	pDSA602->Command(command, NULL, 0);
+	rv = true;
+    }
+    SET_DEBUG_STACK;
+    return rv;
+}
+
+/**
+ ******************************************************************
+ *
+ * Function Name : SetInactive
+ *
+ * Description : Reset the list with the specified ID removed. 
+ *
+ * Inputs : NONE
+ *
+ * Returns : true on success
+ *
+ * Error Conditions : On GPIB read
+ * 
+ * Unit Tested on: 27-Dec-22
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+bool Measurement::SetInactive(MTYPES type) 
+{
+    SET_DEBUG_STACK;
+    DSA602  *pDSA602 = DSA602::GetThis();
+    bool rv = false;
+    char command[128];
+    char tmp[32];
+    int8_t id;
+
+    // Make a local copy of fActive
+    int8_t Active[kMaxReadout];
+    memcpy(Active, fActive, kMaxReadout*sizeof(int8_t));
+    // loop over the local array and set the input id to -1 (inactive).
+    for (int8_t i=0;i<kMaxReadout;i++)
+    {
+	if (Active[i] == type) Active[i] = -1;
+    }
+    // Clear the list - Set everything to false. 
+    Clear();
+
+    /*
+     * Setup the command to send. 
+     */
+    sprintf( command,"MSLI ");
+
+    /*
+     * Now remake the list into a new master command by executing 
+     * the loop again and seting the proper values. 
+     */
+    for (int8_t i=0;i<kMaxReadout;i++)
+    {
+	id = Active[i];
+	if (id > -1)
+	{
+	    sprintf(tmp, "%s,", fMeasurements[id]->Text());
+	    strcat(command, tmp);
+	    fMeasurements[id]->SetState(true);
+	    fActive[fNActive] = id;
+	    fNActive++;
+	}
+    }
+
+    // Now we are ready to send the command. 
+    pDSA602->Command(command, NULL, 0);
+    rv = true;
+
     SET_DEBUG_STACK;
     return rv;
 }
@@ -218,13 +395,11 @@ uint32_t Measurement::ActiveList(void)
     const char *tok = ",";
     DSA602  *pDSA602 = DSA602::GetThis();
     CLogger *log     = CLogger::GetThis();
-    uint32_t rv = 0;
     char     Response[256];
     char     *p, *q;
 
     ClearError(__LINE__);
 
-    memset(fActive, 0, 6*sizeof(uint8_t));
     Clear(); // Clear all active measurements
     /*
      * Looking for something like: MSLIST SFREQUENCY,SMAGNITUDE
@@ -236,153 +411,177 @@ uint32_t Measurement::ActiveList(void)
 	{
 	    log->Log("# Measurement::ActiveList() %s\n", Response);
 	}
-	uint8_t count = 0;          // Measurement list count. 
 	p = strchr(Response, ' ');  // Skip MSLIST response. 
 	q = strtok( p, tok);        // Start the tokenization. 
 	while (q!=NULL)
 	{
 	    if (strstr(q, "GAI") != NULL)
 	    {
-		fActive[count] = Measurement::kGAIN;
+		fActive[fNActive] = Measurement::kGAIN;
+		fNActive++;
 		fMeasurements[kGAIN]->SetState(true);
 	    }
 	    else if (strstr(q, "MAX") != NULL)
 	    {
-		fActive[count] = Measurement::kMAX;
+		fActive[fNActive] = Measurement::kMAX;
+		fNActive++;
 		fMeasurements[kMAX]->SetState(true);
 	    }
 	    else if (strstr(q, "MEA") != NULL)
 	    {
-		fActive[count] = Measurement::kMEAN;
+		fActive[fNActive] = Measurement::kMEAN;
+		fNActive++;
 		fMeasurements[kMEAN]->SetState(true);
 	    }
 	    else if (strstr(q, "MID") != NULL)
 	    {
-		fActive[count] = Measurement::kMID;
+		fActive[fNActive] = Measurement::kMID;
+		fNActive++;
 		fMeasurements[kMID]->SetState(true);
 	    }
 	    else if (strstr(q, "MIN") != NULL)
 	    {
-		fActive[count] = Measurement::kMIN;
+		fActive[fNActive] = Measurement::kMIN;
+		fNActive++;
 		fMeasurements[kMIN]->SetState(true);
 	    }
 	    else if (strstr(q, "OVE") != NULL)
 	    {
-		fActive[count] = Measurement::kOVERSHOOT;
+		fActive[fNActive] = Measurement::kOVERSHOOT;
+		fNActive++;
 		fMeasurements[kOVERSHOOT]->SetState(true);
 	    }
 	    else if (strstr(q, "PP") != NULL)
 	    {
-		fActive[count] = Measurement::kPP;
+		fActive[fNActive] = Measurement::kPP;
+		fNActive++;
 		fMeasurements[kPP]->SetState(true);
 	    }
 	    else if (strstr(q, "RMS") != NULL)
 	    {
-		fActive[count] = Measurement::kRMS;
+		fActive[fNActive] = Measurement::kRMS;
+		fNActive++;
 		fMeasurements[kRMS]->SetState(true);
 	    }
 	    else if (strstr(q, "UND") != NULL)
 	    {
-		fActive[count] = Measurement::kUNDERSHOOT;
+		fActive[fNActive] = Measurement::kUNDERSHOOT;
+		fNActive++;
 		fMeasurements[kUNDERSHOOT]->SetState(true);
 	    }
 	    else if (strstr(q, "YTE") != NULL)
 	    {
-		fActive[count] = Measurement::kYTENERGY;
+		fActive[fNActive] = Measurement::kYTENERGY;
+		fNActive++;
 		fMeasurements[kYTENERGY]->SetState(true);
 	    }
 	    else if (strstr(q, "YTM") != NULL)
 	    {
-		fActive[count] = Measurement::kYTMNS_AREA;
+		fActive[fNActive] = Measurement::kYTMNS_AREA;
+		fNActive++;
 		fMeasurements[kYTMNS_AREA]->SetState(true);
 	    }
 	    else if (strstr(q, "YTPL") != NULL)
 	    {
-		fActive[count] = Measurement::kYTPLS_AREA;
+		fActive[fNActive] = Measurement::kYTPLS_AREA;
+		fNActive++;
 		fMeasurements[kYTPLS_AREA]->SetState(true);
 	    }
 	    else if (strstr(q, "SFR") != NULL)
 	    {
-		fActive[count] = Measurement::kSFREQ;
+		fActive[fNActive] = Measurement::kSFREQ;
+		fNActive++;
 		fMeasurements[kSFREQ]->SetState(true);
 	    }
 	    else if (strstr(q, "SMA") != NULL)
 	    {
-		fActive[count] = Measurement::kSMAG;
+		fActive[fNActive] = Measurement::kSMAG;
+		fNActive++;
 		fMeasurements[kSMAG]->SetState(true);
 	    }
 	    else if (strstr(q, "THD") != NULL)
 	    {
-		fActive[count] = Measurement::kTHD;
+		fActive[fNActive] = Measurement::kTHD;
+		fNActive++;
 		fMeasurements[kTHD]->SetState(true);
 	    }
 	    else if (strstr(q, "CRO") != NULL)
 	    {
-		fActive[count] = Measurement::kCROSS;
+		fActive[fNActive] = Measurement::kCROSS;
+		fNActive++;
 		fMeasurements[kCROSS]->SetState(true);
 	    }
 	    else if (strstr(q, "DEL") != NULL)
 	    {
-		fActive[count] = Measurement::kDELAY;
+		fActive[fNActive] = Measurement::kDELAY;
+		fNActive++;
 		fMeasurements[kDELAY]->SetState(true);
 	    }
 	    else if (strstr(q, "DUT") != NULL)
 	    {
-		fActive[count] = Measurement::kDUTY;
+		fActive[fNActive] = Measurement::kDUTY;
+		fNActive++;
 		fMeasurements[kDUTY]->SetState(true);
 	    }
 	    else if (strstr(q, "FAL") != NULL)
 	    {
-		fActive[count] = Measurement::kFALLTIME;
+		fActive[fNActive] = Measurement::kFALLTIME;
+		fNActive++;
 		fMeasurements[kFALLTIME]->SetState(true);
 	    }
 	    else if (strstr(q, "FRE") != NULL)
 	    {
-		fActive[count] = Measurement::kFREQ;
+		fActive[fNActive] = Measurement::kFREQ;
+		fNActive++;
 		fMeasurements[kFREQ]->SetState(true);
 	    }
 	    else if (strstr(q, "PDE") != NULL)
 	    {
-		fActive[count] = Measurement::kPDELAY;
+		fActive[fNActive] = Measurement::kPDELAY;
+		fNActive++;
 		fMeasurements[kPDELAY]->SetState(true);
 	    }
 	    else if (strstr(q, "PER") != NULL)
 	    {
-		fActive[count] = Measurement::kPERIOD;
+		fActive[fNActive] = Measurement::kPERIOD;
+		fNActive++;
 		fMeasurements[kPERIOD]->SetState(true);
 	    }
 	    else if (strstr(q, "PHA") != NULL)
 	    {
-		fActive[count] = Measurement::kPHASE;
+		fActive[fNActive] = Measurement::kPHASE;
+		fNActive++;
 		fMeasurements[kPHASE]->SetState(true);
 	    }
 	    else if (strstr(q, "RIS") != NULL)
 	    {
-		fActive[count] = Measurement::kRISETIME;
+		fActive[fNActive] = Measurement::kRISETIME;
+		fNActive++;
 		fMeasurements[kRISETIME]->SetState(true);
 	    }
 	    else if (strstr(q, "SKE") != NULL)
 	    {
-		fActive[count] = Measurement::kSKEW;
+		fActive[fNActive] = Measurement::kSKEW;
+		fNActive++;
 		fMeasurements[kSKEW]->SetState(true);
 	    }
 	    else if (strstr(q, "TT") != NULL)
 	    {
-		fActive[count] = Measurement::kTTRIG;
+		fActive[fNActive] = Measurement::kTTRIG;
+		fNActive++;
 		fMeasurements[kTTRIG]->SetState(true);
 	    }
 	    else if (strstr(q, "WID") != NULL)
 	    {
-		fActive[count] = Measurement::kWIDTH;
+		fActive[fNActive] = Measurement::kWIDTH;
+		fNActive++;
 		fMeasurements[kWIDTH]->SetState(true);
 	    }
-	    count++;
 	    q = strtok(NULL, tok);
 	}
-	rv = count;
     }
     SET_DEBUG_STACK;
-    return rv;
+    return fNActive;
 }
 
 /**
@@ -688,10 +887,17 @@ MeasurementA*  Measurement::Find(const char *v)
 void Measurement::Clear(void)
 {
     SET_DEBUG_STACK;
+    // Number of active is now zero. 
+    fNActive = 0;
+    // Set the active ids to -1 (none)
+    memset(fActive, -1, 6*sizeof(int8_t));
+
+    // Reset all the Active measurements in the long array to off. 
     for (uint32_t i=0;i<kNMeasurements;i++)
     {
 	fMeasurements[i]->SetState(false);
     }
+
     SET_DEBUG_STACK;
 }
 
@@ -729,6 +935,10 @@ ostream& operator<<(ostream& output, const Measurement &n)
     {
 	output << *n.fMeasurements[i]     << endl;
     }
+    output << " Active " << n.fNActive << endl;
+    for (int8_t i=0; i<Measurement::kMaxReadout; i++) 
+	output << (int) n.fActive[i] << " ";
+    output << endl;
     output << "============================================" << endl;
     SET_DEBUG_STACK;
     return output;

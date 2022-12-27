@@ -47,6 +47,7 @@ public:
      *    NONE
      */
     MeasurementA(const char *l);
+
     /*!
      * Description: 
      *   
@@ -58,6 +59,7 @@ public:
      *    NONE
      */
     ~MeasurementA(void);
+
     /*!
      * Description: 
      *   
@@ -69,6 +71,7 @@ public:
      *    NONE
      */
     const char *Text(void) const;
+
     /*!
      * Description: 
      *   
@@ -80,6 +83,7 @@ public:
      *    NONE
      */
     bool Match(const char *l);
+
     /*!
      * Description: 
      *   
@@ -91,6 +95,7 @@ public:
      *    NONE
      */
     inline void     SetState(bool s)     {fEnabled = s;};
+
     /*!
      * Description: 
      *   
@@ -102,6 +107,7 @@ public:
      *    NONE
      */
     inline bool     State(void) const          {return fEnabled;};
+
     /*!
      * Description: 
      *   
@@ -113,6 +119,7 @@ public:
      *    NONE
      */
     inline double Value(void)            {return fValue;};
+
     /*!
      * Description: 
      *   
@@ -144,6 +151,7 @@ public:
      *    NONE
      */
     inline unsigned Qualifier(void) const {return (unsigned) fQualifier;};
+
     /*!
      * Description: 
      *   
