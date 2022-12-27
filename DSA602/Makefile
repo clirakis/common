@@ -29,7 +29,7 @@ INCLUDE =  -I$(COMMON)/GPIB -I$(COMMON)/utility \
 SRC     = 
 SRCCPP  = DSA602.cpp DSA602_Utility.cpp WFMPRE.cpp \
 	Channel.cpp DSAFFT.cpp Module.cpp System.cpp \
-	StatusAndEvent.cpp Measurement.cpp MeasurementA.cpp MValue.cpp \
+	StatusAndEvent.cpp Measurement.cpp MeasurementA.cpp \
 	TimeBase.cpp Trace.cpp AdjTrace.cpp Units.cpp GParse.cpp
 
 SRCS    = $(SRC) $(SRCCPP)
@@ -37,7 +37,7 @@ SRCS    = $(SRC) $(SRCCPP)
 HEADERS = Version.hh DSA602.hh WFMPRE.hh \
 	Module.hh Channel.hh DSA602_Types.hh System.hh StatusAndEvent.hh \
 	Measurement.hh MeasurementA.hh DSAFFT.hh TimeBase.hh Trace.hh \
-	AdjTrace.hh MValue.hh Units.hh GParse.hh 
+	AdjTrace.hh Units.hh GParse.hh 
 
 # When we build all, what do we build?
 all:      $(LIBRARY)

@@ -21,7 +21,6 @@
 #define __MEASUREMENT_hh_
 #  include "CObject.hh"
 #  include "MeasurementA.hh"
-#  include "MValue.hh"
 
 /*!
  * Manage measurements that pertain to the trace on the screen. 

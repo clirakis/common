@@ -27,7 +27,7 @@
  */
 #ifndef __MeasurementA_hh_
 #define __MeasurementA_hh_
-#  include "MValue.hh"
+#  include "DSA602_Types.hh"
 /*!
  * Keep track of all of the possible measurements we can make
  * off a waveform. Class MeasurementA stores on element of this list
