@@ -55,7 +55,7 @@ using namespace std;
  *
  * Error Conditions :
  * 
- * Unit Tested on: 
+ * Unit Tested on: 27-Dec-22
  *
  * Unit Tested by: CBL
  *
@@ -68,10 +68,15 @@ Measurement::Measurement (void) : CObject()
     SetName("Measurement");
     ClearError(__LINE__);
 
-    // Use the below instead. 
+    /*
+     * This is kind of handy to keep around. I may remove it later. 
+     * but for the active measurements, it tells me where to look
+     * using one of the enums. 
+     */
     memset(fActive, 0, 6*sizeof(uint8_t));
     /*
      * Initialize all the fMeasurementA values. 
+     * I.E. Shove the names into the classes. 
      */
     for(uint32_t i=0;i<kNMeasurements;i++)
     {
@@ -85,15 +90,15 @@ Measurement::Measurement (void) : CObject()
  *
  * Function Name : Measurement destructor
  *
- * Description :
+ * Description : clean up measurement list. 
  *
- * Inputs :
+ * Inputs : NONE
  *
- * Returns :
+ * Returns : NONE
  *
  * Error Conditions :
  * 
- * Unit Tested on: 
+ * Unit Tested on: 27-Dec-22
  *
  * Unit Tested by: CBL
  *
@@ -192,6 +197,7 @@ uint32_t Measurement::NList(void)
  * Function Name : ActiveList
  *
  * Description : Get the list of active elements to measure. 
+ *               This is somewhat redundant with Update. 
  *
  * Inputs : NONE
  *
@@ -199,7 +205,7 @@ uint32_t Measurement::NList(void)
  *
  * Error Conditions : On GPIB read
  * 
- * Unit Tested on: 
+ * Unit Tested on: 27-Dec-22
  *
  * Unit Tested by: CBL
  *
@@ -219,7 +225,7 @@ uint32_t Measurement::ActiveList(void)
     ClearError(__LINE__);
 
     memset(fActive, 0, 6*sizeof(uint8_t));
-    
+    Clear(); // Clear all active measurements
     /*
      * Looking for something like: MSLIST SFREQUENCY,SMAGNITUDE
      */
@@ -238,110 +244,137 @@ uint32_t Measurement::ActiveList(void)
 	    if (strstr(q, "GAI") != NULL)
 	    {
 		fActive[count] = Measurement::kGAIN;
+		fMeasurements[kGAIN]->SetState(true);
 	    }
 	    else if (strstr(q, "MAX") != NULL)
 	    {
 		fActive[count] = Measurement::kMAX;
+		fMeasurements[kMAX]->SetState(true);
 	    }
 	    else if (strstr(q, "MEA") != NULL)
 	    {
 		fActive[count] = Measurement::kMEAN;
+		fMeasurements[kMEAN]->SetState(true);
 	    }
 	    else if (strstr(q, "MID") != NULL)
 	    {
 		fActive[count] = Measurement::kMID;
+		fMeasurements[kMID]->SetState(true);
 	    }
 	    else if (strstr(q, "MIN") != NULL)
 	    {
 		fActive[count] = Measurement::kMIN;
+		fMeasurements[kMIN]->SetState(true);
 	    }
 	    else if (strstr(q, "OVE") != NULL)
 	    {
 		fActive[count] = Measurement::kOVERSHOOT;
+		fMeasurements[kOVERSHOOT]->SetState(true);
 	    }
 	    else if (strstr(q, "PP") != NULL)
 	    {
 		fActive[count] = Measurement::kPP;
+		fMeasurements[kPP]->SetState(true);
 	    }
 	    else if (strstr(q, "RMS") != NULL)
 	    {
 		fActive[count] = Measurement::kRMS;
+		fMeasurements[kRMS]->SetState(true);
 	    }
 	    else if (strstr(q, "UND") != NULL)
 	    {
 		fActive[count] = Measurement::kUNDERSHOOT;
+		fMeasurements[kUNDERSHOOT]->SetState(true);
 	    }
 	    else if (strstr(q, "YTE") != NULL)
 	    {
 		fActive[count] = Measurement::kYTENERGY;
+		fMeasurements[kYTENERGY]->SetState(true);
 	    }
 	    else if (strstr(q, "YTM") != NULL)
 	    {
 		fActive[count] = Measurement::kYTMNS_AREA;
+		fMeasurements[kYTMNS_AREA]->SetState(true);
 	    }
 	    else if (strstr(q, "YTPL") != NULL)
 	    {
 		fActive[count] = Measurement::kYTPLS_AREA;
+		fMeasurements[kYTPLS_AREA]->SetState(true);
 	    }
 	    else if (strstr(q, "SFR") != NULL)
 	    {
 		fActive[count] = Measurement::kSFREQ;
+		fMeasurements[kSFREQ]->SetState(true);
 	    }
 	    else if (strstr(q, "SMA") != NULL)
 	    {
 		fActive[count] = Measurement::kSMAG;
+		fMeasurements[kSMAG]->SetState(true);
 	    }
 	    else if (strstr(q, "THD") != NULL)
 	    {
 		fActive[count] = Measurement::kTHD;
+		fMeasurements[kTHD]->SetState(true);
 	    }
 	    else if (strstr(q, "CRO") != NULL)
 	    {
 		fActive[count] = Measurement::kCROSS;
+		fMeasurements[kCROSS]->SetState(true);
 	    }
 	    else if (strstr(q, "DEL") != NULL)
 	    {
 		fActive[count] = Measurement::kDELAY;
+		fMeasurements[kDELAY]->SetState(true);
 	    }
 	    else if (strstr(q, "DUT") != NULL)
 	    {
 		fActive[count] = Measurement::kDUTY;
+		fMeasurements[kDUTY]->SetState(true);
 	    }
 	    else if (strstr(q, "FAL") != NULL)
 	    {
 		fActive[count] = Measurement::kFALLTIME;
+		fMeasurements[kFALLTIME]->SetState(true);
 	    }
 	    else if (strstr(q, "FRE") != NULL)
 	    {
 		fActive[count] = Measurement::kFREQ;
+		fMeasurements[kFREQ]->SetState(true);
 	    }
 	    else if (strstr(q, "PDE") != NULL)
 	    {
 		fActive[count] = Measurement::kPDELAY;
+		fMeasurements[kPDELAY]->SetState(true);
 	    }
 	    else if (strstr(q, "PER") != NULL)
 	    {
 		fActive[count] = Measurement::kPERIOD;
+		fMeasurements[kPERIOD]->SetState(true);
 	    }
 	    else if (strstr(q, "PHA") != NULL)
 	    {
 		fActive[count] = Measurement::kPHASE;
+		fMeasurements[kPHASE]->SetState(true);
 	    }
 	    else if (strstr(q, "RIS") != NULL)
 	    {
 		fActive[count] = Measurement::kRISETIME;
+		fMeasurements[kRISETIME]->SetState(true);
 	    }
 	    else if (strstr(q, "SKE") != NULL)
 	    {
 		fActive[count] = Measurement::kSKEW;
+		fMeasurements[kSKEW]->SetState(true);
 	    }
 	    else if (strstr(q, "TT") != NULL)
 	    {
 		fActive[count] = Measurement::kTTRIG;
+		fMeasurements[kTTRIG]->SetState(true);
 	    }
 	    else if (strstr(q, "WID") != NULL)
 	    {
 		fActive[count] = Measurement::kWIDTH;
+		fMeasurements[kWIDTH]->SetState(true);
 	    }
 	    count++;
 	    q = strtok(NULL, tok);
@@ -366,13 +399,13 @@ uint32_t Measurement::ActiveList(void)
  *
  * Error Conditions : On GPIB read
  * 
- * Unit Tested on: 25-Jan-21
+ * Unit Tested on: 27-Dec-22
  *
  * Unit Tested by: CBL
  *
  *
  *******************************************************************
-\\ */
+ */
 bool Measurement::Query(const char *Command)
 {
     SET_DEBUG_STACK;
@@ -475,7 +508,7 @@ bool Measurement::Query(const char *Command)
  *
  * Error Conditions : NONE
  * 
- * Unit Tested on: 25-Jan-21
+ * Unit Tested on: 27-Dec-22
  *
  * Unit Tested by: CBL
  *
@@ -491,115 +524,115 @@ void Measurement::Decode(const char *Command, const char *Result)
 
     if (cmd.find("CROSS")==0)
     {
-	fCross.Decode(Result);
+	fMeasurements[kCROSS]->Decode(Result);
     }
     else if (cmd.find("DELAY")==0)
     {
-	fDelay.Decode(Result);
+	// This may barf and find PDELAY - some degenerecy
+	fMeasurements[kDELAY]->Decode(Result);
     }
     else if (cmd.find("DUTY")==0)
     {
-	fDuty.Decode(Result);
+	fMeasurements[kDUTY]->Decode(Result);
     }
     else if (cmd.find("FALLTIME")==0)
     {
-	fFalltime.Decode(Result);
+	fMeasurements[kFALLTIME]->Decode(Result);
     }
     else if (cmd.find("FREQ")==0)
     {
-	fFreq.Decode( Result);
+	fMeasurements[kFREQ]->Decode(Result);
     }
     else if (cmd.find("GAIN")==0)
     {
-	fGain.Decode( Result);
+	fMeasurements[kGAIN]->Decode(Result);
     }
     else if (cmd.find("MAX")==0)
     {
-	fMax.Decode( Result);
+	fMeasurements[kMAX]->Decode(Result);
     }
     else if (cmd.find("MEAN")==0)
     {
-	fMean.Decode( Result);
+	fMeasurements[kMEAN]->Decode(Result);
     }
     else if (cmd.find("MID")==0)
     {
-	fMidpoint.Decode( Result);
+	fMeasurements[kMID]->Decode(Result);
     }
     else if (cmd.find("MIN")==0)
     {
-	fMin.Decode( Result);
+	fMeasurements[kMIN]->Decode(Result);
     }
     else if ((rv = cmd.find("OVE"))==0)
     {
-	fOvershoot.Decode( Result);
+	fMeasurements[kOVERSHOOT]->Decode(Result);
     }
     else if (cmd.find("PDE")==0)
     {
-	fPDelay.Decode( Result);
+	fMeasurements[kPDELAY]->Decode(Result);
     }
     else if (cmd.find("PER")==0)
     {
-	fPeriod.Decode( Result);
+	fMeasurements[kPERIOD]->Decode(Result);
     }
     else if (cmd.find("PHA")==0)
     {
-	fPhase.Decode( Result);
+	fMeasurements[kPHASE]->Decode(Result);
     }
     else if (cmd.find("PP")==0)
     {
-	fPeakToPeak.Decode( Result);
+	fMeasurements[kPP]->Decode(Result);
     }
     else if (cmd.find("RIS")==0)
     {
-	fRisetime.Decode( Result);
+	fMeasurements[kRISETIME]->Decode(Result);
     }
     else if (cmd.find("RMS")==0)
     {
-	fRMS.Decode( Result);
+	fMeasurements[kRMS]->Decode(Result);
     }
     else if (cmd.find("SFR")==0)
     {
-	fSpectralFrequency.Decode( Result);
+	fMeasurements[kSFREQ]->Decode(Result);
     }
     else if (cmd.find("SKEW")==0)
     {
-	fSkew.Decode( Result);
+	fMeasurements[kSKEW]->Decode(Result);
     }
     else if (cmd.find("SMA")==0)
     {
-	fSpectralMagnitude.Decode( Result);
+	fMeasurements[kSMAG]->Decode(Result);
     }
     else if (cmd.find("THD")==0)
     {
-	fTotalHarmonicDistortion.Decode(Result);
+	fMeasurements[kTHD]->Decode(Result);
     }
     else if (cmd.find("TTR")==0)
     {
-	fTimeToTrigger.Decode(Result);
+	fMeasurements[kTTRIG]->Decode(Result);
     }
     else if (cmd.find("UND")==0)
     {
-	fUndershoot.Decode(Result);
+	fMeasurements[kUNDERSHOOT]->Decode(Result);
     }
     else if (cmd.find("WID")==0)
     {
-	fWidth.Decode(Result);
+	fMeasurements[kWIDTH]->Decode(Result);
     }
     else if (cmd.find("YTE")==0)
     {
-	fYTEnergy.Decode(Result);
+	fMeasurements[kYTENERGY]->Decode(Result);
     }
     else if (cmd.find("YTM")==0)
     {
-	fYTMNS_Area.Decode(Result);
+	fMeasurements[kYTMNS_AREA]->Decode(Result);
     }
     else if (cmd.find("YTP")==0)
     {
-	fYTPLS_Area.Decode(Result);
+	fMeasurements[kYTPLS_AREA]->Decode(Result);
     }
      SET_DEBUG_STACK;
 }
-
 
 /**
  ******************************************************************
@@ -639,13 +672,13 @@ MeasurementA*  Measurement::Find(const char *v)
  *
  * Description : Reset the State of the measuement vector to all false
  *
- * Inputs :
+ * Inputs : NONE
  *
- * Returns :
+ * Returns : NONE
  *
- * Error Conditions :
+ * Error Conditions : NONE
  * 
- * Unit Tested on: 
+ * Unit Tested on: 27-Dec-22
  *
  * Unit Tested by: CBL
  *
@@ -680,7 +713,7 @@ void Measurement::Clear(void)
  *
  * Error Conditions : NONE
  * 
- * Unit Tested on: 25-Jan-21
+ * Unit Tested on: 27-Dec-22
  *
  * Unit Tested by: CBL
  *
@@ -692,40 +725,10 @@ ostream& operator<<(ostream& output, const Measurement &n)
     SET_DEBUG_STACK;
     output << "============================================" << endl
 	   << "Measurement:  " << endl ;
-    output << "CROSS:        " << n.fCross << endl;
-    output << "Delay:        " << n.fDelay << endl;
-    output << "Duty :        " << n.fDuty << endl;
-    output << "Falltime :    " << n.fFalltime << endl;
-    output << "Frequency:    " << n.fFreq << endl;
-    output << "Gain :        " << n.fGain << endl;
-    output << "Max :         " << n.fMax << endl;
-    output << "Mean :        " << n.fMean << endl;
-    output << "Midpoint :    " << n.fMidpoint << endl;
-    output << "Min :         " << n.fMin << endl;
-    output << "Overshoot :   " << n.fOvershoot << endl;
-    output << "PDelay :      " << n.fPDelay << endl;
-    output << "Period :      " << n.fPeriod << endl;
-    output << "Phase :       " << n.fPhase << endl;
-    output << "Peak to Peak :" << n.fPeakToPeak << endl;
-    output << "Rise Time :   " << n.fRisetime << endl;
-    output << "RMS :         " << n.fRMS << endl;
-    output << "Spectral Frequency :" << n.fSpectralFrequency << endl;
-    output << "Skew :        " << n.fSkew << endl;
-    output << "Spectral Magnitude :" << n.fSpectralMagnitude << endl;
-    output << "Total Harmonic Distortion :" << n.fTotalHarmonicDistortion << endl;
-    output << "Time To Trigger :" << n.fTimeToTrigger << endl;
-    output << "Undershoot :   " << n.fUndershoot << endl;
-    output << "Width:         " << n.fWidth << endl;
-    output << "Y Total Energy:" << n.fYTEnergy << endl;
-    output << "YT MNS Area:   " << n.fYTMNS_Area << endl;
-    output << "YT PLS Area:   " << n.fYTPLS_Area << endl;
-
-#if 0 // FIXME
-    for (uint32_t i=0;i<kNMeasurements;i++)
+    for (uint32_t i=0; i<Measurement::kNMeasurements; i++)
     {
-	outut<< n.fMeasurements[i] << endl;
+	output << *n.fMeasurements[i]     << endl;
     }
-#endif
     output << "============================================" << endl;
     SET_DEBUG_STACK;
     return output;

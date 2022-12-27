@@ -11,6 +11,7 @@
  *
  * Change Descriptions :
  * 26-Dec-22 CBL Removed CERN root references. Moved into library. 
+ * 27-Dec-22 CBL Moved MValue attributes into this file. 
  *
  * Classification : Unclassified
  *
@@ -30,11 +31,12 @@ using namespace std;
 #include "debug.h"
 #include "MeasurementA.hh"
 #include "GParse.hh"
+#include "DSA602_Types.hh"
 
 /**
  ******************************************************************
  *
- * Function Name : 
+ * Function Name : MeasurementA Constructor
  *
  * Description :
  *
@@ -54,9 +56,10 @@ using namespace std;
 MeasurementA::MeasurementA(const char *l)
 {
     SET_DEBUG_STACK;
-    fMeas    = new string(l);
-    fValue   = 0.0;
-    fEnabled = false;
+    fMeas      = new string(l);
+    fValue     = 0.0;
+    fEnabled   = false;
+    fQualifier = kMNONE;
     SET_DEBUG_STACK;
 }
 /**
@@ -79,7 +82,7 @@ MeasurementA::MeasurementA(const char *l)
  *
  *******************************************************************
  */
-MeasurementA::~MeasurementA()
+MeasurementA::~MeasurementA(void)
 {
     SET_DEBUG_STACK;
 //     cout << __FUNCTION__ << " Delete: " << endl;
@@ -87,6 +90,80 @@ MeasurementA::~MeasurementA()
     delete fMeas; 
     fMeas = NULL;
     SET_DEBUG_STACK;
+}
+/**
+ ******************************************************************
+ *
+ * Function Name : Decode
+ *
+ * Description : Decode a response into a MValue pair
+ *     an example of a response is: "-9.942585E-7,EQ"
+ *     The command echo has been stripped out. 
+ *
+ * Inputs : the result of the MEAS? command
+ *
+ * Returns : none
+ *
+ * Error Conditions : Only if the Command doesn't equal the response
+ * 
+ * Unit Tested on: 
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+bool MeasurementA::Decode(const char *Response)
+{
+    SET_DEBUG_STACK;
+    string resp(Response);
+    size_t end;
+    if (!Response)
+    {
+	return false;
+    }
+    /*
+     * By the time we have gotten here we have the correct command
+     * checked and the command is stripped it out by finding the 
+     * first space delimter. 
+     *
+     *
+     * We are now positioned to just before the value. 
+     * Parse until the , delimeter that denotes the qualifier data. 
+     */
+    end   = resp.find_first_of(',');
+    fValue = stof(resp.substr(0, end));
+    string qual(resp.substr(end+1));
+    if (qual.compare("EQ") == 0)
+    {
+	fQualifier = kEQUAL;
+    }
+    else if(qual.compare("LT") == 0)
+    {
+	fQualifier = kLESS_THAN;
+    }
+    else if(qual.compare("GT") == 0)
+    {
+	fQualifier =  kGREATER_THAN;
+    }
+    else if(qual.compare("UN") == 0)
+    {
+	fQualifier = kUNKNOWN;
+    }
+    else if(qual.compare("ER") == 0)
+    {
+	fQualifier = kERROR;
+    }
+
+    // If we were asked to decode, then it is really on. 
+    fEnabled = true;
+
+// 	cout << "TO PARSE: " << fValue << " qual " << qual 
+// 	     << " qual num: " << (int) fQualifier
+// 	     << endl;
+
+    SET_DEBUG_STACK;
+    return true;
 }
 /**
  ******************************************************************
@@ -170,11 +247,35 @@ bool MeasurementA::Match(const char *name)
 ostream& operator<<(ostream& output, const MeasurementA &n)
 {
     SET_DEBUG_STACK;
-    output << n.fMeas << " " 
+    output << *n.fMeas << " " 
 	   << n.fValue << " ";
     if(n.State())
 	output << " Check";
     output << " ,";
+    switch(n.fQualifier)
+    {
+    case kEQUAL:
+	output << " Equal.";
+	break;
+    case kLESS_THAN:
+	output << " Less Than.";
+	break;
+    case kGREATER_THAN:
+	output << " Greater Than.";
+	break;
+    case kUNKNOWN:
+	output << " Unknown.";
+	break;
+    case kERROR:
+	output << " Error.";
+	break;
+    case kMNONE:
+	output << " NOPARSE.";
+	break;
+    default:
+	break;
+    }
+
     SET_DEBUG_STACK;
     return output;
 }
@@ -230,7 +331,7 @@ void MSLIST::FillState(const char *s)
  *
  * Function Name : 
  *
- * Description :
+ * Description : OBSOLETE!
  *
  * Inputs :
  *

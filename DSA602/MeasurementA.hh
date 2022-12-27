@@ -10,6 +10,7 @@
  * Restrictions/Limitations :
  *
  * Change Descriptions :
+ * 27-Dec-22  CBL absorb MValue functionality into this.
  *
  * Classification : Unclassified
  *
@@ -26,7 +27,7 @@
  */
 #ifndef __MeasurementA_hh_
 #define __MeasurementA_hh_
-
+#  include "MValue.hh"
 /*!
  * Keep track of all of the possible measurements we can make
  * off a waveform. Class MeasurementA stores on element of this list
@@ -123,6 +124,38 @@ public:
      *    NONE
      */
     inline void     SetValue(double value) {fValue = value;};
+
+    /*!
+     * responses are setup such that they are a value with a qualifier. 
+     * The qualifier is found in DSA602_Types.h
+     * MEASUREMENT_QUALIFIER {kEQUAL=0, kLESS_THAN, kGREATER_THAN,kUNKNOWN, kERROR}
+     *
+     */
+    bool Decode(const char *Response);
+
+    /*!
+     * Description: 
+     *   
+     *
+     * Arguments:
+     *   
+     *
+     * returns:
+     *    NONE
+     */
+    inline unsigned Qualifier(void) const {return (unsigned) fQualifier;};
+    /*!
+     * Description: 
+     *   
+     *
+     * Arguments:
+     *   
+     *
+     * returns:
+     *    NONE
+     */
+    inline bool OK(void) const {return (fQualifier!=kMNONE);};
+
     /*!
      * Description: 
      *   
@@ -136,9 +169,10 @@ public:
     friend ostream& operator<<(ostream& output, const MeasurementA &n); 
 
 private:
-    std::string    *fMeas;   // object name
-    double         fValue;   // Value stored for this measurement. (Change to MValue?)
-    bool           fEnabled; // Since this is a list of known values, is it enabled? 
+    std::string    *fMeas;     // object name
+    double         fValue;     // Value stored for this measurement. 
+    uint8_t        fQualifier; // qualifier on measurement. 
+    bool           fEnabled;   // Since this is a list of known values, is it enabled? 
 };
 
 

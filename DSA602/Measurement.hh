@@ -23,7 +23,6 @@
 #  include "MeasurementA.hh"
 #  include "MValue.hh"
 
-
 /*!
  * Manage measurements that pertain to the trace on the screen. 
  *
@@ -94,7 +93,7 @@ public:
      * returns:
      *    
      */
-    ~Measurement();
+    ~Measurement(void);
 
 
     /* ======================================================== */
@@ -113,6 +112,20 @@ public:
      */
     bool Update(void);
 
+    /*!
+     * Description: 
+     *   Query The specific requested value. 
+     *
+     * Arguments:
+     *   t - type of measurement to perform, see above MTYPES enum. 
+     *   q - perform query (default false)
+     *
+     * returns:
+     *    MValue - Value and value qualifier. 
+     */
+    double GetValue(MTYPES t, bool q=false)  
+	{if(q) Query(Available[t]); return fMeasurements[t]->Value();};
+#if 0
     /*!
      * Description: 
      *   Query The time from the trigger point to a specified reference
@@ -496,7 +509,7 @@ public:
     inline const MValue& YTPLS_Area(bool q=false) 
 	{if(q) Query("YTP"); return fYTPLS_Area;};
 
-
+#endif
     /*!
      * Description: 
      *   Query how many of the measurements are currently active, 
@@ -591,6 +604,7 @@ private:
      * How many of these are there? 
      * Group by what they do. 27 total values, see enum above. 
      */
+#if 0
     /*!
      * Amplitude (9 total values) 
      */
@@ -634,5 +648,6 @@ private:
     MValue fSkew;
     MValue fTimeToTrigger;
     MValue fWidth;
+#endif
 };
 #endif
