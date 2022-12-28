@@ -423,7 +423,7 @@ public:
      *    value or -DBL_MAX if non differential
      */
     inline double Offset(bool q)
-	{if (fDifferential) {if(q) Query(kOFFSET);return fOFFSet;} return -DBL_MAX;};
+	{if(q) Query(kOFFSET);return fOFFSet;};
 
     /*!
      * Description:

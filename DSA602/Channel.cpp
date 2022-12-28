@@ -41,26 +41,57 @@ using namespace std;
  * first 2 - Non differential only
  * next 9 - applicable to differential only
  * Final  - applicable to all modules. 
+ *
+ * Command, type, upper, lower, step, boolean not yet used.
  */
 const struct t_Commands Channel::ChannelCommands[kCHNL_END]= {
-    {"COU",        kCT_COUPLING,    0.0,   0.0},
-    {"PROB",       kCT_STRING,      0.0,   0.0},
-    {"AMP",        kCT_FLOAT,      20.0, -20.0},  // Amplifier offset
-    {"PLSC",       kCT_COUPLING,    0.0,   0.0},
-    {"MNSC",       kCT_COUPLING,    0.0,   0.0},
-    {"PLSO",       kCT_FLOAT,       1.0,  -1.0},
-    {"MNSO",       kCT_FLOAT,       1.0,  -1.0},
-    {"PLSP",       kCT_STRING,      0.0,   0.0},
-    {"MNSP",       kCT_STRING,      0.0,   0.0},
-    {"PROT",       kCT_BOOL,        0.0,   0.0},
-    {"VCO",        kCT_FLOAT,      10.0, -10.0}, // everything below here
-    {"BW",         kCT_FLOAT,     2.0e7,   0.0}, // applies to all modules
-    {"IMP",        kCT_IMPEDANCE,  50.0, 1.0e9},
-    {"BWH",        kCT_FLOAT,     2.0e7,   0.0},
-    {"OFFS",       kCT_FLOAT,       1.0,  -1.0},
-    {"BWL" ,       kCT_FLOAT,     1.0e7,   0.0},
-    {"SENS",       kCT_FLOAT,      10.0,   1.0e-3},
+    {"COUpling",   kCT_COUPLING,    0.0,   0.0,  1.0, true},
+    {"PROBe",      kCT_STRING,      0.0,   0.0,  1.0, false},
+    {"AMPoffset",  kCT_FLOAT,      20.0, -20.0, 25.0e-6, false},
+    {"PLSCoupling",kCT_COUPLING,    0.0,   0.0,  1.0, false},
+    {"MNSCoupling",kCT_COUPLING,    0.0,   0.0,  1.0, false},
+    {"PLSOffset",  kCT_FLOAT,       1.0,  -1.0, 25.0e-6, false},
+    {"MNSOffset",  kCT_FLOAT,       1.0,  -1.0, 25.0e-6, false},
+    {"PLSProbe",   kCT_STRING,      0.0,   0.0,  1.0, false},
+    {"MNSProbe",   kCT_STRING,      0.0,   0.0,  1.0, false},
+    {"PROTect",    kCT_BOOL,        0.0,   0.0,  1.0, false},
+    {"VCOffset",   kCT_FLOAT,       0.0,   0.0,  1.0, true},     
+    {"BW",         kCT_FLOAT,     2.0e7,   0.0,  1.0, false},
+    {"IMPedence",  kCT_IMPEDANCE,   1e6,  50.0,  1.0, true},
+    {"BWHi",       kCT_FLOAT,     3.0e6,   0.0,  1.0, true},
+    {"OFFSet",     kCT_FLOAT,       0.0,   0.0,  1.0, true},
+    {"BWLo",       kCT_FLOAT,     1.0e7,   0.0,  1.0, false},
+    {"SENsitivity",kCT_FLOAT,       0.0,   0.0,  1.0, true},
     {"UNI",        kCT_STRING,      0.0,   0.0},
+};
+
+struct t_Sensitivity P11A32[] = {
+    {  1e-3,   1.99e-3, 1e-6},
+    {  2e-3,   4.98e-3, 20e-6},
+    {  5e-3,   9.95e-3, 50e-6},
+    { 10e-3,  19.9e-3, 100e-6},
+    { 20e-3,  49.8e-3, 200e-6},
+    { 50e-3,  99.5e-3, 500e-6},
+    {100e-3,  199e-3,    1e-3},
+    {200e-3, 498e-3,     2e-3},
+    {500e-3, 995e-3,     5e-3},
+    {   1.0,   1.99,    10e-3},
+    {   2.0,   4.98,    20e-3},
+    {   5.0,   10.0,    50e-3}
+};
+struct t_Sensitivity P11A33[] = {
+    {  1.0e-3,   1.99e-3, 10.0e-6},
+    {  2.0e-3,   4.98e-3, 20.0e-6},
+    {  5.0e-3,   9.95e-3, 50.0e-6},
+    { 10.0e-3,  19.9e-3, 100.0e-6},
+    { 20.0e-3,  49.8e-3, 200.0e-6},
+    { 50.0e-3,  99.5e-3, 500.0e-6},
+    {100.0e-3, 199.0e-3,   1.0e-3},   // not available when impedence = 1e9
+    {200.0e-3, 498.0e-3,   2.0e-3},
+    {500.0e-3, 995.0e-3,   5.0e-3},
+    {  1.0,      1.99,    10.0e-3},
+    {  2.0,      4.98,    20.0e-3},
+    {  5.0,     10.0,     50.0e-3}
 };
 
 
@@ -739,8 +770,12 @@ bool Channel::SendCommand(COMMANDs c, double value)
     // Has to be a float. 
     if (ChannelCommands[c].Type == kCT_FLOAT)
     {
+	cout << ChannelCommands[c].Command << " "
+	     << ChannelCommands[c].Lower << " "
+	     << ChannelCommands[c].Upper
+	     << endl;
 	// Check bounds. 
-	if((value<ChannelCommands[c].Lower) || (value>ChannelCommands[c].Upper))
+	if((value<ChannelCommands[c].Lower)||(value>ChannelCommands[c].Upper))
 	{
 	    SET_DEBUG_STACK;
 	    SetError(-1,__LINE__);
@@ -780,7 +815,7 @@ bool Channel::SendCommand(COMMANDs c, double value)
  *     either the command specified wasn't a bool or the GPIB
  *     command failed. 
  * 
- * Unit Tested on: 27-Nov-14
+ * Unit Tested on: 28-Dec-22
  *
  * Unit Tested by: CBL
  *
@@ -789,10 +824,11 @@ bool Channel::SendCommand(COMMANDs c, double value)
  */
 bool Channel::SendCommand(COMMANDs c, bool value)
 {
+    DSA602 *pDSA602 = DSA602::GetThis();
+    CLogger* log    = CLogger::GetThis();
     bool rc = false;
     char cstring[32];
     const char *p;
-    DSA602 *pDSA602 = DSA602::GetThis();
     SET_DEBUG_STACK;
     ClearError(__LINE__);
 
@@ -808,7 +844,11 @@ bool Channel::SendCommand(COMMANDs c, bool value)
 	}
 	sprintf( cstring, "CH%c%d %s:%s",SlotChar(fSlot),
 		 fNumber+1, ChannelCommands[c].Command, p);
-	//cout << " Send Command Double : " << cstring << endl;
+
+	if(log->CheckVerbose(1))
+	{
+	    log->Log("# Channel::SendCommand (bool): %s\n", cstring);
+	}
 	rc = pDSA602->Command(cstring, NULL, 0);
 	if (!rc)
 	{
@@ -902,7 +942,7 @@ bool Channel::SendCommand(COMMANDs c, IMPEDANCE value)
  *     either the command specified wasn't a COUPLING or the GPIB
  *     command failed. 
  * 
- * Unit Tested on: 27-Nov-14
+ * Unit Tested on: 28-Dec-22
  *
  * Unit Tested by: CBL
  *
@@ -911,10 +951,11 @@ bool Channel::SendCommand(COMMANDs c, IMPEDANCE value)
  */
 bool Channel::SendCommand(COMMANDs c, COUPLING  value)
 {
+    DSA602 *pDSA602 = DSA602::GetThis();
+    CLogger* log    = CLogger::GetThis();
     bool rc = false;
     char cstring[32];
     const char *cs = NULL;
-    DSA602 *pDSA602 = DSA602::GetThis();
     SET_DEBUG_STACK;
     ClearError(__LINE__);
 
@@ -942,7 +983,11 @@ bool Channel::SendCommand(COMMANDs c, COUPLING  value)
 		 fNumber+1, 
 		 ChannelCommands[c].Command,
 		 cs);
-	//cout << " COUPLING COMMAND STRING. " << cstring << endl;
+
+	if(log->CheckVerbose(1))
+	{
+	    log->Log("# Channel::SendCommand (COUPLING): %s\n", cstring);
+	}
 	rc = pDSA602->Command(cstring, NULL, 0);
     }
     return rc;    

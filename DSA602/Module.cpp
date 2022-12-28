@@ -38,74 +38,7 @@ using namespace std;
 // Trigger selection - Trigger Menu
 // A32 - HFLimit 20MHz or 100 MHz
 
-/* Command, type, upper, lower */
-struct t_Commands ChannelCommands[2][18]= {
-    {{"AMPoffset",  kCT_FLOAT,      20.0, -20.0, 25.0e-6, false}, // 11A32 Begin
-     {"BW",         kCT_FLOAT,     2.0e7,   0.0,  1.0, false},
-     {"BWHi",       kCT_FLOAT,     3.0e6,   0.0,  1.0, true},
-     {"BWLo",       kCT_FLOAT,     1.0e7,   0.0,  1.0, false},
-     {"COUpling",   kCT_COUPLING,    0.0,   0.0,  1.0, true},
-     {"IMPedence",  kCT_IMPEDANCE,   1e6,   0.0,  1.0, true},
-     {"MNSCoupling",kCT_COUPLING,    0.0,   0.0,  1.0, false},
-     {"MNSOffset",  kCT_FLOAT,       1.0,  -1.0, 25.0e-6, false},
-     {"MNSProbe",   kCT_STRING,      0.0,   0.0,  1.0, false},
-     {"OFFSet",     kCT_FLOAT,       0.0,   0.0,  1.0, true},
-     {"PLSCoupling",kCT_COUPLING,    0.0,   0.0,  1.0, false},
-     {"PLSOffset",  kCT_FLOAT,       1.0,  -1.0, 25.0e-6, false},
-     {"PLSProbe",   kCT_STRING,      0.0,   0.0,  1.0, false},
-     {"PROBe",      kCT_STRING,      0.0,   0.0,  1.0, false},
-     {"PROTect",    kCT_BOOL,        0.0,   0.0,  1.0, false},
-     {"SENsitivity",kCT_FLOAT,       0.0,   0.0,  1.0, true},
-     {"VCOffset",   kCT_FLOAT,       0.0,   0.0,  1.0, true},     
-     {NULL,         kCT_NONE,        0.0,   0.0,  1.0, false}},   // 11A32 End
-    {{"AMPoffset",  kCT_FLOAT,      20.0, -20.0, 25.0e-6, true},  // 11A33 Begin
-     {"BW",         kCT_FLOAT,     2.0e7,   0.0,  1.0,  true},
-     {"BWHi",       kCT_FLOAT,     2.0e7,   0.0,  1.0,  true},
-     {"BWLo",       kCT_FLOAT,     1.0e7,   0.0,  1.0, false},
-     {"COUpling",   kCT_COUPLING,    0.0,   0.0,  1.0, false},
-     {"IMPedence",  kCT_IMPEDANCE, 1.0e9,   0.0,  0.0,  true},
-     {"MNSCoupling",kCT_COUPLING,    0.0,   0.0,  0.0,  true},
-     {"MNSOffset",  kCT_FLOAT,       0.0,   0.0, 25.0e-6,  true},
-     {"MNSProbe",   kCT_STRING,      0.0,   0.0,  0.0,  true},
-     {"OFFSet",     kCT_FLOAT,       1.0,   0.0,  1.0,  true},
-     {"PLSCoupling",kCT_COUPLING,    0.0,   0.0,  0.0,  true},
-     {"PLSOffset",  kCT_FLOAT,       0.0,   0.0, 25.0e-6,  true},
-     {"PLSProbe",   kCT_STRING,      0.0,   0.0,  1.0,  true},
-     {"PROBe",      kCT_STRING,      0.0,   0.0,  1.0, false},
-     {"PROTect",    kCT_BOOL,        0.0,   0.0,  1.0,  true},
-     {"SENsitivity",kCT_FLOAT,       0.0,   0.0,  1.0,  true},
-     {"VCOffset",   kCT_FLOAT,       0.0,   0.0,  1.0,  true},     // depend offset range
-     {NULL,         kCT_NONE,        0.0,   0.0, 25.0e-6, false}}, // 11A33 End
-};
 
-struct t_Sensitivity P11A32[] = {
-    {  1e-3,   1.99e-3, 1e-6},
-    {  2e-3,   4.98e-3, 20e-6},
-    {  5e-3,   9.95e-3, 50e-6},
-    { 10e-3,  19.9e-3, 100e-6},
-    { 20e-3,  49.8e-3, 200e-6},
-    { 50e-3,  99.5e-3, 500e-6},
-    {100e-3,  199e-3,    1e-3},
-    {200e-3, 498e-3,     2e-3},
-    {500e-3, 995e-3,     5e-3},
-    {   1.0,   1.99,    10e-3},
-    {   2.0,   4.98,    20e-3},
-    {   5.0,   10.0,    50e-3}
-};
-struct t_Sensitivity P11A33[] = {
-    {  1.0e-3,   1.99e-3, 10.0e-6},
-    {  2.0e-3,   4.98e-3, 20.0e-6},
-    {  5.0e-3,   9.95e-3, 50.0e-6},
-    { 10.0e-3,  19.9e-3, 100.0e-6},
-    { 20.0e-3,  49.8e-3, 200.0e-6},
-    { 50.0e-3,  99.5e-3, 500.0e-6},
-    {100.0e-3, 199.0e-3,   1.0e-3},   // not available when impedence = 1e9
-    {200.0e-3, 498.0e-3,   2.0e-3},
-    {500.0e-3, 995.0e-3,   5.0e-3},
-    {  1.0,      1.99,    10.0e-3},
-    {  2.0,      4.98,    20.0e-3},
-    {  5.0,     10.0,     50.0e-3}
-};
 
 char *ModuleNames[] = {(char*)"11A32 Two channel",
 		       (char*)"11A33 Differential input"};
@@ -242,9 +175,6 @@ ostream& operator<<(ostream& output, const Module &n)
     {
 	output << *n.fChannel[i];
     }
-
-//    output << endl
-//	   << "============================================" << endl;
     SET_DEBUG_STACK;
     return output;
 }

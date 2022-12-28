@@ -17,7 +17,7 @@ LIBRARY = $(HOME)/lib_Linux/libDSA602.a
 #
 # Compile time resolution.
 #
-EXT_CFLAGS +=  -g 
+#EXT_CFLAGS +=  -g 
 # -DDEBUG_TRACE
 # -DDEBUG_TB
 # -DDEBUG_SAE=1
