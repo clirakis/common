@@ -44,8 +44,8 @@ struct t_Commands
 {
     const char*   Command;
     unsigned char Type;
-    double        Upper;
     double        Lower;
+    double        Upper;
     double        Step;      // Stepsize
     bool          Supported; // not every command is supported per module
 };

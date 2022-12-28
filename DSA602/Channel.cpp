@@ -55,7 +55,7 @@ const struct t_Commands Channel::ChannelCommands[kCHNL_END]= {
     {"PROT",       kCT_BOOL,        0.0,   0.0},
     {"VCO",        kCT_FLOAT,      10.0, -10.0}, // everything below here
     {"BW",         kCT_FLOAT,     2.0e7,   0.0}, // applies to all modules
-    {"IMP",        kCT_IMPEDANCE,   0.0,   0.0},
+    {"IMP",        kCT_IMPEDANCE,  50.0, 1.0e9},
     {"BWH",        kCT_FLOAT,     2.0e7,   0.0},
     {"OFFS",       kCT_FLOAT,       1.0,  -1.0},
     {"BWL" ,       kCT_FLOAT,     1.0e7,   0.0},
@@ -725,10 +725,16 @@ const char* Channel::CouplingString(COUPLING c) const
 bool Channel::SendCommand(COMMANDs c, double value)
 {
     SET_DEBUG_STACK;
-    bool rc = false;
-    char cstring[32];
     DSA602 *pDSA602 = DSA602::GetThis();
+    CLogger* log    = CLogger::GetThis();
+    bool     rc     = false;
+    char cstring[32];
     ClearError(__LINE__);
+
+    if(log->CheckVerbose(1))
+    {
+	log->Log("# Channel::SendCommand: %d %f\n", (int)c, value);
+    }
 
     // Has to be a float. 
     if (ChannelCommands[c].Type == kCT_FLOAT)
@@ -740,10 +746,15 @@ bool Channel::SendCommand(COMMANDs c, double value)
 	    SetError(-1,__LINE__);
 	    return false;
 	}
-	//sprintf( cstring, "CH%c%d %s:%8.1f",SlotChar(fSlot),
+
 	sprintf( cstring, "CH%c%d %s:%g",SlotChar(fSlot),
 		 fNumber+1, ChannelCommands[c].Command, value);
-	//cout << " Send Command Double : " << cstring << endl;
+
+	if(log->CheckVerbose(1))
+	{
+	    log->Log("# Channel::SendCommand: %s\n", cstring);
+	}
+
 	rc = pDSA602->Command(cstring, NULL, 0);
     }
 
@@ -837,10 +848,11 @@ bool Channel::SendCommand(COMMANDs c, bool value)
 bool Channel::SendCommand(COMMANDs c, IMPEDANCE value)
 {
     SET_DEBUG_STACK;
+    DSA602 *pDSA602 = DSA602::GetThis();
+    CLogger* log    = CLogger::GetThis();
     bool rc = false;
     double val;
     char cstring[32];
-    DSA602 *pDSA602 = DSA602::GetThis();
     ClearError(__LINE__);
 
     if (ChannelCommands[c].Type == kCT_IMPEDANCE)
@@ -861,7 +873,11 @@ bool Channel::SendCommand(COMMANDs c, IMPEDANCE value)
 	}
 	sprintf( cstring, "CH%c%d IMP:%f",SlotChar(fSlot),
 		 fNumber+1, val);
-	//cout << "IMPEDANCE : " << cstring << endl;
+	if(log->CheckVerbose(1))
+	{
+	    log->Log("# Channel::SendCommand (IMP): %s\n", cstring);
+	}
+
 	rc = pDSA602->Command(cstring, NULL, 0);
     }
     SET_DEBUG_STACK;

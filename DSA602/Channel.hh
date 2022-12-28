@@ -314,7 +314,7 @@ public:
      * returns:
      *    Channel impedence {kFIFTY=0, kONE_MEG, kONE_GIG}
      */
-    inline IMPEDANCE Impedence(bool q) 
+    inline IMPEDANCE Impedance(bool q) 
 	{if(q) Query(kIMPEDANCE);return fIMPedance;};
     /*!
      * Description: 
@@ -326,8 +326,7 @@ public:
      * returns:
      *    true on success
      */
-    inline bool Impedence(IMPEDANCE v) 
-	{return SendCommand(kIMPEDANCE,v);};
+    bool Impedance(IMPEDANCE v);
 
     /* ======================================================== */
     /*             Differential unit data                       */ 
