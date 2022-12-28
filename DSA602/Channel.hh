@@ -54,12 +54,30 @@ class Channel : CObject
 {
 public:
     /*!
-     * Channel spefic commands. 
+     * Channel spefic commands.
+     * page 77 in manual.  
      */
-    enum COMMANDs { kAMPOFFSET, kBW, kBWHI, kBWLO, kCCOUPLING, kCIMPEDANCE, 
-		    kMNSCOUPLING, kMNSOFFSET, kMNSPROBE, kOFFSET, 
-		    kPLSCOUPLING, kPLSOFFSET, kPLSPROBE, kPROBE, kPROTECT, 
-		    kSENSITIVITY, kUNITS, kVCOFFSET};
+    enum COMMANDs { kCCOUPLING=0 , kPROBE, 
+		    kAMPOFFSET, kPLSCOUPLING, kMNSCOUPLING, kPLSOFFSET,
+		    kMNSOFFSET,  kPLSPROBE, kMNSPROBE, kPROTECT, kVCOFFSET,
+		    kBW, kIMPEDANCE, kBWHI, kOFFSET, kBWLO, kSENSITIVITY,
+		    kUNITS, 
+		    kCHNL_END};
+
+    static const uint8_t kNSINGLE_ENDED = 9;
+    static const uint8_t kNDIFFERENTIAL = 16;
+    const char *Labels[kCHNL_END] = {
+	// Non differential
+	"COUPLING", "PROBE",
+	// Differential only
+	"AMPOFFSET", "PLSCOUPLING", "MSCOUPLING", "PLSOFFSET",
+	"MNSOFFSET", "PLSPROBE", "MNSPROBE", "PROTECT", "VCOFFSET",
+	// ALL
+	"BW", "IMPEDANCE", "BWHI", "OFFSET", "BWLOW", "SENSITIVITY",
+	"UNITS"
+    };
+
+
     /*!
      * Description: 
      *   Constuctor
@@ -67,10 +85,11 @@ public:
      * Arguments:
      *   m - the parent module
      *   c - the channel number
+     *
      * returns:
      *    ...
      */
-    Channel(SLOT s=kSLOT_NONE, unsigned char n=0);
+    Channel(SLOT s=kSLOT_NONE, uint8_t n=0);
 
     /*!
      * Description: 
@@ -87,8 +106,26 @@ public:
     /*             Private Data Access Functions                */ 
     /* ======================================================== */
 
-    static const struct t_Commands ChannelCommands[19];
+    static const struct t_Commands ChannelCommands[ kCHNL_END];
 
+    /*!
+     * Description: 
+     *    Given the specific enum in COMMANDS is this
+     *    command applicable to this channel. This is module specific
+     *    and depends on if it is differential or not. 
+     *
+     * Arguments:
+     *   COMMAND
+     *
+     * returns:
+     *    true if applicable
+     */
+    bool Applicable(uint8_t c);
+
+    inline uint8_t NApplicable(void) const {
+	if (fDifferential) return kNDIFFERENTIAL; else return kNSINGLE_ENDED;};
+
+    
     /*!
      * Description: 
      *    Get the channel number.    
@@ -277,7 +314,7 @@ public:
      *    Channel impedence {kFIFTY=0, kONE_MEG, kONE_GIG}
      */
     inline IMPEDANCE Impedence(bool q) 
-	{if(q) Query(kCIMPEDANCE);return fIMPedance;};
+	{if(q) Query(kIMPEDANCE);return fIMPedance;};
     /*!
      * Description: 
      *   set the current channel impedence. 
@@ -289,9 +326,7 @@ public:
      *    true on success
      */
     inline bool Impedence(IMPEDANCE v) 
-	{return SendCommand(kCIMPEDANCE,v);};
-
-
+	{return SendCommand(kIMPEDANCE,v);};
 
     /* ======================================================== */
     /*             Differential unit data                       */ 
@@ -750,9 +785,8 @@ private:
      *    associated string. 
      */
     const char* CouplingString(COUPLING c) const;
-
     SLOT          fSlot;
-    unsigned char fNumber;     // Channel Number
+    unsigned char fNumber;       // Channel Number
     bool          fDifferential; // Is this channel on a differential module?
 
     // Page 90

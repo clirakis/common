@@ -27,32 +27,40 @@ using namespace std;
 
 // Local Includes.
 #include "debug.h"
+#include "CLogger.hh"
 #include "Channel.hh"
 #include "GParse.hh"
 #include "DSA602.hh"
 #include "DSA602_Utility.hh"
 
-/* Command, type, upper bound, lower bound */
-const struct t_Commands Channel::ChannelCommands[19]= {
-    {"AMP",        kCT_FLOAT,      20.0, -20.0},  // Amplifier offset
-    {"BW",         kCT_FLOAT,     2.0e7,   0.0},
-    {"BWH",        kCT_FLOAT,     2.0e7,   0.0},
-    {"BWL" ,       kCT_FLOAT,     1.0e7,   0.0},
+/* 
+ * Command, type, upper bound, lower bound.
+ * Put these in the same order as the enum Commands. 
+ * The label here is a tiny bit redundant with Label in the header file. 
+ * These are also grouped by 
+ * first 2 - Non differential only
+ * next 9 - applicable to differential only
+ * Final  - applicable to all modules. 
+ */
+const struct t_Commands Channel::ChannelCommands[kCHNL_END]= {
     {"COU",        kCT_COUPLING,    0.0,   0.0},
-    {"IMP",        kCT_IMPEDANCE,   0.0,   0.0},
-    {"MNSC",       kCT_COUPLING,    0.0,   0.0},
-    {"MNSO",       kCT_FLOAT,       1.0,  -1.0},
-    {"MNSP",       kCT_STRING,      0.0,   0.0},
-    {"OFFS",       kCT_FLOAT,       1.0,  -1.0},
-    {"PLSC",       kCT_COUPLING,    0.0,   0.0},
-    {"PLSO",       kCT_FLOAT,       1.0,  -1.0},
-    {"PLSP",       kCT_STRING,      0.0,   0.0},
     {"PROB",       kCT_STRING,      0.0,   0.0},
+    {"AMP",        kCT_FLOAT,      20.0, -20.0},  // Amplifier offset
+    {"PLSC",       kCT_COUPLING,    0.0,   0.0},
+    {"MNSC",       kCT_COUPLING,    0.0,   0.0},
+    {"PLSO",       kCT_FLOAT,       1.0,  -1.0},
+    {"MNSO",       kCT_FLOAT,       1.0,  -1.0},
+    {"PLSP",       kCT_STRING,      0.0,   0.0},
+    {"MNSP",       kCT_STRING,      0.0,   0.0},
     {"PROT",       kCT_BOOL,        0.0,   0.0},
+    {"VCO",        kCT_FLOAT,      10.0, -10.0}, // everything below here
+    {"BW",         kCT_FLOAT,     2.0e7,   0.0}, // applies to all modules
+    {"IMP",        kCT_IMPEDANCE,   0.0,   0.0},
+    {"BWH",        kCT_FLOAT,     2.0e7,   0.0},
+    {"OFFS",       kCT_FLOAT,       1.0,  -1.0},
+    {"BWL" ,       kCT_FLOAT,     1.0e7,   0.0},
     {"SENS",       kCT_FLOAT,      10.0,   1.0e-3},
     {"UNI",        kCT_STRING,      0.0,   0.0},
-    {"VCO",        kCT_FLOAT,      10.0, -10.0},
-    {NULL,         kCT_NONE,        0.0,   0.0},
 };
 
 
@@ -139,6 +147,99 @@ Channel::~Channel()
     delete fPLSProbe;
     delete fPROBe;
 }
+
+/**
+ ******************************************************************
+ *
+ * Function Name : Applicable
+ *
+ * Description : Is this function applicable to this channel? 
+ *
+ * Inputs : from enum COMMANDS
+ *
+ * Returns : true if it is. 
+ *
+ * Error Conditions : NONE
+ * 
+ * Unit Tested on: 
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+bool Channel::Applicable(uint8_t c)
+{
+    SET_DEBUG_STACK;
+    bool rc = false;
+    if (fDifferential)
+    {
+	switch(c)
+	{
+	case kCCOUPLING:
+	case kPROBE:
+	    rc = false;
+	    break;
+	case kAMPOFFSET: 
+	case kPLSCOUPLING:
+	case kMNSCOUPLING: 
+	case kPLSOFFSET:
+	case kMNSOFFSET:  
+	case kPLSPROBE: 
+	case kMNSPROBE: 
+	case kPROTECT: 
+	case kVCOFFSET:
+	case kBW: 
+	case kIMPEDANCE: 
+	case kBWHI: 
+	case kOFFSET: 
+	case kBWLO:
+	case kSENSITIVITY:
+	case kUNITS:
+	    rc = true;
+	    break;
+	default:
+	    rc = false;
+	    break;
+	}
+    }
+    else
+    {
+ 	switch(c)
+	{
+	case kCCOUPLING:
+	case kPROBE:
+	    rc = true;
+	    break;
+	case kAMPOFFSET: 
+	case kPLSCOUPLING:
+	case kMNSCOUPLING: 
+	case kPLSOFFSET:
+	case kMNSOFFSET:  
+	case kPLSPROBE: 
+	case kMNSPROBE: 
+	case kPROTECT: 
+	case kVCOFFSET:
+	    rc = false;
+	    break;
+	case kBW: 
+	case kIMPEDANCE: 
+	case kBWHI: 
+	case kOFFSET: 
+	case kBWLO:
+	case kSENSITIVITY:
+	case kUNITS:
+	    rc = true;
+	    break;
+	default:
+	    rc = false;
+	    break;
+	}
+    }
+    SET_DEBUG_STACK;
+    return rc;
+}
+
 /**
  ******************************************************************
  *
@@ -857,9 +958,11 @@ bool Channel::SendCommand(COMMANDs c, COUPLING  value)
  */
 bool Channel::Update(void)
 {
+    SET_DEBUG_STACK;
+    DSA602*  pDSA602 = DSA602::GetThis();
+    CLogger* log     = CLogger::GetThis();
     bool rc = false;
     char cstring[32],response[1024];
-    DSA602 *pDSA602 = DSA602::GetThis();
     char pSlot;
     SET_DEBUG_STACK;
     ClearError(__LINE__);
@@ -883,11 +986,11 @@ bool Channel::Update(void)
     sprintf(cstring, "CH%c%d?", pSlot,fNumber+1);
     memset(response, 0, sizeof(response));
     rc = pDSA602->Command(cstring, response, sizeof(response));
-#if 0
-    cout << "CHANNEL:   " << cstring
-	 << " RESPONSE: " << response
-	 << endl;
-#endif
+    if(log->CheckVerbose(1))
+    {
+	log->Log("# Channel::Update %s\n", response);
+    }
+
     if (rc)
     {
 	Decode(response);
@@ -929,6 +1032,7 @@ bool Channel::Update(void)
  */
 bool Channel::Query(COMMANDs c)
 {
+    SET_DEBUG_STACK;
     char   cstring[32], Response[64];
     const  char *p;
     DSA602 *pDSA602 = DSA602::GetThis();
@@ -970,7 +1074,7 @@ bool Channel::Query(COMMANDs c)
 	case kCCOUPLING:
 	    fCOUpling = DecodeCoupling(p);
 	    break;
-	case kCIMPEDANCE:
+	case kIMPEDANCE:
 	    fIMPedance = DecodeImpedance(p);
 	    break;
 	case kMNSCOUPLING:

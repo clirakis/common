@@ -222,13 +222,13 @@ ostream& operator<<(ostream& output, const Module &n)
     output << "Serial: " << n.fUnitSerial << " Type: ";
     switch (n.fType)
     {
-    case Module::kTYPE_NONE:
+    case kTYPE_NONE:
 	output << "NONE";
 	break;
-    case Module::kTYPE_11A32:
+    case kTYPE_11A32:
 	output << "11A32";
 	break;
-    case Module::kTYPE_11A33:
+    case kTYPE_11A33:
 	output << "11A33";
 	break;
     }

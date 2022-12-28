@@ -38,6 +38,7 @@
     enum PT_TYPES {kPT_ENV=0, kPT_XY, kPT_Y, kPT_NONE};
     enum MEASUREMENT_QUALIFIER {kEQUAL=0, kLESS_THAN, kGREATER_THAN, 
 				kUNKNOWN, kERROR, kMNONE};
+    enum MODULE_TYPE {kTYPE_11A32=0, kTYPE_11A33, kTYPE_NONE};
 
 struct t_Commands
 {

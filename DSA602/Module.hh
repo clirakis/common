@@ -37,7 +37,6 @@
 class Module : public CObject
 {
 public:
-    enum TYPES    {kTYPE_11A32=0, kTYPE_11A33, kTYPE_NONE};
 
     /*!
      * Description: 
@@ -99,7 +98,7 @@ public:
      * returns:
      *    
      */
-    inline TYPES Type(void) const {return fType;};
+    inline MODULE_TYPE Type(void) const {return fType;};
 
     /*!
      * Description: 
@@ -173,7 +172,7 @@ public:
      * returns:
      *    number {0:1} of channels associated with the channel. 
      */
-    inline Channel*      GetChannel(size_t c) 
+    inline Channel*      GetChannel(uint8_t c) 
 	{if (c<fNChannel) return fChannel[c]; else return NULL;};
 
     /*!
@@ -209,7 +208,7 @@ protected:
 
     std::string fUnitSerial;    // Serial number of this module. 
     SLOT        fSlot;          // Slot position of this module.
-    TYPES       fType;          // Module type
+    MODULE_TYPE fType;          // Module type, 11A32 - Single Ended
     Channel*    fChannel[2];    // Data on each channel in module. 
     size_t      fNChannel;      // Number of channels in module. 
     bool        fDifferential;  // Is the module differential?
