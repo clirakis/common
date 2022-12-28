@@ -202,8 +202,7 @@ ostream& operator<<(ostream& output, const Module &n)
 {
     SET_DEBUG_STACK;
     output << "============================================" << endl
-	   << "Module data ( " 
-	   << "Positon:";
+	   << "Module  ( Position: ";
     switch (n.fSlot)
     {
     case kSLOT_LEFT:
@@ -232,16 +231,20 @@ ostream& operator<<(ostream& output, const Module &n)
 	output << "11A33";
 	break;
     }
-    cout << ")";
 
-    for (size_t i=0;i<n.fNChannel;i++)
+    if (n.fDifferential)
+	output << " differential ";
+    else
+	output << " single ended ";
+    output << ")" << endl;
+
+    for (uint8_t i=0;i<n.fNChannel;i++)
     {
-	output << "  Channel:" << i << endl
-	       << *n.fChannel[i] << endl;
+	output << *n.fChannel[i];
     }
 
-    output << endl
-	   << "============================================" << endl;
+//    output << endl
+//	   << "============================================" << endl;
     SET_DEBUG_STACK;
     return output;
 }
@@ -317,7 +320,7 @@ void Module::Type(const string &in)
     for(size_t i=0; i<fNChannel; i++)
     {
 	fChannel[i] = new Channel(fSlot, i);
-	if (fDifferential) fChannel[i]->Differential();
+	if (fDifferential) fChannel[i]->SetDifferential();
     }
     SET_DEBUG_STACK;
 }

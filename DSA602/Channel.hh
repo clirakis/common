@@ -160,7 +160,8 @@ public:
      * returns:
      *    NONE
      */
-    inline void Differential(void)  {fDifferential = true;};
+    inline void SetDifferential(void)  {fDifferential = true;};
+    inline bool IsDifferential(void) {return fDifferential;};
 
     /*!
      * Description: 

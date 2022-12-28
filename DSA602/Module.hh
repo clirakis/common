@@ -187,6 +187,8 @@ public:
      */
     const char*     ModuleString(void);
 
+    inline bool IsDifferential(void) const {return fDifferential;};
+
 #ifdef DEBUG_MODULE
     /*!
      * Description: 

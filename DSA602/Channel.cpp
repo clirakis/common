@@ -358,7 +358,7 @@ ostream& operator<<(ostream& output, const Channel &n)
     SET_DEBUG_STACK;
     const char space[] = "    ";
     output << "============================================" << endl
-	   << "Channel data: " << endl << space
+	   << "Channel: " << (int) n.fNumber << endl << space
 	   << "AMPoffset: " << n.fAMPoffset << endl << space
 	   << "BW: "        << n.fBW 
 	   << " BWHi: "     << n.fBWHi 
