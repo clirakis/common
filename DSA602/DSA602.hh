@@ -273,8 +273,6 @@ public:
 
 
     // Trace manipulation ========================================
-
-
     /*!
      * Description: 
      *   
@@ -302,7 +300,6 @@ public:
     // FIXME
     inline bool GetDisplayTrace(unsigned char n) 
  	{if(n<8) return fTrace; else return false;};
-
 
     /*!
      * Description: 

@@ -14,23 +14,26 @@
  * Classification : Unclassified
  *
  * References : DSA602A Programming Reference Manual
- * Summary page 38
- * Details start on page 44
+ * ADJTrace - placement of trace on screen. 
+ *   Summary page 38
+ *   Details start on page 44
+ *
+ * Trace - page 292 All the other properties. 
+ *   
  *
  *******************************************************************
  */
 #ifndef __TRACE_hh_
 #define __TRACE_hh_
-#    include <vector>
 #    include "CObject.hh"
 #    include "AdjTrace.hh"
 #    include "DSA602_Types.hh"
 
-
-/// Trace documentation here. 
+/// Keep trace of which traces are on the screen. 
 class Trace : public CObject
 {
 public:
+    static const uint8_t kMaxTraces = 8;
 
     /*!
      * Description: 
@@ -56,8 +59,6 @@ public:
      */
     ~Trace(void);
 
-    static const size_t kMaxTraces;
-
 
     /* ======================================================== */
     /*             Private Data Access Functions                */ 
@@ -76,12 +77,12 @@ public:
      * 'ADJTRACE1 PANZOOM:OFF,HMAG:-1.0E+0,HPOSITION:1.0E+16,HVPOSITION:1.0E+16,HVSIZE:-1.0E+0,TRSEP:1.0E+16,VPOSITION:1.0E+16,VSIZE:-1.0E+0,FSPAN:-1.0E+0,FRESOLUTION:-1.0E+0'
      * 
      * Arguments:
-     *   put in trace number {1:8}, 0 - get all traces.
+     *   init - if true, assume we have nothing. 
      *
      * returns:
      *    true on success
      */
-    bool Update(size_t trace); 
+    bool Update(bool init=false); 
 
     /*!
      * Description: 
@@ -143,12 +144,12 @@ private:
      *   in the array. 
      *
      * Arguments:
-     *   trace to find in array. 
+     *   id - trace to find in array. 
      *
      * returns:
      *    index into the array where that number exists. 
      */
-    size_t Find(size_t n);
+    uint8_t Find(uint8_t id);
 
     /*!
      * Description: 
@@ -168,7 +169,7 @@ private:
     void Test(void);
 #endif
 
-    int    fNTrace;           // number of traces detected. 
-    vector<AdjTrace*> fAdjTrace; // Maximum number of traces.
+    int8_t    fNTrace;               // number of traces detected. 
+    AdjTrace* fAdjTrace[kMaxTraces]; // Maximum number of traces.
 };
 #endif

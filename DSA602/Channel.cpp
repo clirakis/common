@@ -65,6 +65,10 @@ const struct t_Commands Channel::ChannelCommands[kCHNL_END]= {
     {"UNI",        kCT_STRING,      0.0,   0.0},
 };
 
+/*
+ * FIXME 
+ * offset depends on sensitivity per module basis. Page 83 
+ */
 struct t_Sensitivity P11A32[] = {
     {  1e-3,   1.99e-3, 1e-6},
     {  2e-3,   4.98e-3, 20e-6},

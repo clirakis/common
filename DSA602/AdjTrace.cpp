@@ -16,18 +16,15 @@
  *
  ********************************************************************/
 // System includes.
-
 #include <iostream>
 using namespace std;
 #include <string>
 #include <cmath>
 #include <cstring>
-#include <ctime>
-#include <cfloat> 
-#include <unistd.h>
 
 // Local Includes.
 #include "debug.h"
+#include "CLogger.hh"
 #include "DSA602.hh"
 #include "AdjTrace.hh"
 
@@ -45,9 +42,6 @@ const struct t_Commands AdjTrace::Commands[kEND_LIST+1]= {
     {"VSI",        kCT_FLOAT,     0.0,     0.0},
     {NULL,         kCT_NONE,      0.0,     0.0},
 };
-const double AdjTrace::HMAG_Values[kHM_END] = {
-    1.0, 2.0, 2.5, 4.0, 5.0, 8.0, 10.0, 16.0, 20.0, 25.0, 40.0, 50.0, 80.0,
-    100.0, 160.0, 200.0, 250.0, 400.0, 500.0, 800.0, 1000.0, 2000.0, 5000.0};
 
 /**
  ******************************************************************
@@ -114,6 +108,51 @@ void AdjTrace::Clear(void)
 /**
  ******************************************************************
  *
+ * Function Name : Update
+ *
+ * Description : Update Trace information, this is part of a collection
+ *
+ * Inputs : none
+ *    
+ * Returns : true on success. 
+ *
+ * Error Conditions :
+ * 
+ * Unit Tested on: 
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+bool AdjTrace::Update(void)
+{
+    SET_DEBUG_STACK;
+    DSA602*  pDSA602 = DSA602::GetThis();
+    CLogger* log     = CLogger::GetThis();
+    char     s[32];
+    char     Response[256];
+
+
+    // Command the mainframe to tell me everything about this trace. 
+    sprintf(s, "ADJ %d", fTraceNumber); 
+    memset(Response, 0, sizeof(Response));
+    if (pDSA602->Command(s, Response, sizeof(Response)))
+    {
+	if(log->CheckVerbose(1))
+	{
+	    log->Log("# AdjTrace::Update %s\n", Response);
+	}
+	Decode(Response);
+	return true;
+    }
+    SET_DEBUG_STACK;
+    return false;
+}
+
+/**
+ ******************************************************************
+ *
  * Function Name : Decode
  *
  * Description : given a string associated with a query about
@@ -140,7 +179,6 @@ void AdjTrace::Clear(void)
 bool AdjTrace::Decode(const string &response) 
 { 
     SET_DEBUG_STACK;
-
     /*
      * When we get here this should be stripped to just the tags
      * and values. 
@@ -249,30 +287,33 @@ bool AdjTrace::Decode(const string &response)
  */
 bool AdjTrace::Query(COMMANDs c)
 {
-    char   cstring[32], Response[4096];
-    DSA602 *pDSA602 = DSA602::GetThis();
     SET_DEBUG_STACK;
+    DSA602*  pDSA602 = DSA602::GetThis();
+    CLogger* log     = CLogger::GetThis();
+    char   cstring[32], Response[4096];
     ClearError(__LINE__);
 
     memset(cstring, 0, sizeof(cstring));
 
     if (c<kEND_LIST)
     {
-	sprintf( cstring, "ADJ%ld? %s", fTraceNumber, Commands[c].Command);
+	sprintf( cstring, "ADJ%d? %s", fTraceNumber, Commands[c].Command);
     }
     else
     {
 	// out of band;
 	return false;
     }
-    //cout << "----AdjTrace Query: " << cstring ;
 
     memset(Response, 0, sizeof(Response));
     if(pDSA602->Command(cstring, Response, sizeof(Response)))
     {
+	if(log->CheckVerbose(1))
+	{
+	    log->Log("# AdjTrace::Query: %s\n", Response);
+	}
 	if (strlen(Response)>1)
 	{
-	    //cout << " RESPONSE: " << Response << endl;
 	    Decode(Response);
 	}
 	else
@@ -320,9 +361,10 @@ bool AdjTrace::Query(COMMANDs c)
 bool AdjTrace::HorizontalMagnification(HMAG_VAL value)
 {
     SET_DEBUG_STACK;
+    DSA602 *pDSA602 = DSA602::GetThis();
+    CLogger* log    = CLogger::GetThis();
     bool rc = false;
     char cstring[32];
-    DSA602 *pDSA602 = DSA602::GetThis();
     ClearError(__LINE__);
 
     if (!fPanZoom)
@@ -335,8 +377,11 @@ bool AdjTrace::HorizontalMagnification(HMAG_VAL value)
      * Not sure how to connect this to a record length. 
      */
     memset(cstring, 0, sizeof(cstring));
-    sprintf( cstring, "ADJ%ld HMA:%f",fTraceNumber, HMAG_Values[value]);
-    //cout << __FUNCTION__ << "  Double : " << cstring << endl;
+    sprintf( cstring, "ADJ%d HMA:%f",fTraceNumber, HMAG_Values[value]);
+    if(log->CheckVerbose(1))
+    {
+	log->Log("# AdjTrace::HMAG: %s\n", cstring);
+    }
     rc = pDSA602->Command(cstring, NULL, 0);
     SET_DEBUG_STACK;
     return rc;
@@ -368,22 +413,27 @@ bool AdjTrace::HorizontalMagnification(HMAG_VAL value)
 bool AdjTrace::SetPanZoom(bool val)
 {
     SET_DEBUG_STACK;
-    bool rc = false;
+    DSA602*  pDSA602 = DSA602::GetThis();
+    CLogger* log    = CLogger::GetThis();
+    bool     rc     = false;
     char cstring[32];
-    DSA602 *pDSA602 = DSA602::GetThis();
     ClearError(__LINE__);
 
     memset(cstring, 0, sizeof(cstring));
     if(val)
     {
-	sprintf( cstring, "ADJ%ld PAN:ON",fTraceNumber);
+	sprintf( cstring, "ADJ%d PAN:ON",fTraceNumber);
     }
     else
     {
-	sprintf( cstring, "ADJ%ld PAN:OFF",fTraceNumber);
+	sprintf( cstring, "ADJ%d PAN:OFF",fTraceNumber);
     }
     //cout << __FUNCTION__ << "  bool : " << cstring << endl;
     rc = pDSA602->Command(cstring, NULL, 0);
+    if(log->CheckVerbose(1))
+    {
+	log->Log("# AdjTrace::PAN: %s %d\n", cstring, rc);
+    }
     SET_DEBUG_STACK;
     return rc;
 }
@@ -414,6 +464,7 @@ bool AdjTrace::SetPanZoom(bool val)
 bool AdjTrace::PosSize(bool Horizontal, bool Position, double value)
 {
     SET_DEBUG_STACK;
+    CLogger* log     = CLogger::GetThis();
     bool rc = false;
     char cstring[32];
     const char *HV, *P;
@@ -458,9 +509,13 @@ bool AdjTrace::PosSize(bool Horizontal, bool Position, double value)
 	}
     }
     memset(cstring, 0, sizeof(cstring));
-    sprintf( cstring, "ADJ%ld %s%s:%g",fTraceNumber, HV, P, value);
-    cout << " " << __FUNCTION__ << "  double : " << cstring << endl;
+    sprintf( cstring, "ADJ%d %s%s:%g",fTraceNumber, HV, P, value);
+    // FIXME
     rc = pDSA602->Command(cstring, NULL, 0);
+    if(log->CheckVerbose(1))
+    {
+	log->Log("# AdjTrace::POSIZE: %s %d\n", cstring, rc);
+    }
     SET_DEBUG_STACK;
     return rc;
 }
@@ -499,6 +554,7 @@ bool AdjTrace::PosSize(bool Horizontal, bool Position, double value)
 bool AdjTrace::HorizontalPosition(size_t v)
 {
     SET_DEBUG_STACK;
+    CLogger* log     = CLogger::GetThis();
     bool rc = false;
     char cstring[32];
     DSA602 *pDSA602 = DSA602::GetThis();
@@ -517,9 +573,13 @@ bool AdjTrace::HorizontalPosition(size_t v)
      */
     
     memset(cstring, 0, sizeof(cstring));
-    sprintf( cstring, "ADJ%ld HPO:%ld",fTraceNumber, v);
+    sprintf( cstring, "ADJ%d HPO:%ld",fTraceNumber, v);
     //cout << __FUNCTION__ << "  int : " << cstring << endl;
     rc = pDSA602->Command(cstring, NULL, 0);
+    if(log->CheckVerbose(1))
+    {
+	log->Log("# AdjTrace::HorizontalPosition: %s %d\n", cstring, rc);
+    }
     SET_DEBUG_STACK;
     return rc;
 }
@@ -554,6 +614,7 @@ bool AdjTrace::HorizontalPosition(size_t v)
 bool AdjTrace::HVPosition(double v)
 {
     SET_DEBUG_STACK;
+    CLogger* log     = CLogger::GetThis();
     bool rc = false;
     char cstring[32];
     DSA602 *pDSA602 = DSA602::GetThis();
@@ -572,7 +633,7 @@ bool AdjTrace::HVPosition(double v)
     }
     
     memset(cstring, 0, sizeof(cstring));
-    sprintf( cstring, "ADJ%ld HVP:%g",fTraceNumber, v);
+    sprintf( cstring, "ADJ%d HVP:%g",fTraceNumber, v);
     //cout << __FUNCTION__ << "  double : " << cstring << endl;
     rc = pDSA602->Command(cstring, NULL, 0);
     SET_DEBUG_STACK;
@@ -609,6 +670,7 @@ bool AdjTrace::HVPosition(double v)
 bool AdjTrace::HVSize(double v)
 {
     SET_DEBUG_STACK;
+    CLogger* log     = CLogger::GetThis();
     bool rc = false;
     char cstring[32];
     DSA602 *pDSA602 = DSA602::GetThis();
@@ -627,7 +689,7 @@ bool AdjTrace::HVSize(double v)
     }
 
     memset(cstring, 0, sizeof(cstring));
-    sprintf( cstring, "ADJ%ld HVS:%g",fTraceNumber, v);
+    sprintf( cstring, "ADJ%d HVS:%g",fTraceNumber, v);
     cout << __FUNCTION__ << "  double : " << cstring << endl;
     rc = pDSA602->Command(cstring, NULL, 0);
     SET_DEBUG_STACK;
@@ -665,6 +727,7 @@ bool AdjTrace::HVSize(double v)
 bool AdjTrace::TraceSeparation(double v)
 {
     SET_DEBUG_STACK;
+    CLogger* log     = CLogger::GetThis();
     bool rc = false;
     char cstring[32];
     DSA602 *pDSA602 = DSA602::GetThis();
@@ -683,14 +746,16 @@ bool AdjTrace::TraceSeparation(double v)
     }
 
     memset(cstring, 0, sizeof(cstring));
-    sprintf( cstring, "ADJ%ld TRS:%g",fTraceNumber, v);
-    cout << __FUNCTION__ << "  double : " << cstring << endl;
+    sprintf( cstring, "ADJ%d TRS:%g",fTraceNumber, v);
+
     rc = pDSA602->Command(cstring, NULL, 0);
+    if(log->CheckVerbose(1))
+    {
+	log->Log("# AdjTrace::TraceSep: %s %d\n", cstring, rc);
+    }
     SET_DEBUG_STACK;
     return rc;
 }
-
-
 /**
  ******************************************************************
  *

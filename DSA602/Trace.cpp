@@ -13,6 +13,7 @@
  * Classification : Unclassified
  *
  * References :
+ * DSA602 Programming Manual Page 291
  *
  ********************************************************************/
 // System includes.
@@ -20,20 +21,13 @@
 #include <iostream>
 using namespace std;
 #include <string>
-#include <cmath>
 #include <cstring>
-#include <ctime>
-#include <cfloat> 
-#include <unistd.h>
 
 // Local Includes.
 #include "debug.h"
 #include "DSA602.hh"
 #include "Trace.hh"
 #include "GParse.hh"
-
-const size_t Trace::kMaxTraces = 8;
-
 
 /**
  ******************************************************************
@@ -60,9 +54,17 @@ Trace::Trace (void) : CObject()
     SET_DEBUG_STACK;
     ClearError(__LINE__);
     SetName("Trace");
-
-    fNTrace                  = 0;    // Number of traces detected
-    Update(0);
+    /*
+     * Store how many traces are available. -1 means uninitalized.
+     */
+    fNTrace   = -1;
+    for (uint8_t i=0;i<kMaxTraces; i++)
+    {
+	fAdjTrace[i] = NULL;
+    }
+    // Update them all. Pass in true to indicate that we have to recreate
+    // everything. 
+    Update(true);
 #ifdef DEBUG_TRACE
     Test();
 #endif
@@ -117,7 +119,7 @@ Trace::~Trace (void)
 void Trace::Reset(void) 
 {
     SET_DEBUG_STACK;
-    for(size_t i=0;i<fAdjTrace.size();i++) 
+    for(size_t i=0;kMaxTraces;i++) 
     {
 	delete fAdjTrace[i];
 	fAdjTrace[i]=NULL;
@@ -129,14 +131,13 @@ void Trace::Reset(void)
  *
  * Function Name : Update
  *
- * Description : Update Trace information 
+ * Description : Update All Trace information 
  *
- * Inputs : 
- *    Trace number {1:8}, specifying a 0 means get all traces. 
+ * Inputs : NONE
+ *    
+ * Returns : true on success. 
  *
- * Returns :
- *
- * Error Conditions :
+ * Error Conditions : 
  * 
  * Unit Tested on: 
  *
@@ -145,42 +146,32 @@ void Trace::Reset(void)
  *
  *******************************************************************
  */
-bool Trace::Update(size_t trace)
+bool Trace::Update(bool init)
 {
     SET_DEBUG_STACK;
     ClearError(__LINE__);
-    char   cstring[32], Response[4096];
-    DSA602 *pDSA602 = DSA602::GetThis();
 
-
-    // For the moment just always get everything. 
-    Reset();
-    fNTrace = GetNTrace();
-
-    memset(cstring, 0, sizeof(cstring));
-    sprintf(cstring, "ADJ?");
-
-    memset(Response, 0, sizeof(Response));
-    if(pDSA602->Command(cstring, Response, sizeof(Response)))
+    if (init)
     {
-	if (strlen(Response)>1)
+	// Make sure we are starting with a clean slate. 
+	Reset();
+	// How manuy traces do we have in play? 
+	fNTrace = GetNTrace();
+	for (uint8_t i=0;i<fNTrace;i++)
 	{
-	    //cout << " RESPONSE: " << Response << endl;
-	    Decode(Response);
-	}
-	else
-	{
-	    SetError(-2,__LINE__);
-	    SET_DEBUG_STACK;
-	    return false;
+	    fAdjTrace[i] = new AdjTrace();
 	}
     }
-    else
+
+    /*
+     * Loop over known traces. 
+     * Cleaner method. 
+     */
+    for (uint8_t i=0;i<fNTrace;i++)
     {
-	SetError(-1,__LINE__);
-	SET_DEBUG_STACK;
-	return false;
+	fAdjTrace[i]->Update(); 
     }
+
     SET_DEBUG_STACK;
     return true;
 }
@@ -275,7 +266,7 @@ bool Trace::Decode(const char *c)
     {
 	ptrTrace = new AdjTrace();
 	ptrTrace->Number(TraceNumber); // Set the trace number. 
-	fAdjTrace.push_back(ptrTrace);
+	fAdjTrace[fNTrace] = ptrTrace;
     }
     else
     {
@@ -311,22 +302,21 @@ bool Trace::Decode(const char *c)
  *
  *******************************************************************
  */
-size_t Trace::Find(size_t n)
+uint8_t Trace::Find(uint8_t id)
 {
     SET_DEBUG_STACK;
     size_t rv = kMaxTraces+1;   // Not found, maximum of 8 traces
-    size_t i = 0;    // counting index. 
+    uint8_t i = 0;
 
-    while ((i<fAdjTrace.size()) && (fAdjTrace[i]!=NULL))
+    while((i<kMaxTraces) && (fAdjTrace[i]!=NULL))
     {
-	if (fAdjTrace[i]->Number() == n)
+	if (fAdjTrace[i]->Number() == id)
 	{
 	    rv = i;
 	    break;
 	}
 	i++;
-    }
-
+    } 
     SET_DEBUG_STACK;
     return rv;
 }

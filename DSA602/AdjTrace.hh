@@ -5,7 +5,8 @@
  *
  * Author/Date : C.B. Lirakis / 13-Feb-21
  *
- * Description : 
+ * Description : Contains the information about where the trace is 
+ *               displayed on the screen. 
  *
  * Restrictions/Limitations :
  *
@@ -44,7 +45,11 @@ public:
 		   kHM_80, kHM_100, kHM_160, kHM_200, kHM_250, 
 		   kHM_400, kHM_500, kHM_800, kHM_1000, kHM_2000, 
 		   kHM_5000, kHM_END};
-    static const double HMAG_Values[kHM_END];
+
+    const double HMAG_Values[kHM_END] = {
+	1.0, 2.0, 2.5, 4.0, 5.0, 8.0, 10.0, 16.0, 20.0, 25.0, 40.0, 50.0, 80.0,
+	100.0, 160.0, 200.0, 250.0, 400.0, 500.0, 800.0, 1000.0, 2000.0, 
+	5000.0};
 
     /*!
      * Description: 
@@ -58,6 +63,18 @@ public:
      *    NONE
      */
     AdjTrace(void);
+
+    /*!
+     * Description: 
+     *   Get the data associated with this trace. 
+     *
+     * Arguments:
+     *   NONE
+     *
+     * returns:
+     *    true on success.
+     */
+    bool Update(void);
 
     /*!
      * Description: 
@@ -415,7 +432,11 @@ private:
     bool PosSize(bool Horizontal, bool Position, double value);
 
 
-    size_t fTraceNumber; 
+    uint8_t fTraceNumber; 
+
+    /*
+     * Parameters associated with ADJTrace command. 
+     */
     bool   fPanZoom;
     double fHorizontialMagnification;
     double fHorizontialPosition;
@@ -426,5 +447,6 @@ private:
     double fVSize;
     double fFSpan;
     double fFResolution;
+
 };
 #endif
