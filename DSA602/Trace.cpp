@@ -119,7 +119,7 @@ Trace::~Trace (void)
 void Trace::Reset(void) 
 {
     SET_DEBUG_STACK;
-    for(size_t i=0;kMaxTraces;i++) 
+    for(uint8_t i=0;i<kMaxTraces;i++) 
     {
 	delete fAdjTrace[i];
 	fAdjTrace[i]=NULL;
