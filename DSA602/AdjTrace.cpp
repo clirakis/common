@@ -135,13 +135,14 @@ bool AdjTrace::Update(void)
 
 
     // Command the mainframe to tell me everything about this trace. 
-    sprintf(s, "ADJ %d", fTraceNumber); 
+    sprintf(s, "ADJ%d?", fTraceNumber+1); 
     memset(Response, 0, sizeof(Response));
     if (pDSA602->Command(s, Response, sizeof(Response)))
     {
 	if(log->CheckVerbose(1))
 	{
-	    log->Log("# AdjTrace::Update %s\n", Response);
+	    log->Log("# AdjTrace::Update Command %s, Response: %s\n", 
+		     s, Response);
 	}
 	Decode(Response);
 	return true;
@@ -310,7 +311,8 @@ bool AdjTrace::Query(COMMANDs c)
     {
 	if(log->CheckVerbose(1))
 	{
-	    log->Log("# AdjTrace::Query: %s\n", Response);
+	    log->Log("# AdjTrace::Query Command: %s, Response: %s\n", 
+		     cstring, Response);
 	}
 	if (strlen(Response)>1)
 	{

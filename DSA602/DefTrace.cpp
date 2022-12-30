@@ -54,7 +54,7 @@ const struct t_Commands DefTrace::Commands[kEND_LIST]= {
  *
  * Error Conditions : NONE
  * 
- * Unit Tested on: 13-Feb-21
+ * Unit Tested on: 30-Dec-22
  *
  * Unit Tested by: CBL
  *
@@ -67,6 +67,11 @@ DefTrace::DefTrace(void) : CObject()
     ClearError(__LINE__);
     SetName("DefTrace");
     Clear();
+}
+DefTrace::~DefTrace(void)
+{
+    SET_DEBUG_STACK;
+    delete fDescription;
 }
 /**
  ******************************************************************
@@ -128,13 +133,14 @@ bool DefTrace::Update(void)
     char     Response[256];
 
     // Command the mainframe to tell me everything about this trace. 
-    sprintf(s, "TRA %d", fTraceNumber); 
+    sprintf(s, "TRA%d?", fTraceNumber+1); 
     memset(Response, 0, sizeof(Response));
     if (pDSA602->Command(s, Response, sizeof(Response)))
     {
 	if(log->CheckVerbose(1))
 	{
-	    log->Log("# DefTrace::Update %s\n", Response);
+	    log->Log("# DefTrace::Update Command: %s, Response: %s\n", 
+		     s, Response);
 	}
 	Decode(Response);
 	return true;
@@ -161,7 +167,7 @@ bool DefTrace::Update(void)
  * Error Conditions :
  *     NONE
  * 
- * Unit Tested on: 
+ * Unit Tested on: 30-Dec-22
  *
  * Unit Tested by: CBL
  *
@@ -196,56 +202,88 @@ bool DefTrace::Decode(const string &response)
 	end   = response.find(',',start);
 	val   = response.substr(start, end-start);
 	start = end + 1;
-	cout << " CMD: " << cmd << "  VAL: " << val << endl;
 #if 0
-	if (cmd.find("PANZOOM") < string::npos)
+	cout << " DefTrace::Decode Response: " << response
+	     << " CMD: " << cmd 
+	     << " VAL: " << val << endl;
+#endif
+	if (cmd.find("ACC") < string::npos)
 	{
-	    if (val.find("ON") != string::npos)
+	    if (val.find("INFP") != string::npos)
 	    {
-		fPanZoom = true;
+		fACCumulate = kINFPERSIST;
+	    }
+	    else if (val.find("OFF") != string::npos)
+	    {
+		fACCumulate = kACC_OFF;
+	    }
+	    else if (val.find("VAR") != string::npos)
+	    {
+		fACCumulate = kVARPERSIST;
 	    }
 	    else 
 	    {
-		fPanZoom = false;
+		fACCumulate = kACC_OFF;
 	    }
 	}
-	else if (cmd.find("HMAG") < string::npos)
+	else if (cmd.find("ACS") < string::npos)
 	{
-	    fHorizontialMagnification = stod(val);
+	    if (val.find("ENH") != string::npos)
+	    {
+		fACState = true;
+	    }
+	    else 
+	    {
+		fACState = false;
+	    }
 	}
-	else if (cmd.find("HPOSITION") < string::npos)
+	else if (cmd.find("DES") < string::npos)
 	{
-	    fHorizontialPosition = stod(val);
+	    delete fDescription;
+	    fDescription = new string(val);
 	}
-	else if (cmd.find("HVPOSITION") < string::npos)
+	else if (cmd.find("GRL") < string::npos)
 	{
-	    fHVPosition = stod(val);
+	    if (val.find("UPP") != string::npos)
+	    {
+		fGRLocation = true;
+	    }
+	    else if (val.find("LOW") != string::npos)
+	    {
+		fGRLocation = false;
+	    }
+	    else
+	    {
+		fGRLocation = false;
+	    }
 	}
-	else if (cmd.find("HVSIZE") < string::npos)
+	else if (cmd.find("GRT") < string::npos)
 	{
-	    fHVSize = stod(val);
+	    // For the moment ignore
 	}
-	else if (cmd.find("TRSEP") < string::npos)
+	else if (cmd.find("WFMC") < string::npos)
 	{
-	    fTRSEP = stod(val);
+	    if (val.find("HIP") != string::npos)
+	    {
+		fWFMCalc = true;
+	    }
+	    else if (val.find("FAS") != string::npos)
+	    {
+		fWFMCalc = false;
+	    }
+	    else
+	    {
+		fWFMCalc = false;
+	    }	    
 	}
-	else if (cmd.find("VPOSITION") < string::npos)
+	else if (cmd.find("XUN") < string::npos)
 	{
-	    fVPosition = stod(val);
+	    fXUNit = DecodeUnits(val.c_str());
 	}
-	else if (cmd.find("VSIZE") < string::npos)
+	else if (cmd.find("YUN") < string::npos)
 	{
-	    fVSize = stod(val);
+	    fYUNit = DecodeUnits(val.c_str());
 	}
-	else if (cmd.find("FSPAN") < string::npos)
-	{
-	    fFSpan = stod(val);
-	}
-	else if (cmd.find("FRESOLUTION") < string::npos)
-	{
-	    fFResolution = stod(val);
-	}
-#endif
     } while (end<response.size());
 
     SET_DEBUG_STACK;
@@ -271,7 +309,7 @@ bool DefTrace::Decode(const string &response)
  * Error Conditions :
  *     GPIB fail. 
  * 
- * Unit Tested on: 13-Feb-21
+ * Unit Tested on: 30-Dec-22
  *
  * Unit Tested by: CBL
  *
@@ -462,7 +500,7 @@ bool DefTrace::Description(const char *Description)
  *
  * Error Conditions : NONE
  * 
- * Unit Tested on: 07-Feb-21
+ * Unit Tested on: 30-Dec-22
  *
  * Unit Tested by: CBL
  *

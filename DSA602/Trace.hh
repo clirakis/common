@@ -25,9 +25,10 @@
  */
 #ifndef __TRACE_hh_
 #define __TRACE_hh_
-#    include "CObject.hh"
-#    include "AdjTrace.hh"
-#    include "DSA602_Types.hh"
+#  include "CObject.hh"
+#  include "AdjTrace.hh"
+#  include "DefTrace.hh"
+#  include "DSA602_Types.hh"
 
 /// Keep trace of which traces are on the screen. 
 class Trace : public CObject
@@ -98,7 +99,7 @@ public:
 
     /*!
      * Description: 
-     *   get the specified trace if available. 
+     *   get the specified trace Adj if available. 
      *
      * Arguments:
      *   Trace number
@@ -106,7 +107,20 @@ public:
      * returns:
      *    Class AdjTrace
      */
-    inline AdjTrace* GetData(int n) {if (n<fNTrace) return fAdjTrace[n]; else
+    inline AdjTrace* GetAdj(int n) {if (n<fNTrace) return fAdjTrace[n]; else
+					 return NULL;};
+
+    /*!
+     * Description: 
+     *   get the specified trace Definition if available. 
+     *
+     * Arguments:
+     *   Trace number
+     *
+     * returns:
+     *    Class AdjTrace
+     */
+    inline DefTrace* GetDef(int n) {if (n<fNTrace) return fDefTrace[n]; else
 					 return NULL;};
 
     /*!
@@ -123,20 +137,6 @@ public:
 
     /* ======================================================== */
 private:
-
-    /*!
-     * Description: 
-     *   Decode the return string for any query. 
-     *
-     * Arguments:
-     *   result - a standard string containing the parsed result. 
-     *   main   - if set to true, then it is a main window result. 
-     *
-     * returns:
-     *    true on success
-     */
-    bool Decode(const char *c);
-
 
     /*!
      * Description: 
@@ -168,8 +168,8 @@ private:
 #ifdef DEBUG_TRACE
     void Test(void);
 #endif
-
     int8_t    fNTrace;               // number of traces detected. 
     AdjTrace* fAdjTrace[kMaxTraces]; // Maximum number of traces.
+    DefTrace* fDefTrace[kMaxTraces]; // Maximum number of traces.
 };
 #endif

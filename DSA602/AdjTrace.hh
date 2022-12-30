@@ -370,7 +370,7 @@ public:
      * returns:
      *    trace number, {1:8}
      */
-    inline size_t Number(void) const {return fTraceNumber;};
+    inline uint8_t Number(void) const {return fTraceNumber;};
     /*!
      * Description: 
      *     Sets the trace number, used by calling program.    
@@ -381,7 +381,7 @@ public:
      * returns:
      *     none
      */
-    inline void   Number(size_t n)   {if (n<9) fTraceNumber = n;};
+    inline void   Number(uint8_t n)   {if (n<9) fTraceNumber = n;};
 
     /*!
      * Description: 
