@@ -133,7 +133,7 @@ public:
      * returns:
      *    pointer to this.
      */
-    static DSA602* GetThis()    {return fDSA602;};
+    static DSA602* GetThis(void)    {return fDSA602;};
 
 
     /* ======================================================== */
@@ -275,7 +275,7 @@ public:
     // Trace manipulation ========================================
     /*!
      * Description: 
-     *   
+     *   Set the internal display trace to be used in the various dialogs. 
      *
      * Arguments:
      *   
@@ -283,7 +283,8 @@ public:
      * returns:
      *    
      */
-    void SetDisplayTrace(unsigned char n, bool t);
+    void SetDisplayTrace(uint8_t n);
+    inline uint8_t GetSelectedTrace(void) const {return fSelectedTrace;}
     /*!
      * Description: 
      *  FIXME, this looks dangerous. 
@@ -298,8 +299,8 @@ public:
     inline Trace* GetTrace(void) {return fTrace;};
 
     // FIXME
-    inline bool GetDisplayTrace(unsigned char n) 
- 	{if(n<8) return fTrace; else return false;};
+//    inline bool GetDisplayTrace(uint8_t n) 
+// 	{if(n<8) return fTrace; else return false;};
 
     /*!
      * Description: 
@@ -379,6 +380,7 @@ private:
      */
     WFMPRE*         fWFMPRE;
     Trace*          fTrace;        // Trace class
+    uint8_t         fSelectedTrace;
 
     /*!
      * Description: 

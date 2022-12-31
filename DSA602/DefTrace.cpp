@@ -19,9 +19,9 @@
 #include <iostream>
 using namespace std;
 #include <string>
-#include <cmath>
+//#include <cmath>
 #include <cstring>
-#include <string>
+#include <stdlib.h>
 
 // Local Includes.
 #include "debug.h"
@@ -178,12 +178,27 @@ bool DefTrace::Update(void)
 bool DefTrace::Decode(const string &response) 
 { 
     SET_DEBUG_STACK;
+
+
     /*
      * When we get here this should be stripped to just the tags
      * and values. 
      */
     size_t start = 0;
     size_t end   = 0;
+
+    /*
+     * Get the trace id from the input. 
+     */
+    start = response.find("TRACE");
+    // Skip the word TRACE.
+    start += 5;
+    // Get the number. 
+    end = start + 1;
+    fTraceNumber = stoi(response.substr(start,1));
+    //cout << "DefTrace trace number.: " << (int) fTraceNumber << endl;
+
+    start = end = 0;
     /*
      * A response from ADJ1? HMA looks like:
      *
@@ -191,7 +206,6 @@ bool DefTrace::Decode(const string &response)
      * ^          
      * Imagine we start here
      */
-
     string cmd;
     string val;
 

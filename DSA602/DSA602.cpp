@@ -73,6 +73,7 @@ DSA602::DSA602 (unsigned int gpib_address): GPIB(gpib_address)
     fMeasurement = NULL;
     fTrace       = NULL;
     fTimeBase    = NULL;
+    fSelectedTrace = 0;
 
     if(!Init())
     {
@@ -476,15 +477,15 @@ size_t DSA602::Curve(int trace, double **X, double **Y)
 /**
  ******************************************************************
  *
- * Function Name : 
+ * Function Name : SetDisplayTrace
  *
- * Description :
+ * Description : Set the selected display trace. 
  *
- * Inputs :
+ * Inputs : n {0:7}; (index value. 
  *
- * Returns :
+ * Returns : none
  *
- * Error Conditions :
+ * Error Conditions : none
  * 
  * Unit Tested on: 
  *
@@ -493,9 +494,13 @@ size_t DSA602::Curve(int trace, double **X, double **Y)
  *
  *******************************************************************
  */
-void DSA602::SetDisplayTrace(unsigned char n, bool t)
+void DSA602::SetDisplayTrace(uint8_t n)
 {
-    cout << __FILE__<< " " << __FUNCTION__ << " FIXME!!" << endl;
+    cout << __FILE__<< " " 
+	 << __FUNCTION__ << " FIXME!! "
+	 << (int) n
+	 << endl;
+    fSelectedTrace = n;
 }
 
 

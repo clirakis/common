@@ -25,6 +25,7 @@ using namespace std;
 
 // Local Includes.
 #include "debug.h"
+#include "CLogger.hh"
 #include "DSA602.hh"
 #include "Trace.hh"
 #include "GParse.hh"
@@ -140,7 +141,7 @@ void Trace::Reset(void)
  *    
  * Returns : true on success. 
  *
- * Error Conditions : 
+ * Error Conditions : GPIB error
  * 
  * Unit Tested on: 
  *
@@ -152,37 +153,64 @@ void Trace::Reset(void)
 bool Trace::Update(bool init)
 {
     SET_DEBUG_STACK;
+    DSA602*  pDSA602 = DSA602::GetThis();
+    CLogger* log     = CLogger::GetThis();
+    char     Response[512];
     ClearError(__LINE__);
 
+    fNTrace = GetNTrace();
     if (init)
     {
 	// Make sure we are starting with a clean slate. 
 	Reset();
 	/*
 	 * How manuy traces do we have in play? 
-	 * trace identifiers are {1:8} and do not contain zero. 
+	 * trace identifiers are {1:8} and do not contain zero.
 	 */
-	fNTrace = GetNTrace();
 	for (uint8_t i=0;i<fNTrace;i++)
 	{
 	    fAdjTrace[i] = new AdjTrace();
-	    fAdjTrace[i]->Number(i+1); // Set the trace number. 
-
 	    fDefTrace[i] = new DefTrace();
-	    fDefTrace[i]->Number(i+1); // Set the trace number.  
 	}
     }
 
     /*
-     * Loop over known traces. 
-     * Cleaner method. 
+     * It appears that there isn't a clean way to get the 
+     * traces individually. Query for all of the traces and 
+     * parse that. 
+     * 
+     * example of 2 trace response. 
+     *  'TRACE1 DESCRIPTION:"R1 ON MAIN",ACCUMULATE:OFF,ACSTATE:NENHANCED,GRLOCATION:UPPER,GRTYPE:LINEAR,WFMCALC:FAST,XUNIT:SECONDS,YUNIT:VOLTS;TRACE2 DESCRIPTION:"FFTmag(R1) ON MAIN",ACCUMULATE:OFF,ACSTATE:NENHANCED,GRLOCATION:UPPER,GRTYPE:LINEAR,WFMCALC:HIPREC,XUNIT:HERTZ,YUNIT:DIVS'
+     *
+     * The traces are separated by semicolons. 
+     * 
+     * The TRA? command will get all of the DefTrace results. 
      */
-    for (uint8_t i=0;i<fNTrace;i++)
+    memset(Response, 0, sizeof(Response));
+    if (pDSA602->Command("TRA?", Response, sizeof(Response)))
     {
-	fAdjTrace[i]->Update(); 
-	fDefTrace[i]->Update();
+	size_t   start, end;
+	if(log->CheckVerbose(1))
+	{
+	    log->Log("# Trace::Update Command: TRA?, Response: %s\n", 
+		     Response);
+	}
+	string toparse(Response);
+	string TraceStr;
+	start = end = 0;
+	/*
+	 * Loop the trace numbers.
+	 */
+	for (uint8_t i=0;i<fNTrace;i++)
+	{
+	    end = toparse.find(';',start);
+	    TraceStr = toparse.substr(start, end-start);
+	    //cout << "TRACE SUBSTR: " << TraceStr << endl;
+	    fDefTrace[i]->Decode(TraceStr);
+	    //fAdjTrace[i]->Update(); 
+	    start = end + 1;
+	}
     }
-
     SET_DEBUG_STACK;
     return true;
 }

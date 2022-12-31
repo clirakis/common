@@ -8,6 +8,7 @@
 #	23-Jan-21       CBL     Original
 #       18-Dec-22       CBL     Making a library. 
 #       26-Dec-22       CBL     Moved MSLIST here
+#       31-Dec-22       CBL     Moved input class here. 
 #
 ######################################################################
 # Machine specific stuff
@@ -31,14 +32,14 @@ SRCCPP  = DSA602.cpp DSA602_Utility.cpp WFMPRE.cpp \
 	Channel.cpp DSAFFT.cpp Module.cpp System.cpp \
 	StatusAndEvent.cpp Measurement.cpp MeasurementA.cpp \
 	TimeBase.cpp Trace.cpp AdjTrace.cpp DefTrace.cpp Units.cpp \
-	GParse.cpp
+	Input.cpp GParse.cpp
 
 SRCS    = $(SRC) $(SRCCPP)
 
 HEADERS = Version.hh DSA602.hh WFMPRE.hh \
 	Module.hh Channel.hh DSA602_Types.hh System.hh StatusAndEvent.hh \
 	Measurement.hh MeasurementA.hh DSAFFT.hh TimeBase.hh Trace.hh \
-	AdjTrace.hh DefTrace.hh Units.hh GParse.hh 
+	AdjTrace.hh DefTrace.hh Units.hh Input.hh GParse.hh 
 
 # When we build all, what do we build?
 all:      $(LIBRARY)
