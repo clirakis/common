@@ -197,6 +197,7 @@ bool Trace::Update(bool init)
 	}
 	string toparse(Response);
 	string TraceStr;
+
 	start = end = 0;
 	/*
 	 * Loop the trace numbers.
@@ -207,7 +208,8 @@ bool Trace::Update(bool init)
 	    TraceStr = toparse.substr(start, end-start);
 	    //cout << "TRACE SUBSTR: " << TraceStr << endl;
 	    fDefTrace[i]->Decode(TraceStr);
-	    //fAdjTrace[i]->Update(); 
+	    fAdjTrace[i]->Number(fDefTrace[i]->Number());
+	    fAdjTrace[i]->Update(); 
 	    start = end + 1;
 	}
     }
