@@ -158,15 +158,18 @@ bool Trace::Update(bool init)
     {
 	// Make sure we are starting with a clean slate. 
 	Reset();
-	// How manuy traces do we have in play? 
+	/*
+	 * How manuy traces do we have in play? 
+	 * trace identifiers are {1:8} and do not contain zero. 
+	 */
 	fNTrace = GetNTrace();
 	for (uint8_t i=0;i<fNTrace;i++)
 	{
 	    fAdjTrace[i] = new AdjTrace();
-	    fAdjTrace[i]->Number(i); // Set the trace number. (Is this in the header?? FIXME)
+	    fAdjTrace[i]->Number(i+1); // Set the trace number. 
 
 	    fDefTrace[i] = new DefTrace();
-	    fDefTrace[i]->Number(i); // Set the trace number. 
+	    fDefTrace[i]->Number(i+1); // Set the trace number.  
 	}
     }
 
@@ -291,12 +294,12 @@ ostream& operator<<(ostream& output, const Trace &n)
 
     output << "    ========================================" << endl
 	   << "Trace data: " << endl 
-	   << "  NTrace:   " << n.fNTrace 
+	   << "  NTrace:   " << (int) n.fNTrace 
 	   << endl;
     for (int i=0; i<n.fNTrace;i++)
     { 
-	output << "    AdjTrace:    " << i << endl << *n.fAdjTrace[i];
-	output << "    DefTrace:    " << i << endl << *n.fDefTrace[i];
+	output << "    AdjTrace index:    " << i << endl << *n.fAdjTrace[i];
+	output << "    DefTrace index:    " << i << endl << *n.fDefTrace[i];
     }
 
     output << "    ========================================" << endl;

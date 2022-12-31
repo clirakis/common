@@ -432,7 +432,7 @@ private:
     bool PosSize(bool Horizontal, bool Position, double value);
 
 
-    uint8_t fTraceNumber; 
+    uint8_t fTraceNumber;   // {1:8} note no index 0. 
 
     /*
      * Parameters associated with ADJTrace command. 

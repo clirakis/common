@@ -95,7 +95,7 @@ public:
 
     /*!
      * Description: 
-     *   controls the display persistance for the specified trace. 
+     *   Queries the display persistance for the specified trace. 
      *
      * Arguments:
      *   q - true if we want an immediate query
@@ -105,6 +105,18 @@ public:
      */
     inline ACCUMULATE Accumulate(bool q=false) 
 	{if(q) Query(kACCUMULATE); return fACCumulate;};
+
+    /*!
+     * Description: 
+     *  Sets the display persistance for the specified trace. 
+     *
+     * Arguments:
+     *   Val - value to set to. kINFPERSIST=0, kACC_OFF, kVARPERSIST
+     *
+     * returns:
+     *    true on success. 
+     */
+    bool Accumulate(ACCUMULATE val); 
 
     /*!
      * Description: 
@@ -288,7 +300,7 @@ private:
     bool PosSize(bool Horizontal, bool Position, double value);
 
 
-    uint8_t fTraceNumber; 
+    uint8_t fTraceNumber;    // {1:8} note no index 0. 
 
     /*
      * Parameters associated with ADJTrace command. 

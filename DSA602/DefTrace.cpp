@@ -71,6 +71,7 @@ DefTrace::DefTrace(void) : CObject()
 DefTrace::~DefTrace(void)
 {
     SET_DEBUG_STACK;
+    cout << "DEFTRACE DESTROY" << endl;
     delete fDescription;
 }
 /**
@@ -117,7 +118,7 @@ void DefTrace::Clear(void)
  *
  * Error Conditions :
  * 
- * Unit Tested on: 
+ * Unit Tested on: 31-Dec-22
  *
  * Unit Tested by: CBL
  *
@@ -133,7 +134,7 @@ bool DefTrace::Update(void)
     char     Response[256];
 
     // Command the mainframe to tell me everything about this trace. 
-    sprintf(s, "TRA%d?", fTraceNumber+1); 
+    sprintf(s, "TRA%d?", fTraceNumber); 
     memset(Response, 0, sizeof(Response));
     if (pDSA602->Command(s, Response, sizeof(Response)))
     {
@@ -380,7 +381,7 @@ bool DefTrace::Query(COMMANDs c)
  * Error Conditions : 
  *    GPIB command failed. 
  * 
- * Unit Tested on: 
+ * Unit Tested on: 31-Dec-22
  *
  * Unit Tested by: CBL
  *
@@ -393,22 +394,80 @@ bool DefTrace::SetGRLocation(bool value)
     DSA602 *pDSA602 = DSA602::GetThis();
     CLogger* log    = CLogger::GetThis();
     bool rc = false;
-    char cstring[32];
+    char cstring[64];
     ClearError(__LINE__);
 
     memset(cstring, 0, sizeof(cstring));
     if (value)
     {
-	sprintf( cstring, "ADJ%d GRL:UPP",fTraceNumber);
+	sprintf( cstring, "TRA%d GRL:UPP",fTraceNumber);
     }
     else
-    if (value)
     {
-	sprintf( cstring, "ADJ%d GRL:LOW",fTraceNumber);
+	sprintf( cstring, "TRA%d GRL:LOW",fTraceNumber);
     }
     if(log->CheckVerbose(1))
     {
 	log->Log("# DefTrace::GRL: %s\n", cstring);
+    }
+    rc = pDSA602->Command(cstring, NULL, 0);
+    SET_DEBUG_STACK;
+    return rc;
+}
+
+/**
+ ******************************************************************
+ *
+ * Function Name : Accumulate
+ *
+ * Description : 
+ *     Set the Persistance
+ *
+ * Inputs : 
+ *    value - kINFPERSIST=0, kACC_OFF, kVARPERSIST
+ *
+ * Returns : true on success
+ *
+ * Error Conditions : 
+ *    GPIB command failed. 
+ * 
+ * Unit Tested on: 31-Dec-22
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+bool DefTrace::Accumulate(ACCUMULATE val)
+{
+    SET_DEBUG_STACK;
+    DSA602 *pDSA602 = DSA602::GetThis();
+    CLogger* log    = CLogger::GetThis();
+    bool     rc     = false;
+    char     cstring[32];
+    const char *p;
+    ClearError(__LINE__);
+
+    switch(val)
+    {
+    case kINFPERSIST:
+	p = "INFP";
+	break;
+    case kACC_OFF:
+	p = "OFF";
+	break;
+    case kVARPERSIST:
+	p = "VARP";
+	break;
+    default:
+	SET_DEBUG_STACK;
+	return false;
+    }
+    memset(cstring, 0, sizeof(cstring));
+    sprintf( cstring, "TRA%d ACC:%s",fTraceNumber,p);
+    if(log->CheckVerbose(1))
+    {
+	log->Log("# DefTrace::ACCumulate Set: %s\n", cstring);
     }
     rc = pDSA602->Command(cstring, NULL, 0);
     SET_DEBUG_STACK;
@@ -514,7 +573,7 @@ ostream& operator<<(ostream& output, const DefTrace &n)
 
     output << "============================================" << endl
 	   << "DefTrace data: " << endl 
-	   << "   Trace Number: " << n.fTraceNumber << endl;
+	   << "   Trace Number: " << (int) n.fTraceNumber << endl;
     switch(n.fACCumulate)
     {
     case kINFPERSIST:
@@ -536,7 +595,7 @@ ostream& operator<<(ostream& output, const DefTrace &n)
 	output << "       ACState: Not Enhanced" << endl;
     }
 
-    output << "       Description: " << n.fDescription << endl;
+    output << "       Description: " << *n.fDescription << endl;
     if (n.fGRLocation)
     {
 	output << "       GR Locaton: Upper " << endl;

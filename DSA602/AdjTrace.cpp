@@ -93,7 +93,7 @@ AdjTrace::AdjTrace(void) : CObject()
 void AdjTrace::Clear(void)
 {
     SET_DEBUG_STACK;
-    fTraceNumber              = 0;
+    fTraceNumber              = 0;    // This is a non value. 
     fPanZoom                  = false; 
     fHorizontialMagnification = 0.0;
     fHorizontialPosition      = 0.0; 
@@ -135,7 +135,7 @@ bool AdjTrace::Update(void)
 
 
     // Command the mainframe to tell me everything about this trace. 
-    sprintf(s, "ADJ%d?", fTraceNumber+1); 
+    sprintf(s, "ADJ%d?", fTraceNumber); 
     memset(Response, 0, sizeof(Response));
     if (pDSA602->Command(s, Response, sizeof(Response)))
     {
@@ -788,7 +788,7 @@ ostream& operator<<(ostream& output, const AdjTrace &n)
 
     output << "============================================" << endl
 	   << "AdjTrace data: " << endl 
-	   << "   Trace Number: " << n.fTraceNumber << endl;
+	   << "   Trace Number: " << (int) n.fTraceNumber << endl;
     if (n.fPanZoom)
     {
 	output << "       Pan Zoom:ON " << endl;
