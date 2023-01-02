@@ -27,6 +27,8 @@
  * Full explaination of sub commands begins on page: 78
  *
  * We haven't provided for queries of the type: CH<slot><ui>?
+ *
+ * This is subclassed to Module.xxx
  * 
  *******************************************************************
  */
@@ -733,6 +735,8 @@ public:
      */
     void Decode(const char *ChannelString);
 
+    inline string Text(void) {return *fText;};
+
     /*!
      * Description: 
      *   print out the entire data about this class. 
@@ -785,6 +789,8 @@ private:
      *    associated string. 
      */
     const char* CouplingString(COUPLING c) const;
+
+    string*       fText;       // text when querying channel. 
     SLOT          fSlot;
     unsigned char fNumber;       // Channel Number
     bool          fDifferential; // Is this channel on a differential module?

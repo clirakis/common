@@ -12,7 +12,9 @@
  *
  * Classification : Unclassified
  *
- * References : DSA602A Programming Reference Manual
+ * References : 
+ *   DSA602A Programming Reference Manual
+ *   This manages the channels in the mainframe. 
  *
  ********************************************************************/
 // System includes.
@@ -55,6 +57,9 @@ StatusAndEvent::StatusAndEvent (void) : CObject()
     SetName("StatusAndEvent");
     ClearError(__LINE__);
 
+    /*
+     * Modules each have one or more channels.
+     */
     for (int i=0;i<3;i++) fModule[i] = new Module(); // Empty modules
     fNModule    = 0;
 
@@ -221,6 +226,7 @@ bool StatusAndEvent::Configuration(void)
     if (pDSA602->Command("CONFIG?", response, sizeof(response)))
     {
 	/*
+	 * CONFIG query is documented on page: 99.
 	 * success. 
 	 * Parse out the type of the modules. 
 	 * create a string to manipulate.

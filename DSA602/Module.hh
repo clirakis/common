@@ -23,7 +23,10 @@
  *
  * Classification : Unclassified
  *
- * References : DSA602A Programming Reference Manual
+ * References :
+ *   DSA602A Programming Reference Manual
+ *   This keeps track of Channel.xxx per module. 
+ *   And is called by StatusAndEvent.
  * 
  *******************************************************************
  */

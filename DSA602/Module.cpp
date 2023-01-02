@@ -38,8 +38,6 @@ using namespace std;
 // Trigger selection - Trigger Menu
 // A32 - HFLimit 20MHz or 100 MHz
 
-
-
 char *ModuleNames[] = {(char*)"11A32 Two channel",
 		       (char*)"11A33 Differential input"};
 

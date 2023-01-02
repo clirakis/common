@@ -13,6 +13,8 @@
  * Classification : Unclassified
  *
  * References :
+ * DSA602 programmers reference manual. 
+ * This is a subclass to Module.cpp
  *
  ********************************************************************/
 // System includes.
@@ -23,7 +25,7 @@ using namespace std;
 #include <cmath>
 #include <string.h>
 #include <stdlib.h>
-#include <arpa/inet.h>
+#include <string>
 
 // Local Includes.
 #include "debug.h"
@@ -125,6 +127,7 @@ Channel::Channel(SLOT s, unsigned char n) : CObject()
     SetName("Channel");
     ClearError(__LINE__);
 
+    fText        = new string("NONE");
     // Initalize all read variables to some default value.
     fAMPoffset   = 0.0;
     fBW          = 0.0;
@@ -178,6 +181,7 @@ Channel::Channel(SLOT s, unsigned char n) : CObject()
  */
 Channel::~Channel()
 {
+    delete fText;
     delete fMNSProbe;
     delete fPLSProbe;
     delete fPROBe;
@@ -1111,6 +1115,9 @@ bool Channel::Query(COMMANDs c)
 
     if(pDSA602->Command(cstring, Response, sizeof(Response)))
     {
+	delete fText;
+	fText = new string(Response);
+
 	//cout << " RESPONSE: " << Response << endl;
 	// Parse the command into value and command subset using GParse
 	GParse par(Response);
