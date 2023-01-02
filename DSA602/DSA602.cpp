@@ -88,6 +88,7 @@ DSA602::DSA602 (unsigned int gpib_address): GPIB(gpib_address)
     fMeasurement = new Measurement();
     fTimeBase    = new TimeBase();
     fTrace       = new Trace();
+    fFFT         = new DSAFFT();
 }
 
 /**
@@ -118,6 +119,7 @@ DSA602::~DSA602 ()
     delete fpSE;
     delete fMeasurement;
     delete fWFMPRE;
+    delete fFFT;
     CLogger::GetThis()->Log("# DSA602 close\n");
 }
 

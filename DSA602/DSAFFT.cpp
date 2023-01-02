@@ -20,13 +20,14 @@
 #include <iostream>
 using namespace std;
 #include <string>
-#include <cmath>
-#include <string.h>
-#include <stdlib.h>
-#include <arpa/inet.h>
+// #include <cmath>
+// #include <string.h>
+// #include <stdlib.h>
+// #include <arpa/inet.h>
 
 // Local Includes.
 #include "debug.h"
+#include "CLogger.hh"
 #include "DSA602.hh"
 #include "DSAFFT.hh"
 #include "GParse.hh"
@@ -34,7 +35,7 @@ using namespace std;
 
 /* Command, type, upper, lower */
 struct t_Commands DSAFFT::DSAFFTCommands[7]= {
-    {"AVG",         kCT_BOOL, 0.0,0.0},
+    {"AVG",         kCT_BOOL,      0.0,0.0},
     {"DCSUP",       kCT_BOOL,      0.0,0.0},
     {"FORMAT",      kCT_FORMAT,    0.0,0.0},
     {"PHASE",       kCT_BOOL,      0.0,0.0},
@@ -49,13 +50,13 @@ struct t_Commands DSAFFT::DSAFFTCommands[7]= {
  *
  * Function Name : DSAFFT constructor
  *
- * Description :
+ * Description : Construct a DSA602 FFT status from a text input
  *
- * Inputs :
+ * Inputs : input to be decoded
  *
  * Returns :
  *
- * Error Conditions :
+ * Error Conditions : NONE
  * 
  * Unit Tested on:  24-Dec-14
  *
@@ -69,16 +70,19 @@ DSAFFT::DSAFFT(const char *val) : CObject()
     SET_DEBUG_STACK;
     SetName("DSAFFT");
     ClearError(__LINE__);
+    fText = new string("NONE");
     fAVG    = false;
     fDCSUP  = false; 
     fFORMat = kFFTNONE;   
     fPHAse  = false; 
     fWINDow = kWINDOW_NONE;
     fFILTer = false;
+    fNAvg   = 0;
     if (val!=NULL)
     {
 	DecodeString(val);
     }
+    SET_DEBUG_STACK;
 }
 
 /**
@@ -101,17 +105,17 @@ DSAFFT::DSAFFT(const char *val) : CObject()
  *
  *******************************************************************
  */
-DSAFFT::~DSAFFT()
+DSAFFT::~DSAFFT(void)
 {
     SET_DEBUG_STACK;
-
+    delete fText;
 }
 /**
  ******************************************************************
  *
- * Function Name : DSAFFT destructor
+ * Function Name : DSAFFT output operator
  *
- * Description :
+ * Description : 
  *
  * Inputs :
  *
@@ -145,6 +149,7 @@ ostream& operator<<(ostream& output, const DSAFFT &n)
     {
 	output << "OFF";
     }
+    output << " Number: " << n.fNAvg;
     output << ", DC supression: ";
     if (n.fDCSUP)
     {
@@ -185,15 +190,15 @@ ostream& operator<<(ostream& output, const DSAFFT &n)
  *
  * Function Name : DecodeString
  *
- * Description :
+ * Description : Decode the FFT response string
  *
- * Inputs :
+ * Inputs : string to parse
  *
- * Returns :
+ * Returns : NONE
  *
- * Error Conditions :
+ * Error Conditions : NONE
  * 
- * Unit Tested on:  24-Dec-14
+ * Unit Tested on:  02-Jan-22
  *
  * Unit Tested by: CBL
  *
@@ -283,21 +288,22 @@ void DSAFFT::DecodeString(const char *val)
     {
 	fFILTer = (strncmp(p,"ENA",3)==0);
     }
+    SET_DEBUG_STACK;
 }
 /**
  ******************************************************************
  *
  * Function Name : SendCommand
  *
- * Description : Floating point value
+ * Description : boolean version
  *
- * Inputs :
+ * Inputs : true/false turn the requested feature on or off. 
  *
- * Returns :
+ * Returns : true on success
  *
- * Error Conditions :
+ * Error Conditions : GPIB Write
  * 
- * Unit Tested on: 
+ * Unit Tested on: 02-Jan-22
  *
  * Unit Tested by: CBL
  *
@@ -308,9 +314,10 @@ bool DSAFFT::SendCommand(COMMANDs c, bool t)
 {
     SET_DEBUG_STACK;
     ClearError(__LINE__);
-    char cstring[64];
-    DSA602 *pDSA602 = DSA602::GetThis();
-
+    DSA602 * pDSA602 = DSA602::GetThis();
+    CLogger* log     = CLogger::GetThis();
+    char     cstring[64];
+    bool     rv = false;
 
     if (c==kCPHASE)
     {
@@ -324,52 +331,134 @@ bool DSAFFT::SendCommand(COMMANDs c, bool t)
     {
 	if (t)
 	{
-	    sprintf( cstring, "FFT %s: ON",DSAFFTCommands[c].Command);
+	    sprintf( cstring, "FFT %s:ON",DSAFFTCommands[c].Command);
 	}
 	else
 	{
-	    sprintf( cstring, "FFT %s: OFF",DSAFFTCommands[c].Command);
+	    sprintf( cstring, "FFT %s:OFF",DSAFFTCommands[c].Command);
 	}
     }
-    return pDSA602->Command(cstring, NULL, 0);
+    rv = pDSA602->Command(cstring, NULL, 0);
+    if(log->CheckVerbose(1))
+    {
+	log->Log("# DSAFFT::SendCommand boolean %s, rv: %d\n", cstring, rv);
+    }
+    SET_DEBUG_STACK;    
+    return rv;
 }
+/**
+ ******************************************************************
+ *
+ * Function Name : SetPhase
+ *
+ * Description : Alternative to SendCommand
+ *
+ * Inputs : true/false turn the requested feature on or off. 
+ *
+ * Returns : true on success
+ *
+ * Error Conditions : GPIB Write
+ * 
+ * Unit Tested on: 02-Jan-22
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
 bool DSAFFT::SetPhase(bool t)
 {
     SET_DEBUG_STACK;
     ClearError(__LINE__);
     char cstring[32];
-    DSA602 *pDSA602 = DSA602::GetThis();
+    DSA602 * pDSA602 = DSA602::GetThis();
+    CLogger* log     = CLogger::GetThis();
+    bool rv = false;
 
     if (t)
     {
-	sprintf( cstring, "FFT PHASE: UNWRAP");
+	sprintf( cstring, "FFT PHASE:UNWRAP");
     }
     else
     {
-	sprintf( cstring, "FFT PHASE: WRAP");
+	sprintf( cstring, "FFT PHASE:WRAP");
     }
-    return pDSA602->Command(cstring, NULL, 0);
+    rv = pDSA602->Command(cstring, NULL, 0);
+    if(log->CheckVerbose(1))
+    {
+	log->Log("# DSAFFT::SendCommand boolean %s, rv: %d\n", cstring, rv);
+    }
+    SET_DEBUG_STACK;
+    return rv;
 }
+/**
+ ******************************************************************
+ *
+ * Function Name : SetFilter
+ *
+ * Description : Alternative to SendCommand
+ *
+ * Inputs : true/false turn the requested feature on or off. 
+ *
+ * Returns : true on success
+ *
+ * Error Conditions : GPIB Write
+ * 
+ * Unit Tested on: 02-Jan-22
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
 bool DSAFFT::SetFilter(bool t)
 {
     SET_DEBUG_STACK;
     ClearError(__LINE__);
     char cstring[32];
-    DSA602 *pDSA602 = DSA602::GetThis();
+    DSA602 * pDSA602 = DSA602::GetThis();
+    CLogger* log     = CLogger::GetThis();
+    bool rv = false;
 
 
     cout << "NOT IMPLEMENTED." << endl;
     return false;
     if (t)
     {
-	sprintf( cstring, "FFT FILTER: ENABLE");
+	sprintf( cstring, "FFT FILTER:ENABLE");
     }
     else
     {
-	sprintf( cstring, "FFT FILTER: DISABLE");
+	sprintf( cstring, "FFT FILTER:DISABLE");
     }
-    return pDSA602->Command(cstring, NULL, 0);
+    rv = pDSA602->Command(cstring, NULL, 0);
+    if(log->CheckVerbose(1))
+    {
+	log->Log("# DSAFFT::SendCommand boolean %s, rv: %d\n", cstring, rv);
+    }
+    SET_DEBUG_STACK;
+    return rv;
 }
+/**
+ ******************************************************************
+ *
+ * Function Name : SetFormat
+ *
+ * Description : Set the y axis units for the FFT
+ *
+ * Inputs : See the possible formats listed below. 
+ *
+ * Returns : true on success
+ *
+ * Error Conditions : GPIB Write
+ * 
+ * Unit Tested on: 02-Jan-22
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
 bool DSAFFT::SetFormat(FFTFORMAT f)
 {
     SET_DEBUG_STACK;
@@ -378,11 +467,40 @@ bool DSAFFT::SetFormat(FFTFORMAT f)
 			      (char*) "DBVPEAK", (char*) "DBVRMS",
 			      (char*) "VPEAK", (char*) "VRMS"};
     char cstring[64];
-    DSA602 *pDSA602 = DSA602::GetThis();
+    DSA602 * pDSA602 = DSA602::GetThis();
+    CLogger* log     = CLogger::GetThis();
+    bool rv = false;
 
-    sprintf( cstring, "FFT FORMAT: %s", cformat[f]);
-    return pDSA602->Command(cstring, NULL, 0);
+    sprintf( cstring, "FFT FORMAT:%s", cformat[f]);
+
+    rv = pDSA602->Command(cstring, NULL, 0);
+    if(log->CheckVerbose(1))
+    {
+	log->Log("# DSAFFT::SendCommand boolean %s, rv: %d\n", cstring, rv);
+    }
+    SET_DEBUG_STACK;
+    return rv;
 }
+/**
+ ******************************************************************
+ *
+ * Function Name : SetWindow
+ *
+ * Description : Set the FFT window
+ *
+ * Inputs : See the possible formats listed below. 
+ *
+ * Returns : true on success
+ *
+ * Error Conditions : GPIB Write
+ * 
+ * Unit Tested on: 02-Jan-22
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
 bool DSAFFT::SetWindow(FFT_WINDOW w)
 {
     SET_DEBUG_STACK;
@@ -391,12 +509,19 @@ bool DSAFFT::SetWindow(FFT_WINDOW w)
 			      (char*) "HAMMING", (char*) "HANNING",
 			      (char*) "RECTANGULAR", (char*) "TRIANGULAR"};
     char cstring[64];
-    DSA602 *pDSA602 = DSA602::GetThis();
+    DSA602 * pDSA602 = DSA602::GetThis();
+    CLogger* log     = CLogger::GetThis();
+    bool rv = false;
 
-    sprintf( cstring, "FFT WINDOW: %s", cwindow[w]);
-    return pDSA602->Command(cstring, NULL, 0);
+    sprintf( cstring, "FFT WINDOW:%s", cwindow[w]);
+    rv = pDSA602->Command(cstring, NULL, 0);
+    if(log->CheckVerbose(1))
+    {
+	log->Log("# DSAFFT::SendCommand boolean %s, rv: %d\n", cstring, rv);
+    }
+    SET_DEBUG_STACK;
+    return rv;
 }
-
 
 /**
  ******************************************************************
@@ -405,11 +530,11 @@ bool DSAFFT::SetWindow(FFT_WINDOW w)
  *
  * Description : Fill up the structure from the DSA602 mainframe.
  *
- * Inputs :
+ * Inputs : NONE
  *
- * Returns :
+ * Returns : true on success
  *
- * Error Conditions :
+ * Error Conditions : Failure on GPIB side. 
  * 
  * Unit Tested on: 21-Dec-14
  *
@@ -421,7 +546,8 @@ bool DSAFFT::SetWindow(FFT_WINDOW w)
 bool DSAFFT::Update(void)
 {
     SET_DEBUG_STACK;
-    DSA602 *pDSA602 = DSA602::GetThis();
+    DSA602 * pDSA602 = DSA602::GetThis();
+    CLogger* log     = CLogger::GetThis();
     ClearError(__LINE__);
     bool rc = false;
     char Response[128];
@@ -429,12 +555,103 @@ bool DSAFFT::Update(void)
     rc = pDSA602->Command("FFT?", Response, sizeof(Response));
     if (rc)
     {
+	delete fText;
+	fText = new string(Response);
+	if(log->CheckVerbose(1))
+	{
+	    log->Log("# DSAFFT::Update %s\n", Response);
+	}
 	DecodeString(Response);
-#ifdef DEBUG
-	cout << "DSAFFTGPIB:" << Response << endl
-	     << *this << endl;
-#endif
     }
+    GetNAvg();
+    SET_DEBUG_STACK;
     return rc;
 }
 
+/**
+ ******************************************************************
+ *
+ * Function Name : 
+ *
+ * Description : Fill up the structure from the DSA602 mainframe.
+ *
+ * Inputs : NONE
+ *
+ * Returns : true on success
+ *
+ * Error Conditions : Failure on GPIB side. 
+ * 
+ * Unit Tested on: 
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+bool DSAFFT::SetNAvg(uint16_t val)
+{
+    SET_DEBUG_STACK;
+    ClearError(__LINE__);
+    char cstring[32];
+    DSA602 * pDSA602 = DSA602::GetThis();
+    CLogger* log     = CLogger::GetThis();
+    bool rv = false;
+
+    if ((val>1) && (val<65534))
+    {
+	sprintf( cstring, "NAVG:%d",val);
+	rv = pDSA602->Command(cstring, NULL, 0);
+	if(log->CheckVerbose(1))
+	{
+	    log->Log("# DSAFFT::SetNAVG %s, rv: %d\n", cstring, rv);
+	}
+    }
+    SET_DEBUG_STACK;
+    return rv;
+}
+/**
+ ******************************************************************
+ *
+ * Function Name : 
+ *
+ * Description : 
+ *
+ * Inputs : NONE
+ *
+ * Returns : true on success
+ *
+ * Error Conditions : Failure on GPIB side. 
+ * 
+ * Unit Tested on: 
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+bool DSAFFT::GetNAvg(void)
+{
+    SET_DEBUG_STACK;
+    DSA602 * pDSA602 = DSA602::GetThis();
+    CLogger* log     = CLogger::GetThis();
+    ClearError(__LINE__);
+    bool rc = false;
+    char Response[128];
+    char *p;
+
+    rc = pDSA602->Command("NAVG?", Response, sizeof(Response));
+    if (rc)
+    {
+	delete fText;
+	fText = new string(Response);
+	if(log->CheckVerbose(1))
+	{
+	    log->Log("# DSAFFT::NAVG %s\n", Response);
+	}
+	p = strstr(Response, "NAVG");
+	p += 4; // Skip the word
+	fNAvg = atoi(p);
+    }
+    SET_DEBUG_STACK;
+    return rc;
+}

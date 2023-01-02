@@ -88,6 +88,7 @@
 #  include "Module.hh"
 #  include "TimeBase.hh"
 #  include "Trace.hh"
+#  include "DSAFFT.hh"
 
 /// DS602 documentation here. 
 class DSA602 : public GPIB
@@ -108,7 +109,6 @@ public:
      *    
      */
     DSA602(unsigned int gpib_address);
-
 
     /*!
      * Description: 
@@ -142,6 +142,8 @@ public:
 
     inline bool UpdateWaveformHeader(void) {return fWFMPRE->Update();};
     inline WFMPRE* GetWFMPRE(void) {return fWFMPRE;};
+
+    inline DSAFFT* GetFFT(void) {return fFFT;};
 
     /*!
      * Description: 
@@ -381,6 +383,8 @@ private:
     WFMPRE*         fWFMPRE;
     Trace*          fTrace;        // Trace class
     uint8_t         fSelectedTrace;
+
+    DSAFFT*         fFFT;
 
     /*!
      * Description: 

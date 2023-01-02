@@ -18,8 +18,9 @@
  * 
  *******************************************************************
  */
-#ifndef __DSAFFT_h_
-#define __DSAFFT_h_
+#ifndef __DSAFFT_hh_
+#define __DSAFFT_hh_
+#  include <string> 
 #  include "CObject.hh"
 #  include "DSA602_Types.hh"
 #  include "Units.hh"
@@ -28,7 +29,6 @@
  * Typical channel query data. page 150
  * FFT AVG:ON,FORMAT:DBM,WINDOW:RECTANGULAR,PHASE:WRAP,DCSUP:OFF'
  */
-
 class DSAFFT : public CObject
 {
 public:
@@ -50,6 +50,8 @@ public:
     inline bool FILTer(void) const {return fFILTer;};
     inline FFT_WINDOW WINDow(void) const {return fWINDow;};
     inline FFTFORMAT  FORMat(void)   const {return fFORMat;};
+    inline uint16_t   NAvg(void) const {return fNAvg;};
+    inline string Text(void) const {return *fText;};
 
     bool SendCommand(COMMANDs c, bool t);
     bool SetFilter (bool t);
@@ -57,9 +59,15 @@ public:
     bool SetFormat(FFTFORMAT t);
     bool SetWindow(FFT_WINDOW t);
 
+    bool SetNAvg(uint16_t N);
+
     bool Update(void);
 
+
+
 private:
+    bool GetNAvg(void);          // Query NAvg. 
+    string        *fText;        // Response string. 
     // Page 150
     bool          fAVG;          // true = on
     bool          fDCSUP;        // true = on
@@ -67,6 +75,12 @@ private:
     bool          fPHAse;        // true = UNWrap
     FFT_WINDOW    fWINDow;       // see descriptions
     bool          fFILTer;       // true = on
+    /*! 
+     * Don't know if this belongs here, but I'll put it here. 
+     * Number of averages to perform, page 217
+     * {2:65534}
+     */
+    uint16_t      fNAvg;         
 };
 
 #endif
