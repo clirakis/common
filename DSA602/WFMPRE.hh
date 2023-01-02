@@ -580,6 +580,9 @@ public:
      */
     double ScaleXY( int i, short* DataIn, double &y);
 
+
+    inline string Text(void) const {return *fText;};
+
 #ifdef DEBUG_WFM
     void Test(void);
 #endif
@@ -644,6 +647,7 @@ private:
 
     static const char* Axis[9];
 
+    string   *fText;    // The actual text associated with the inquiry. 
     bool     fACState; // true = ENHANCED
     bool     fBIT;     // true = 16 bit, false = 8 bit
     bool     fBN;      // Should always be true. 

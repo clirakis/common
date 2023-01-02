@@ -84,7 +84,7 @@ WFMPRE::WFMPRE(const char *val) : CObject()
     SET_DEBUG_STACK;
     SetName("WFMPRE");
     ClearError(__LINE__);
-
+    fText = new string("NONE");
     Reset();
     if (val!=NULL) Decode(val);
 }
@@ -322,6 +322,7 @@ bool WFMPRE::Decode(const char *val)
 WFMPRE::~WFMPRE()
 {
     SET_DEBUG_STACK;
+    delete fText;
 }
 /**
  ******************************************************************
@@ -620,6 +621,9 @@ bool WFMPRE::Update(void)
     rc = pDSA602->Command("WFMPRE?", Response, sizeof(Response));
     if (rc)
     {
+	// Save a copy of the response. 
+	delete fText;
+	fText = new string(Response);
 	// Decode the response. 
 	Decode(Response);
 	if(log->CheckVerbose(1))
