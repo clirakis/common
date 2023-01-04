@@ -358,6 +358,33 @@ public:
 
     /*!
      * Description: 
+     *   read a file of commands meant for the DSA602 and execute them
+     *   comments are # and //
+     * Arguments:
+     *   Filename - file name for commands
+     *
+     * returns:
+     *   true on success
+     *    
+     */
+    bool ExecuteFile(const char *Filename);
+
+    /*!
+     * Description: 
+     *   Save setup parameters to a file. 
+     *   comments are # and //
+     * Arguments:
+     *   Filename - file name for commands
+     *
+     * returns:
+     *   true on success
+     *    
+     */
+    bool SaveSetup(const char *Filename);
+
+
+    /*!
+     * Description: 
      *   print out the entire data about this class. 
      *
      * Arguments:

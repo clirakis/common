@@ -17,11 +17,12 @@
  ********************************************************************/
 // System includes.
 #include <iostream>
+#include <fstream>
 using namespace std;
 #include <string>
 #include <cmath>
-#include <string.h>
-#include <stdlib.h>
+#include <cstring>
+// #include <stdlib.h>
 #include <arpa/inet.h>
 
 // Local Includes.
@@ -609,4 +610,117 @@ ostream& operator<<(ostream& output, const DSA602 &n)
     output << *n.fpSE;
     SET_DEBUG_STACK;
     return output;
+}
+/**
+ ******************************************************************
+ *
+ * Function Name : :ExecuteFile
+ *
+ * Description : read a file of commands meant for the DSA602 and execute them
+ *               comments are # and //
+ *
+ * Inputs : Filename - file name to execute
+ *
+ * Returns : bool true on success
+ *
+ * Error Conditions : NONE
+ * 
+ * Unit Tested on: 03-Jan-23
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+bool DSA602::ExecuteFile(const char *Filename)
+{
+    SET_DEBUG_STACK;
+    CLogger *log = CLogger::GetThis();
+    bool     rv  = false;
+    bool     rc  = false;
+    string   line;  // input line
+    size_t   ptr;
+
+    ifstream in( Filename, ifstream::in);
+    if (!in.fail())
+    {
+	do {
+	    getline(in, line);
+	    ptr = line.find("#"); // look for this. comment follows. 
+	    if (ptr != string::npos)
+		line.erase(ptr);
+
+	    // repeat for double slash
+	    ptr = line.find("//");
+	    if (ptr != string::npos)
+		line.erase(ptr);
+
+	    if (!line.empty())
+	    {
+		rc = Command( line.c_str(), NULL, 0);
+		if(log->CheckVerbose(1))
+		{
+		    log->Log("# DSA602::ExecuteFile,Command: %s, Response: %B\n", 
+			     line.c_str(), rc);
+		}
+	    }
+	} while (!in.eof());
+	in.close();
+	rv = true;
+    }
+    SET_DEBUG_STACK;
+    return rv;
+}
+/**
+ ******************************************************************
+ *
+ * Function Name : SaveSetup
+ *
+ * Description : Save the current setup to a file. 
+ *
+ * Inputs : Filename - file name to save the setup to. 
+ *
+ * Returns : bool true on success
+ *
+ * Error Conditions : NONE
+ * 
+ * Unit Tested on: 03-Jan-22
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+bool DSA602::SaveSetup(const char *Filename)
+{
+    SET_DEBUG_STACK;
+    static const char *Commands[] = {"CH?", "FFT?", "NAVG?", NULL};
+    CLogger *log = CLogger::GetThis();
+    bool     rv  = false;
+    char     Response[512];
+    time_t   now;
+    uint8_t  idx = 0;
+
+    ofstream out( Filename, ofstream::out);
+    if (!out.fail())
+    {
+	time(&now);
+	out << "# File created on: " << ctime(&now);
+	out << "#######################################" << endl;
+	do {
+	    if (Command(Commands[idx], Response, sizeof(Response)))
+	    {
+		out << Response << endl;
+		if(log->CheckVerbose(1))
+		{
+		    log->Log("# DSA602::SaveSetup Response: %s\n", Response);
+		}
+	    }
+	    idx++;
+	} while (Commands[idx]!=NULL);
+	out.close();
+	rv = true;
+    }
+    SET_DEBUG_STACK;
+    return rv;
 }
