@@ -172,17 +172,19 @@ public:
      * Description: 
      *   Get the points associated with the trace indicated.
      *   The arrays are allocated in the call, the user
-     *   is expected to clean up these allocations.  
+     *   is expected to clean up these allocations. 
+     *
+     * The points retrieved are from the currently defined trace.  
+     * see fTrace->GetCurrentDef()->Number()
      *
      * Arguments:
-     *   trace - 
      *   X - pointer to X return data. 
      *   Y - pointer to Y return data. 
      *
      * returns:
      *    returns number of points in the arrays.
      */
-    size_t Curve(int trace, double **X, double **Y);
+    size_t Curve(double **X, double **Y);
 
     /*!
      * Description: 

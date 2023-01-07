@@ -109,6 +109,8 @@ public:
      */
     inline AdjTrace* GetAdj(int n) {if (n<fNTrace) return fAdjTrace[n]; else
 					 return NULL;};
+
+    inline AdjTrace* GetCurrentAdj(void) {return fAdjTrace[fSelectedTrace];};
     /*!
      * Description: 
      *   get the specified trace Definition if available. 
@@ -121,6 +123,8 @@ public:
      */
     inline DefTrace* GetDef(int n) {if (n<fNTrace) return fDefTrace[n]; else
 					 return NULL;};
+
+    inline DefTrace* GetCurrentDef(void) {return fDefTrace[fSelectedTrace];};
 
     inline uint8_t GetSelectedTrace(void) const {return fSelectedTrace;}
     inline void SetSelectedTrace(uint8_t sel)   {fSelectedTrace = sel;};

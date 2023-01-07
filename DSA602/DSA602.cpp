@@ -352,7 +352,7 @@ bool DSA602::Init(void)
  *
  *******************************************************************
  */
-size_t DSA602::Curve(int trace, double **X, double **Y)
+size_t DSA602::Curve(double **X, double **Y)
 {
     SET_DEBUG_STACK;
     // This is the form of the preamble if LONGFORM is set and PATH is off.
@@ -367,7 +367,8 @@ size_t DSA602::Curve(int trace, double **X, double **Y)
     double *xtmp, *ytmp;
     size_t nbytes = 0;
 
-    int8_t TraceID = fTrace->GetDef(trace)->Number();
+    // Get the current defined trace value. 
+    int8_t TraceID = fTrace->GetCurrentDef()->Number();
     val = NULL;
     /*
      * Set which trace to read out. 
