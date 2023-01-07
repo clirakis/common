@@ -93,7 +93,7 @@ public:
      *   NONE
      *
      * returns:
-     *    Number available traces. 
+     *    Number available traces. {0:8}
      */
     unsigned int  GetNTrace(void);
 
@@ -102,20 +102,19 @@ public:
      *   get the specified trace Adj if available. 
      *
      * Arguments:
-     *   Trace number
+     *   index to the trace number Trace number {0:7}
      *
      * returns:
      *    Class AdjTrace
      */
     inline AdjTrace* GetAdj(int n) {if (n<fNTrace) return fAdjTrace[n]; else
 					 return NULL;};
-
     /*!
      * Description: 
      *   get the specified trace Definition if available. 
      *
      * Arguments:
-     *   Trace number
+     *   index to the trace number Trace number {0:7}
      *
      * returns:
      *    Class AdjTrace
@@ -123,6 +122,8 @@ public:
     inline DefTrace* GetDef(int n) {if (n<fNTrace) return fDefTrace[n]; else
 					 return NULL;};
 
+    inline uint8_t GetSelectedTrace(void) const {return fSelectedTrace;}
+    inline void SetSelectedTrace(uint8_t sel)   {fSelectedTrace = sel;};
     /*!
      * Description: 
      *   print out the entire data about this class. 
@@ -169,6 +170,7 @@ private:
     void Test(void);
 #endif
     int8_t    fNTrace;               // number of traces detected. 
+    uint8_t   fSelectedTrace;        // This is an index into the trace 
     AdjTrace* fAdjTrace[kMaxTraces]; // Maximum number of traces.
     DefTrace* fDefTrace[kMaxTraces]; // Maximum number of traces.
 };

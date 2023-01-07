@@ -74,7 +74,6 @@ DSA602::DSA602 (unsigned int gpib_address): GPIB(gpib_address)
     fMeasurement = NULL;
     fTrace       = NULL;
     fTimeBase    = NULL;
-    fSelectedTrace = 0;
 
     if(!Init())
     {
@@ -368,12 +367,13 @@ size_t DSA602::Curve(int trace, double **X, double **Y)
     double *xtmp, *ytmp;
     size_t nbytes = 0;
 
+    int8_t TraceID = fTrace->GetDef(trace)->Number();
     val = NULL;
     /*
      * Set which trace to read out. 
      */
     xtmp = NULL;
-    sprintf(msg, "OUT TRA%d",trace);   // page 221
+    sprintf(msg, "OUT TRA%d",TraceID);   // page 221
     // Setup to read trace. 
     Command(msg, NULL, 0);
 
@@ -477,6 +477,7 @@ size_t DSA602::Curve(int trace, double **X, double **Y)
     SET_DEBUG_STACK;
     return count;
 }
+#if 0
 /**
  ******************************************************************
  *
@@ -505,7 +506,7 @@ void DSA602::SetDisplayTrace(uint8_t n)
 	 << endl;
     fSelectedTrace = n;
 }
-
+#endif
 
 /**
  ******************************************************************

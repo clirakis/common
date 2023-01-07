@@ -35,7 +35,6 @@ public:
 
     static const struct t_Commands Commands[kEND_LIST];
 
-
     /*!
      * Description: 
      *   The DefTrace class holds all the parameters for a screen trace. 
@@ -298,7 +297,6 @@ private:
      *    true on success. 
      */
     bool PosSize(bool Horizontal, bool Position, double value);
-
 
     uint8_t fTraceNumber;    // {1:8} note no index 0. 
 

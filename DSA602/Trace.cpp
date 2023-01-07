@@ -55,6 +55,9 @@ Trace::Trace (void) : CObject()
     SET_DEBUG_STACK;
     ClearError(__LINE__);
     SetName("Trace");
+
+    fSelectedTrace = 0;
+
     /*
      * Store how many traces are available. -1 means uninitalized.
      */

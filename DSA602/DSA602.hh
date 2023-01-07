@@ -285,24 +285,23 @@ public:
      * returns:
      *    
      */
-    void SetDisplayTrace(uint8_t n);
-    inline uint8_t GetSelectedTrace(void) const {return fSelectedTrace;}
+    //void SetDisplayTrace(uint8_t n);
+
     /*!
      * Description: 
-     *  FIXME, this looks dangerous. 
-     *  What was I trying to do here??
+     *  Get the trace class. This is composed of 
+     *     DefTrace - how is the trace actually defined?
+     *     AdjTrace - how is it displayed?
+     *
+     *  note that there may be upto 8 traces defined at any given time. 
      *
      * Arguments:
-     *   
+     *    NONE   
      *
      * returns:
-     *    
+     *    Trace class
      */
     inline Trace* GetTrace(void) {return fTrace;};
-
-    // FIXME
-//    inline bool GetDisplayTrace(uint8_t n) 
-// 	{if(n<8) return fTrace; else return false;};
 
     /*!
      * Description: 
@@ -409,7 +408,6 @@ private:
      */
     WFMPRE*         fWFMPRE;
     Trace*          fTrace;        // Trace class
-    uint8_t         fSelectedTrace;
 
     DSAFFT*         fFFT;
 
