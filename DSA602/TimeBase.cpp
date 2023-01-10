@@ -30,7 +30,7 @@ using namespace std;
 #include "DSA602.hh"
 #include "TimeBase.hh"
 #include "GParse.hh"
-
+#include "CLogger.hh"
 
 TimeBase* TimeBase::fTimeBase;
 
@@ -170,13 +170,13 @@ struct t_TBLength TimeBase::PossibleLengths[10] = {
  *
  * Function Name : TimeBase constructor
  *
- * Description :
+ * Description : create an interface to the setting the timebase
  *
- * Inputs :
+ * Inputs : NONE
  *
- * Returns :
+ * Returns : NONE
  *
- * Error Conditions :
+ * Error Conditions : NONE
  * 
  * Unit Tested on: 
  *
@@ -195,9 +195,9 @@ TimeBase::TimeBase (void) : CObject()
     // Set to no values
     fNPossibleLengths        = 0; 
 
-    memset(fLength,0, kEND_FRAME*sizeof(double));
-    memset(fTime,0, kEND_FRAME*sizeof(double));
-    memset(fXIncrement,0, kEND_FRAME*sizeof(double));
+    memset(fLength    , 0, kEND_FRAME*sizeof(double));
+    memset(fTime      , 0, kEND_FRAME*sizeof(double));
+    memset(fXIncrement, 0, kEND_FRAME*sizeof(double));
 
     // Try filling as much as we can
 
@@ -230,6 +230,7 @@ TimeBase::TimeBase (void) : CObject()
  */
 TimeBase::~TimeBase ()
 {
+    SET_DEBUG_STACK;
 }
 
 
@@ -281,9 +282,10 @@ TimeBase::~TimeBase ()
  */
 bool TimeBase::Query(COMMANDs c, bool Main)
 {
+    DSA602*  pDSA602 = DSA602::GetThis();
+    CLogger* log     = CLogger::GetThis();  
     char   cstring[32], Response[64];
     char   frame;
-    DSA602 *pDSA602 = DSA602::GetThis();
     SET_DEBUG_STACK;
     ClearError(__LINE__);
 
@@ -305,11 +307,14 @@ bool TimeBase::Query(COMMANDs c, bool Main)
     {
 	sprintf( cstring, "TB%c?", frame);
     }
-    //cout << "----TIMEBASE Query: " << cstring ;
 
     if(pDSA602->Command(cstring, Response, sizeof(Response)))
     {
-	//cout << " RESPONSE: " << Response << endl;
+	if(log->CheckVerbose(1))
+	{
+	    log->Log("# TimeBase::Query Command: %s, Response: %s\n", 
+		     cstring, Response);
+	}
 	Decode(Response, Main);
     }
     else
@@ -388,6 +393,7 @@ bool TimeBase::Decode(const char *c, bool Main)
 	}
 	else if (cmd.find("TIME") == 0)
 	{
+	    //cout << "DECODE index: " << index << " TIME: " << val << endl;
 	    fTime[index] = atof(val.c_str());
 	}
 	else if (cmd.find("XINCR") == 0)
@@ -841,9 +847,10 @@ double TimeBase::CheckLength(double Time)
  */
 bool TimeBase::SetPeriod(PERIOD Time, bool Main)
 {
+    DSA602*  pDSA602 = DSA602::GetThis();
+    CLogger* log     = CLogger::GetThis();  
     char   cstring[32];
     char   frame;
-    DSA602 *pDSA602 = DSA602::GetThis();
     SET_DEBUG_STACK;
     ClearError(__LINE__);
 
@@ -861,6 +868,10 @@ bool TimeBase::SetPeriod(PERIOD Time, bool Main)
      */
     sprintf(cstring, "TB%c TIM:%g", frame, Period[Time].DT);
     //cout << "----TIMEBASE TIME SET: " << cstring << endl;
+    if(log->CheckVerbose(1))
+    {
+	log->Log("# TimeBase::SetPeriod Command: %s\n", cstring);
+    }
 
     if(!pDSA602->Command(cstring, NULL, 0))
     {
@@ -901,10 +912,11 @@ bool TimeBase::SetPeriod(PERIOD Time, bool Main)
  */
 bool TimeBase::SetLength(LENGTH Lindex, bool Main)
 {
+    DSA602*  pDSA602 = DSA602::GetThis();
+    CLogger* log     = CLogger::GetThis();  
     char   cstring[32];
     char   frame;
     int    ival;
-    DSA602 *pDSA602 = DSA602::GetThis();
     SET_DEBUG_STACK;
     ClearError(__LINE__);
 
@@ -923,7 +935,10 @@ bool TimeBase::SetLength(LENGTH Lindex, bool Main)
     ival = PossibleLengths[Lindex].val;
     sprintf(cstring, "TB%c LEN:%d", frame, ival);
     //cout << "----TIMEBASE LENGTH SET: " << cstring << endl;
-
+    if(log->CheckVerbose(1))
+    {
+	log->Log("# TimeBase::SetLength Command: %s\n", cstring);
+    }
     if(!pDSA602->Command(cstring, NULL, 0))
     {
 	SetError(-1,__LINE__);
@@ -938,7 +953,7 @@ bool TimeBase::SetLength(LENGTH Lindex, bool Main)
 /**
  ******************************************************************
  *
- * Function Name : 
+ * Function Name : IndexFromTime
  *
  * Description : 
  *
@@ -976,7 +991,7 @@ uint32_t TimeBase::IndexFromTime(double Time)
 /**
  ******************************************************************
  *
- * Function Name : 
+ * Function Name : IndexFromLength
  *
  * Description : 
  *
@@ -986,9 +1001,9 @@ uint32_t TimeBase::IndexFromTime(double Time)
  *
  * Error Conditions :
  *
- * Unit Tested on: 14-Dec-14
+ * Unit Tested on: 
  *
- * Unit Tested by:
+ * Unit Tested by: CBL
  *
  *
  *******************************************************************
@@ -1002,19 +1017,19 @@ uint32_t TimeBase::IndexFromLength(double Length)
 	LengthIndex = k512;
     else if (Length<=1024)
 	LengthIndex = k1024;
-    else if (Length<=k2048)
+    else if (Length<=2048)
 	LengthIndex = k2048;
-    else if (Length<=k4096)
+    else if (Length<=4096)
 	LengthIndex = k4096;
-    else if (Length<=k5120)
+    else if (Length<=5120)
 	LengthIndex = k5120;
-    else if (Length<=k8192)
+    else if (Length<=8192)
 	LengthIndex = k8192;
-    else if (Length<=k16384)
+    else if (Length<=16384)
 	LengthIndex = k16384;
-    else if (Length<=k20464)
+    else if (Length<=20464)
 	LengthIndex = k20464;
-    else if (Length<=k32768)
+    else if (Length<=32768)
 	LengthIndex = k32768;
     else
 	LengthIndex = kTB_END;

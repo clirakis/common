@@ -126,6 +126,9 @@ public:
 
     inline DefTrace* GetCurrentDef(void) {return fDefTrace[fSelectedTrace];};
 
+    /*! 
+     * Get/Set the index into the currently selected trace. {0:7};
+     */
     inline uint8_t GetSelectedTrace(void) const {return fSelectedTrace;}
     inline void SetSelectedTrace(uint8_t sel)   {fSelectedTrace = sel;};
     /*!
