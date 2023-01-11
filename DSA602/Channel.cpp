@@ -16,6 +16,28 @@
  * DSA602 programmers reference manual. 
  * This is a subclass to Module.cpp
  *
+ *
+ * 11A32 Two Channel Amplifier user supplement
+ * Tidbits from the manual. 
+ *
+ * 50 or 1M ohm input
+ * (Not sure how to set Volt/Div)
+ * Volts/Div Offset Range Stepsize (through GPIB)
+ * --------- ------------ --------
+ * 1:99.5mV  +/- 1         25e-6
+ * 100:995mV +/- 10       250e-6
+ * 1:10V     +/- 100      2.5e-3
+ *
+ * Sensitivity defined as "Sets the deflection factor of the specified channel
+ * Sensitivity is a channel-specific command which does not apply to compound
+ * waveforms. 
+ *
+ * BWHI      <NRx>          HF Limit
+ * ----      -----          --------
+ *           <= 24e6          20e6
+ *           >24e6 & <120e6  100e6
+ *           >120e6          ??
+ *
  ********************************************************************/
 // System includes.
 
@@ -67,9 +89,12 @@ const struct t_Commands Channel::ChannelCommands[kCHNL_END]= {
     {"UNI",        kCT_STRING,      0.0,   0.0},
 };
 
+
+
 /*
- * FIXME 
  * offset depends on sensitivity per module basis. Page 83 
+ * This is laid out as Low, High and stepsize for that range. 
+ * I don't quite appreciate what is meant by sensitivity. 
  */
 struct t_Sensitivity P11A32[] = {
     {  1e-3,   1.99e-3, 1e-6},

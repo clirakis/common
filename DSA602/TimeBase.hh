@@ -305,6 +305,9 @@ public:
     inline struct t_TBLength SampleLengthByIndex(uint32_t i) const 
 	{return PossibleLengths[i];};
 
+    inline string MainText(void)   const {return *fMText;};
+    inline string WindowText(void) const {return *fWText;};
+
     /*!
      * Description: 
      *   print out the entire data about this class. 
@@ -320,6 +323,7 @@ public:
     /* ======================================================== */
 private:
 
+    
     /*!
      * Description: 
      *   Query general query function. 
@@ -403,6 +407,8 @@ private:
 
     // Possible varibles associated with timebase. 
 
+    string *fMText;    // The actual text associated with the main inquiry. 
+    string *fWText;    // The actual text associated with the Window inquiry. 
     double fMainPosition;
 
     double fLength[kEND_FRAME];

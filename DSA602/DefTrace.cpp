@@ -13,6 +13,8 @@
  * Classification : Unclassified
  *
  * References :
+ * DSA602 Programmers Guide
+ * 
  *
  ********************************************************************/
 // System includes.

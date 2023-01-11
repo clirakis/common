@@ -199,6 +199,8 @@ TimeBase::TimeBase (void) : CObject()
     memset(fTime      , 0, kEND_FRAME*sizeof(double));
     memset(fXIncrement, 0, kEND_FRAME*sizeof(double));
 
+    fMText = new string("NONE");
+    fWText = new string("NONE");
     // Try filling as much as we can
 
     Query(kEND_LIST, kMAIN);
@@ -231,6 +233,8 @@ TimeBase::TimeBase (void) : CObject()
 TimeBase::~TimeBase ()
 {
     SET_DEBUG_STACK;
+    delete fMText;
+    delete fWText;
 }
 
 
@@ -297,8 +301,8 @@ bool TimeBase::Query(COMMANDs c, bool Main)
     {
 	frame = 'W';
     }
-    // Query for specific data.
 
+    // Query for specific data.
     if (c<kEND_LIST)
     {
 	sprintf( cstring, "TB%c? %s", frame, TBCommands[c].Command);
@@ -310,11 +314,23 @@ bool TimeBase::Query(COMMANDs c, bool Main)
 
     if(pDSA602->Command(cstring, Response, sizeof(Response)))
     {
+	if(Main)
+	{
+	    delete fMText;
+	    fMText = new string(Response);
+	}
+	else
+	{
+	    delete fWText;
+	    fWText = new string(Response);
+	}
+
 	if(log->CheckVerbose(1))
 	{
 	    log->Log("# TimeBase::Query Command: %s, Response: %s\n", 
 		     cstring, Response);
 	}
+
 	Decode(Response, Main);
     }
     else
