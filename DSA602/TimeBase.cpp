@@ -331,7 +331,7 @@ bool TimeBase::Query(COMMANDs c, bool Main)
 		     cstring, Response);
 	}
 
-	Decode(Response, Main);
+	Decode(Response);
     }
     else
     {
@@ -342,6 +342,72 @@ bool TimeBase::Query(COMMANDs c, bool Main)
     SET_DEBUG_STACK;
     return true;
 }
+
+/**
+ ******************************************************************
+ *
+ * Function Name : Update
+ *
+ * Description : Update both Main and Window parameters
+ *
+ * Inputs : NONE
+ *
+ * Returns : true on success
+ *
+ * Error Conditions :
+ * 
+ * Unit Tested on: 
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+bool TimeBase::Update(void)
+{
+    SET_DEBUG_STACK;
+    DSA602*  pDSA602 = DSA602::GetThis();
+    CLogger* log     = CLogger::GetThis();  
+    char     Response[64];
+    bool     rv = false;
+    ClearError(__LINE__);
+
+
+
+    memset(Response, 0, sizeof(Response));
+    if(pDSA602->Command("TBM?", NULL, 0))
+    {
+	delete fMText;
+	fMText = new string(Response);
+	if(log->CheckVerbose(1))
+	{
+	    log->Log("# TimeBase::Update (Main) Response: %s\n", Response);
+	}
+	Decode(Response);
+	rv = true;
+    }
+
+    memset(Response, 0, sizeof(Response));
+    if(pDSA602->Command("TBW?", NULL, 0))
+    {
+	delete fWText;
+	fWText = new string(Response);
+	if(log->CheckVerbose(1))
+	{
+	    log->Log("# TimeBase::Update (Window) Response: %s\n", Response);
+	}
+	Decode(Response);
+	rv = true;
+    }
+    else
+    {
+	rv = false;
+    }
+
+    SET_DEBUG_STACK;
+    return rv;
+}
+
 /**
  ******************************************************************
  *
@@ -350,26 +416,27 @@ bool TimeBase::Query(COMMANDs c, bool Main)
  * Description :
  *     Decode the return string for any query.
  *
- * Inputs :
+ * Inputs : response string to decode. 
  *
- * Returns :
+ * Returns : true on success. 
  *
  * Error Conditions :
  * 
- * Unit Tested on: 05-Feb-21
+ * Unit Tested on: 
  *
  * Unit Tested by: CBL
  *
  *
  *******************************************************************
  */
-bool TimeBase::Decode(const char *c, bool Main)
+bool TimeBase::Decode(const char *c)
 {
     SET_DEBUG_STACK;
     ClearError(__LINE__);
-    string response(c);
-    size_t start = 0;
-    size_t end   = 0;
+    string  response(c);
+    size_t  start = 0;
+    size_t  end   = 0;
+    uint8_t index = kMAIN;
     /*
      * A response from TBM? looks like:
      *
@@ -378,21 +445,25 @@ bool TimeBase::Decode(const char *c, bool Main)
      * and TBM? LEN
      *
      * 'TBMAIN LENGTH:512'
-     * Skip over the preamble. e.g. TBMAIN
+     * Determine based on preamble if it is MAIN or WINDOW
      */
-    start = response.find(' ',0) +1;
-    string cmd;
-    string val;
-    int index;
-    if (Main)
+    if (response.find("MAIN") != string::npos)
     {
 	index = kMAIN;
     }
-    else
+    else if (response.find("WIN") != string::npos)
     {
 	index = kWINDOW;
     }
+    else
+    {
+	index = kMAIN;
+    }
+    cout << "INPUT: " << response << " INDEX: " << (int) index << endl;
 
+    start = response.find(' ',0) +1;
+    string cmd;
+    string val;
     do {
 
 	end   = response.find(':',start);   // find the command delimeter

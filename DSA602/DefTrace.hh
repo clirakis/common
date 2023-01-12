@@ -24,6 +24,7 @@
 #  include "CObject.hh"
 #  include "DSA602_Types.hh"
 
+
 // Various parameters assoicated with up to 8 traces. 
 class DefTrace : public CObject
 {
@@ -251,6 +252,8 @@ public:
      */
     inline void   Number(uint8_t n)   {if (n<9) fTraceNumber = n;};
 
+    inline string Text(void) const {return *fText;};
+
     /*!
      * Description: 
      *   print out the entire data about this class. 
@@ -300,6 +303,7 @@ private:
 
     uint8_t fTraceNumber;    // {1:8} note no index 0. 
 
+    string*    fText;
     /*
      * Parameters associated with ADJTrace command. 
      */

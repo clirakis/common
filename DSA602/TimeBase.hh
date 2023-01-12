@@ -21,10 +21,9 @@
  */
 #ifndef __TIMEBASE_hh_
 #define __TIMEBASE_hh_
-#    include "CObject.hh"
-#    include "DSA602_Types.hh"
+#  include "CObject.hh"
+#  include "DSA602_Types.hh"
 
-/// TimeBase documentation here. 
 class TimeBase : public CObject
 {
 public:
@@ -310,6 +309,19 @@ public:
 
     /*!
      * Description: 
+     *   Update Main And Window parameters
+     *
+     * Arguments:
+     *   NONE
+     *   All looks something like: 'TBMAIN LENGTH:512,TIME:5.0E-7,XINCR:1.0E-8'
+     * 
+     * returns:
+     *    true on success. 
+     */
+    bool Update(void);
+
+    /*!
+     * Description: 
      *   print out the entire data about this class. 
      *
      * Arguments:
@@ -342,18 +354,19 @@ private:
      */
     bool Query(COMMANDs c, bool Main);
 
+
+
     /*!
      * Description: 
      *   Decode the return string for any query. 
      *
      * Arguments:
      *   result - a standard string containing the parsed result. 
-     *   main   - if set to true, then it is a main window result. 
      *
      * returns:
      *    true on success
      */
-    bool Decode(const char *c, bool Main);
+    bool Decode(const char *c);
 
     /*!
      * Description: 

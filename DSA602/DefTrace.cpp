@@ -69,12 +69,14 @@ DefTrace::DefTrace(void) : CObject()
     ClearError(__LINE__);
     SetName("DefTrace");
     Clear();
+    fText = new string("NONE");
 }
 DefTrace::~DefTrace(void)
 {
     SET_DEBUG_STACK;
     cout << "DEFTRACE DESTROY" << endl;
     delete fDescription;
+    delete fText;
 }
 /**
  ******************************************************************
@@ -140,6 +142,8 @@ bool DefTrace::Update(void)
     memset(Response, 0, sizeof(Response));
     if (pDSA602->Command(s, Response, sizeof(Response)))
     {
+	delete fText;
+	fText = new string(Response);
 	if(log->CheckVerbose(1))
 	{
 	    log->Log("# DefTrace::Update Command: %s, Response: %s\n", 
