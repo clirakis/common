@@ -459,7 +459,6 @@ bool TimeBase::Decode(const char *c)
     {
 	index = kMAIN;
     }
-    cout << "INPUT: " << response << " INDEX: " << (int) index << endl;
 
     start = response.find(' ',0) +1;
     string cmd;
