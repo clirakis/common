@@ -7,6 +7,7 @@
 # 	--------	--	------
 #       16-Sep-17	CBL	Original, do clean and full build 
 # 				of libraries. 
+#       14-Jan-23       CBL     Added in libDSA602
 #
 ##################################################################
 
@@ -16,7 +17,7 @@ COMMON = $(HOME)/common
 all: $(MYLIB)/libBC635.a $(MYLIB)/libio.a $(MYLIB)/libKeithly.a \
 	$(MYLIB)/libmygpib.a $(MYLIB)/libNav.a $(MYLIB)/libTSIP.a \
 	$(MYLIB)/libutility.a $(COMMON)/nmealib/lib/libnmea.a \
-	$(MYLIB)/libNavBasic.a
+	$(MYLIB)/libNavBasic.a $(MYLIB)/libDSA602.a
 
 $(MYLIB)/libio.a:
 	\cd $(COMMON)/iolib; make
@@ -48,6 +49,9 @@ $(MYLIB)/libNavBasic.a:
 $(COMMON)/nmealib/lib/libnmea.a:
 	\cd $(COMMON)/nmealib; make
 
+$(MYLIB)/libDSA602.a:
+	\cd $(COMMON)/DSA602; make
+
 clean:
 	\cd $(COMMON)/libBC635; make clean
 	\cd $(COMMON)/iolib; make clean
@@ -59,3 +63,4 @@ clean:
 	\cd $(COMMON)/utility; make clean
 	\cd $(COMMON)/nmealib; make clean
 	\cd $(COMMON)/libNavBasic; make clean
+	\cd $(COMMON)/DSA602; make clean
