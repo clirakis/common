@@ -22,11 +22,9 @@
 using namespace std;
 #include <string>
 #include <sstream>
-#include <vector>
-#include <locale>
-#include <cmath>
 #include <string.h>
-#include <stdlib.h>
+#include <ctype.h>
+// #include <stdlib.h>
 
 // Local Includes.
 #include "GParse.hh"
@@ -268,7 +266,7 @@ int GParse::ValueType(void) const
 {
     SET_DEBUG_STACK;
     int rv = TYPE_NONE;
-    std::locale loc;
+    //locale loc;
     if (fTmp)
     {
 	if (fTmp->find("\"") != string::npos)
@@ -279,7 +277,9 @@ int GParse::ValueType(void) const
 	{
 	    rv = TYPE_FLOAT;
 	}
-	else if (std::isdigit((string)*fTmp, loc))
+	// Original, no idea what I was up to here
+	//else if (isdigit((string)*fTmp, loc))
+	else if (isdigit(fTmp->data()[0]))
 	{
 	    rv = TYPE_INT;
 	}
