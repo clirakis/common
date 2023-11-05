@@ -35,6 +35,7 @@
 #ifndef __CHANNEL_hh_
 #define __CHANNEL_hh_
 #  include <cfloat>
+#  include <cstdint>
 #  include "DSA602_Types.hh"
 #  include "CObject.hh"
 

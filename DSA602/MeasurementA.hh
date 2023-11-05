@@ -27,6 +27,7 @@
  */
 #ifndef __MeasurementA_hh_
 #define __MeasurementA_hh_
+#  include <cstdint>
 #  include "DSA602_Types.hh"
 /*!
  * Keep track of all of the possible measurements we can make
