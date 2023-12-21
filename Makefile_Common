@@ -8,6 +8,7 @@
 #       16-Sep-17	CBL	Original, do clean and full build 
 # 				of libraries. 
 #       14-Jan-23       CBL     Added in libDSA602
+#       21-Dec-23       CBL     Added in libSignal
 #
 ##################################################################
 
@@ -52,6 +53,9 @@ $(COMMON)/nmealib/lib/libnmea.a:
 $(MYLIB)/libDSA602.a:
 	\cd $(COMMON)/DSA602; make
 
+$(MYLIB)/libSignal.a:
+	\cd $(COMMON)/SignalProcessing; make
+
 clean:
 	\cd $(COMMON)/libBC635; make clean
 	\cd $(COMMON)/iolib; make clean
@@ -64,3 +68,4 @@ clean:
 	\cd $(COMMON)/nmealib; make clean
 	\cd $(COMMON)/libNavBasic; make clean
 	\cd $(COMMON)/DSA602; make clean
+	\cd $(COMMON)/SignalProcessing; make clean

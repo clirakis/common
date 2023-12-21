@@ -143,6 +143,10 @@ public:
 
     /*! 
      * Access header information
+     * index into header must be less than 3.
+     * 0 - Filename
+     * 1 - Creation Date
+     * 2 - Dataset Name 
      */
     const char *HeaderInfo(HeaderIndex);
 
