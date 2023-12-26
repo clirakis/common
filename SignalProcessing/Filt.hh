@@ -14,6 +14,8 @@
  * Classification : Unclassified
  *
  * References :
+ * ~/Projects/Scope/SignalProcessing
+ * ~/Projects/Jupyter/Filter
  *
  *******************************************************************
  */
@@ -29,7 +31,7 @@ class Filt
 public:
 
     // What type of filter is it? 
-    enum FilterType {kBANDPASS=0, kLOWPASS, kHIPASS, kALOWPASS};
+    enum FilterType {kBANDPASS=0, kLOWPASS, kHIPASS, kALOWPASS, kNOTDEFINED};
 
     /// Default Constructor
     Filt(void);
@@ -38,23 +40,29 @@ public:
 
     /// Default destructor
     ~Filt(void);
+    inline void Do(void) {fType=kBANDPASS;};
 
     /*!
      * Description: 
-     *   
+     *   operate on the data provided and returned the filtered data
      *
      * Arguments:
-     *   
+     *   x - the input data
      *
      * Returns:
+     *   The filtered data
      *
      * Errors:
      *
      */
+    vector<double> Filter(const vector<double> &x);
 
     /*!
      * Description: 
-     *   
+     *  If a csv fie withe the filter coefficients is available, 
+     * use this to create the filter! This is typically use with
+     * the python equivalent functions to create the filter 
+     * and then export the coefficients into a CSV file.    
      *
      * Arguments:
      *   

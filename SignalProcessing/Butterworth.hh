@@ -37,6 +37,10 @@ public:
      *  Butterworth constructor.   
      *
      * Arguments:
+     *         FilterOrder
+     *         Lcutoff    - Lower frequency cutoff, nomalized
+     *         Ucutoff    - Upper frequency cutoff, normalized
+     *         Type       - Bandpass, Lowpass, Highpass
      *   
      *
      * returns:
@@ -71,7 +75,7 @@ public:
      * returns:
      *    
      */
-    ~Butterworth();
+    ~Butterworth(void);
 
     /*!
      * Description: 
@@ -133,13 +137,14 @@ private:
 
     /*!
      * Description: 
-     *   
+     *   Perform vector multiplication, used by ComputeNumCoeffs
      *
      * Arguments:
-     *   
+     *   NONE
      *
      * Returns:
-     *
+     *    vector of resulting math. 
+     * 
      * Errors:
      *
      */
@@ -160,27 +165,30 @@ private:
 
     /*!
      * Description: 
-     *   
+     *   Compute the coefficients associated with the filter
+     *   NUMERATOR. Called by Butterworth constructor.
      *
      * Arguments:
-     *   
+     *   NONE   
      *
      * Returns:
+     *   NONE
      *
      * Errors:
      *
      */
-
     void ComputeNumCoeffs(void);
 
     /*!
      * Description: 
-     *   
+     *   Compute the coefficients associated with the filter
+     *   DENOMINATOR. Called by Butterworth constructor.
      *
      * Arguments:
-     *   
+     *   NONE   
      *
      * Returns:
+     *   NONE
      *
      * Errors:
      *

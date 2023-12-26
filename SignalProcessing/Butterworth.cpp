@@ -57,7 +57,7 @@ using namespace std;
  *
  * Returns :
  *
- * Error Conditions :
+ * Error Conditions :  NONE
  * 
  * Unit Tested on: 
  *
@@ -72,6 +72,7 @@ Butterworth::Butterworth (uint16_t FilterOrder,
 			  FilterType Type) : Filt()
 {
     SET_DEBUG_STACK;
+
     fFilterOrder = FilterOrder;
     fLowerCutoff = Lcutoff;
     fUpperCutoff = Ucutoff;

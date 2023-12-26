@@ -50,6 +50,7 @@ using namespace std;
  */
 Filt::Filt (void)
 {
+    fType        = kNOTDEFINED;
 }
 
 /**
@@ -230,11 +231,66 @@ bool Filt::ReadCSVFile(const char *Filename)
     SET_DEBUG_STACK;
     return rv;
 }
+/**
+ ******************************************************************
+ *
+ * Function Name : Filter
+ *
+ * Description : Apply the results
+ *
+ * Inputs : data vector to process. This is not a rolling filter
+ *
+ * Returns : resulting filtered data
+ *
+ * Error Conditions : NONE
+ * 
+ * Unit Tested on: 22-Jan-23 
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+vector<double> Filt::Filter(const vector<double> &x)
+{
+    uint32_t len_x = x.size();
+    uint32_t len_b = fNumCoeffs.size();
+    uint32_t len_a = fDenomCoeffs.size();
+
+    // working variables. 
+    vector<double> zi(len_b);
+    vector<double> filter_x(len_x);
+
+    // Vastly different
+    if (len_a == 1)
+    {
+	for (uint32_t m = 0; m<len_x; m++)
+	{
+	    filter_x[m] = fNumCoeffs[0] * x[m] + zi[0];
+	    for (uint32_t i = 1; i<len_b; i++)
+	    {
+		zi[i-1] = fNumCoeffs[i] * x[m] + zi[i];//-fDenomCoeffs[i]*filter_x[m];
+	    }
+	}
+    }
+    else
+    {
+	for (uint32_t m = 0; m<len_x; m++)
+	{
+	    filter_x[m] = fNumCoeffs[0] * x[m] + zi[0];
+	    for (uint32_t i = 1; i<len_b; i++)
+	    {
+		zi[i-1] = fNumCoeffs[i] * x[m] + zi[i] - fDenomCoeffs[i] * filter_x[m];
+	    }
+	}
+    }
+    return filter_x;
+}
 
 /**
  ******************************************************************
  *
- * Function Name : Butterworth << operator
+ * Function Name : Filt << operator
  *
  * Description : format all the channel information for output
  *
@@ -257,6 +313,7 @@ ostream& operator<<(ostream& output, const Filt &n)
 {
     SET_DEBUG_STACK;
     uint16_t i;
+    output << "Filter compiled on: " << __DATE__ << " " << __TIME__ << endl;
     output << std::fixed << std::setw(6) << std::setprecision(6);
 
     output << "(a) Denominator (" << n.fDenomCoeffs.size() << "): " 
@@ -282,28 +339,3 @@ ostream& operator<<(ostream& output, const Filt &n)
     return output;
 }
 
-/**
- ******************************************************************
- *
- * Function Name : Filt function
- *
- * Description :
- *
- * Inputs :
- *
- * Returns :
- *
- * Error Conditions :
- * 
- * Unit Tested on: 
- *
- * Unit Tested by: CBL
- *
- *
- *******************************************************************
- */
-#if 0
-void* Filt::function(const char *Name)
-{
-}
-#endif
