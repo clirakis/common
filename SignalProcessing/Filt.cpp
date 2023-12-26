@@ -309,7 +309,7 @@ vector<double> Filt::Filter(const vector<double> &x)
  *
  *******************************************************************
  */
-ostream& operator<<(ostream& output, const Filt &n)
+std::ostream& operator<<(std::ostream& output, const Filt &n)
 {
     SET_DEBUG_STACK;
     uint16_t i;

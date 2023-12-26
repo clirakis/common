@@ -84,7 +84,7 @@ public:
      * returns:
      *    
      */
-    friend ostream& operator<<(ostream& output, const Filt &n); 
+    friend std::ostream& operator<<(std::ostream& output, const Filt &n); 
 
 protected:
     vector<double> fDenomCoeffs;   // a

@@ -86,11 +86,15 @@ Butterworth::Butterworth (uint16_t FilterOrder,
 	break;
     case kLOWPASS:
     case kHIPASS:
+    case kNOTDEFINED:
 	cout << "NOT IMPLEMENTED." << endl;
 	break;
     case kALOWPASS: // analog low pass. 
 	// nothing to do right now. 
 	break;
+    default:
+	break;
+	
     }
 
     SET_DEBUG_STACK;
