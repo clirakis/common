@@ -84,8 +84,9 @@ public:
      * returns:
      *    
      */
+#ifndef __CLING__
     friend std::ostream& operator<<(std::ostream& output, const Filt &n); 
-
+#endif
 protected:
     vector<double> fDenomCoeffs;   // a
     vector<double> fNumCoeffs;     // b

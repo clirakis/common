@@ -118,8 +118,9 @@ public:
      * returns:
      *    
      */
+#ifndef __CLING__
     friend ostream& operator<<(ostream& output, const Butterworth &n); 
-
+#endif
 private:
     /*!
      * Description: 

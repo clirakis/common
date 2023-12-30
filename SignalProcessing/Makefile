@@ -7,7 +7,7 @@
 # 	--------	--	------
 #	21-Dec-23       CBL     Original
 #       26-Dec-23	CBL 	Changed to shared library format
-#
+#	30-Dec-23	CBL	Added in a very simple low pass filter class
 #
 ######################################################################
 ###
@@ -44,10 +44,10 @@ OBJS    = $(OBJSC) $(OBJSCPP)
 
 # Rules to make the object files depend on the sources.
 SRC     = 
-SRCCPP  = Butterworth.cpp Filt.cpp
+SRCCPP  = Butterworth.cpp Filt.cpp SFilter.cpp
 SRCS    = $(SRC) $(SRCCPP)
 
-HEADERS = Butterworth.hh Filt.hh
+HEADERS = Butterworth.hh Filt.hh SFilter.hh
 
 .cpp.o:
 	$(CPP) $(CFLAGS) -c $<
