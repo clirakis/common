@@ -77,11 +77,19 @@ public:
     inline void Reset(void) {fPrev = 0.0;};
     void ChangeConstant(double CutoffFrequency);
 
+    /// Access to values
+    inline double Cutoff(void) const {return fCutoff;};
+    inline double SampleRate(void) const {return fSampleRate;};
+
 private:
     /*!
      * Sample rate of input 
      */
     double   fSampleRate;
+    /*!
+     * Cutoff frequency. 
+     */
+    double   fCutoff;
     /*! 
      * The calculated filter value
      */

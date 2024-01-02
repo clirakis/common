@@ -53,6 +53,7 @@ SFilter::SFilter (double CutoffFrequency, double SampleRate)
 {
     SET_DEBUG_STACK;
     fSampleRate = SampleRate;
+    fCutoff     = CutoffFrequency;
     ChangeConstant(CutoffFrequency);
     Reset();
 }
