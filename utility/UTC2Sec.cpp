@@ -2,7 +2,7 @@
  *
  * Module Name : UTC2Sec.cpp
  *
- * Author/Date : C.B. Lirakis / 23-May-21
+ * Author/Date : C.B. Lirakis / 02-Jan-24
  *
  * Description : Generic UTC2Sec
  *

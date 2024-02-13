@@ -26,6 +26,7 @@
 #ifndef __H5LOGGER_hh_
 #define __H5LOGGER_hh_
 #  include <inttypes.h>
+#  include <stdlib.h>
 #  include "CObject.hh"
 #  include "H5Cpp.h"
 #  include "Split.hh"
@@ -149,6 +150,13 @@ public:
      * 2 - Dataset Name 
      */
     const char *HeaderInfo(HeaderIndex);
+
+    /*!
+     * Utility to convert Creation date from string to struct tm. 
+     * This is currently not re-entrant. 
+     */
+    struct tm *H5ParseTime(const char *val);
+
 
     /*!
      * Access revsion information 

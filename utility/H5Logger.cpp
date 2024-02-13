@@ -1476,15 +1476,16 @@ const char* H5Logger::NameFromIndex(uint32_t i)
 /**
  ******************************************************************
  *
- * Function Name : ostream operator << 
+ * Function Name : HeaderInfo
  *
- * Description : friend operator overloaded to dump the contents
- *               of the Logger class for debugging. 
+ * Description : Retrieve the header information like:
+ * 0 - Filename
+ * 1 - Creation Date
+ * 2 - Dataset Name 
  *
- * Inputs : output - ostream 
- *          n - H5Logger to format into output stream. 
+ * Inputs : Index to header info that you want to retrieve
  *
- * Returns : constructed output stream. 
+ * Returns : String info from header
  *
  * Error Conditions : NONE
  * 
@@ -1505,6 +1506,70 @@ const char *H5Logger::HeaderInfo(HeaderIndex idx)
     }
     SET_DEBUG_STACK;
     return rc;
+}
+/**
+ ******************************************************************
+ *
+ * Function Name : H5ParseTime
+ *
+ * Description : convert the string file creation time to struct tm
+ *
+ * Inputs : character value containing a time string like: 
+ *         "2024-02-12 02:43:44"
+ *
+ * Returns : formed struct tm
+ *
+ * Error Conditions : NONE
+ * 
+ * Unit Tested on: 13-Feb-24
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+struct tm *H5ParseTime(const char *val)
+{
+    static struct tm rv;
+    string Time(val);
+    string tmp;
+    size_t pos;
+
+    memset (&rv, 0, sizeof(struct tm));
+    /*
+     * Looks something like this. 
+     * "2024-02-12 02:43:44"
+     */ 
+    if ((val != NULL) && (strlen(val)>18))
+    {
+	pos = Time.find('-');
+	tmp = Time.substr(0,pos);
+	rv.tm_year = stoi(tmp) - 1900;
+	Time.erase(0, pos+1);
+
+	pos = Time.find('-');
+	tmp = Time.substr(0,pos);
+	rv.tm_mon = stoi(tmp) - 1;
+	Time.erase(0, pos+1);
+
+	pos = Time.find(' ');
+	tmp = Time.substr(0,pos);
+	rv.tm_mday = stoi(tmp);
+	Time.erase(0, pos+1);
+
+	pos = Time.find(':');
+	tmp = Time.substr(0,pos);
+	rv.tm_hour = stoi(tmp);
+	Time.erase(0, pos+1);
+
+	pos = Time.find(':');
+	tmp = Time.substr(0,pos);
+	rv.tm_min = stoi(tmp);
+	Time.erase(0, pos+1);
+
+	rv.tm_sec = stoi(Time);
+    }
+    return &rv;
 }
 
 /**
