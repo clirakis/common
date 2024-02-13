@@ -1529,7 +1529,7 @@ const char *H5Logger::HeaderInfo(HeaderIndex idx)
  *
  *******************************************************************
  */
-struct tm *H5ParseTime(const char *val)
+struct tm *H5Logger::H5ParseTime(const char *val)
 {
     static struct tm rv;
     string Time(val);
