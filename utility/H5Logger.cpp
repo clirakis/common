@@ -30,6 +30,7 @@ using namespace std;
 #include "debug.h"
 #include "H5Logger.hh"
 #include "Split.hh"
+#include "YearDay.hh"
 
 const H5std_string sLoggerHeader("H5Logger_Header");
 const H5std_string sVariableHeader("H5Variable_Descriptions");
@@ -1534,6 +1535,7 @@ struct tm *H5ParseTime(const char *val)
     string Time(val);
     string tmp;
     size_t pos;
+    uint32_t Year;
 
     memset (&rv, 0, sizeof(struct tm));
     /*
@@ -1544,7 +1546,8 @@ struct tm *H5ParseTime(const char *val)
     {
 	pos = Time.find('-');
 	tmp = Time.substr(0,pos);
-	rv.tm_year = stoi(tmp) - 1900;
+	Year = stoi(tmp);
+	rv.tm_year = Year - 1900;
 	Time.erase(0, pos+1);
 
 	pos = Time.find('-');
@@ -1568,7 +1571,14 @@ struct tm *H5ParseTime(const char *val)
 	Time.erase(0, pos+1);
 
 	rv.tm_sec = stoi(Time);
+
+	// Last thing calculate day of year. 
+	rv.tm_yday = YearDay( Year, rv.tm_mon, rv.tm_mday);
+
+	// Not filling Day of week, isdst, gmtoff, tm_zone
+	// all of which probably should be stored in the file. 
     }
+    // Calculate day of year here too. 
     return &rv;
 }
 
