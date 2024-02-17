@@ -13,6 +13,7 @@
  * 09-Jun-02 CBL         Modified so that the user can pass in the 
  *                       termination character. 
  * 09-May-20 CBL         Accidentially deleted header, recovering. 
+ * 17-Feb-24 CBL         commenting and neating up. 
  *
  * Classification : Unclassified
  *
@@ -68,12 +69,13 @@ public:
 	     speed_t BR=B9600, 
 	     Parity pr=SerialIO::NONE,  
 	     OpenMode Mode=SerialIO::ModeRaw,
-	     unsigned char Data1=0x0D, unsigned char Data2=2); 
+	     unsigned char Data1=0x0D, unsigned char Data2=2, 
+	     bool Block = false); 
     /// Serial IO destructor.
-    ~SerialIO();
+    ~SerialIO(void);
 
     /// Get a  single byte of data.
-    unsigned char Read();
+    unsigned char Read(void);
     /**
      * Get a  single byte of data. returns true if a single character 
      * was received. 
@@ -86,8 +88,8 @@ public:
      *    buf  - the adress of the buffer to fill. 
      *    size - The number of bytes to fill the above buffer with. 
      */
-    unsigned char  Read(unsigned char *buf, const size_t size, 
-			  const bool CheckSize = false);
+    int32_t  Read(unsigned char *buf, const size_t size, 
+		  const bool CheckSize = false);
     /**
      * Put a buffer of unsigned chars. 
      * INPUTS
@@ -99,7 +101,7 @@ public:
     /**
      * Put a null on the line.
      */
-    bool PutNull();
+    bool PutNull(void);
     /**
      * Put a single character, then read it back, check it against
      * the character we put. 
@@ -120,7 +122,7 @@ public:
     /**
      * Purge the input and output buffers.
      */
-    void FullPurge();
+    void FullPurge(void);
 
     /** 
      * Get status of DCD
@@ -130,12 +132,12 @@ public:
     /**
      * Get the name of the serial port if open. 
      */
-    inline const char * GetPortName() {return PortName;};
+    inline const char * GetPortName(void) {return fPortName;};
 
     /*!
      * Get access  to errno!
      */
-    int GetErrno() const;
+    int GetErrno(void) const;
 
     /*!
      * Set status of DTR line 
@@ -149,6 +151,7 @@ public:
 
     bool IsCTSEnabled(void);
 
+
 private:
     /**
      * set the non-canonical mode, use 
@@ -158,8 +161,8 @@ private:
     void SetModeRaw(struct termios *termios_p, char  nmin, char nwait);
     void SetModeCanonical(struct termios *termios_p,unsigned char *eof);
     bool SetAndCheck( struct termios *termios_p);
-    int  port;
-    char *PortName;
+    int   fPort;
+    char *fPortName;
 
     /*
      * What mode was this opened in? 

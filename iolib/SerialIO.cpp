@@ -10,11 +10,12 @@
  * Restrictions/Limitations :
  *
  * Change Descriptions :
+ * 17-Feb-24  Adding in some comments. 
  *
  * Classification : Unclassified
  *
  * References :
- *
+ *   https://www.ing.iac.es/~docs/external/serial/serial.pdf
  *
  ********************************************************************/
 // System includes.
@@ -70,7 +71,7 @@ int SerialIO::SetDTR(const bool value)
     int status;
     SET_DEBUG_STACK;
     ClearError(__LINE__);
-    ioctl(port, TIOCMGET, &status);
+    ioctl(fPort, TIOCMGET, &status);
     if (value)
     {
 	status |=  TIOCM_DTR;
@@ -79,7 +80,7 @@ int SerialIO::SetDTR(const bool value)
     {
 	status &= ~TIOCM_DTR;
     }
-    ioctl(port, TIOCMSET, &status);
+    ioctl(fPort, TIOCMSET, &status);
     SET_DEBUG_STACK;
     return 1;
 }
@@ -226,7 +227,7 @@ void SerialIO::SetModeCanonical(struct termios *termios_p,unsigned char *eof)
  ********************************************************************/
 SerialIO::SerialIO(const char *ComPortName, speed_t BR, Parity Pr,
 		   SerialIO::OpenMode Mode, unsigned char Data1,
-		   unsigned char Data2) : CObject()
+		   unsigned char Data2, bool Block) : CObject()
 {
     SET_DEBUG_STACK;
 
@@ -240,7 +241,7 @@ SerialIO::SerialIO(const char *ComPortName, speed_t BR, Parity Pr,
     /**
      * Save the name of the current port that is open. 
      */
-    PortName = strdup(ComPortName);
+    fPortName = strdup(ComPortName);
 
     ClearError(__LINE__);
 
@@ -252,6 +253,7 @@ SerialIO::SerialIO(const char *ComPortName, speed_t BR, Parity Pr,
      * Note: Open read-write, no blocking (NOCTTY), and
      * no delay at all!
      * 25-Dec-10 Added the flag O_NDELAY for use on mac.
+     * O_NDELAY means don't wait on DCD. 
      */
 #ifdef __APPLE__
     if (Mode == ModeCanonical)
@@ -262,7 +264,8 @@ SerialIO::SerialIO(const char *ComPortName, speed_t BR, Parity Pr,
     {
 	//flags = O_RDWR | O_NOCTTY | O_NDELAY;
 	//flags = O_RDWR | O_NOCTTY | O_NONBLOCK;
-	flags = O_RDWR | O_NOCTTY;
+	// Raw, use delay be default. 
+	flags = O_RDWR | O_NOCTTY ;
 	//flags = O_RDWR;
     }
 #else
@@ -275,14 +278,21 @@ SerialIO::SerialIO(const char *ComPortName, speed_t BR, Parity Pr,
 	flags = O_RDWR | O_NOCTTY;
     }
 #endif
-    port = open (PortName, flags);
-    if (port > 0)
+    /*
+     * either O_NONBLOCK or O_NDELAY
+     */
+    if (!Block)
+    {
+	flags |= O_NONBLOCK;
+    }
+    fPort = open (fPortName, flags);
+    if (fPort > 0)
     {
 	/* First throw away input data (noise) */
-	if (tcflush(port, TCIOFLUSH) < 0)
+	if (tcflush(fPort, TCIOFLUSH) < 0)
 	{
 	    SetError(SerialIO::BadOpen, __LINE__);
-	    close (port);
+	    close (fPort);
 	    SET_DEBUG_STACK;
             return;
 	}
@@ -302,11 +312,11 @@ SerialIO::SerialIO(const char *ComPortName, speed_t BR, Parity Pr,
 	 */
 
         // Get the current terminal characteristics into termios_p
-	rc = tcgetattr(port, &termios_p);
+	rc = tcgetattr(fPort, &termios_p);
 	if (rc <0)
 	{
 	    SetError(SerialIO::ErrorGetAttributes, __LINE__);
-	    close (port);
+	    close (fPort);
 	    SET_DEBUG_STACK;
             return;	      
 	}
@@ -379,8 +389,8 @@ SerialIO::SerialIO(const char *ComPortName, speed_t BR, Parity Pr,
 	if(!SetAndCheck(&termios_p))
 	{
   	    SetError(SerialIO::ErrorSetBaudRate, __LINE__);
-	    close (port);
-	    port = -1;
+	    close (fPort);
+	    fPort = -1;
 	    return;
 	}
     }
@@ -390,11 +400,13 @@ SerialIO::SerialIO(const char *ComPortName, speed_t BR, Parity Pr,
     }
     SET_DEBUG_STACK;
 }
+
+
 /********************************************************************
  *
  * Function Name : Read
  *
- * Description : Get and return 1 bytes of data from the Serial port.
+ * Description : Get and return 1 byte worth of data from the Serial port.
  *
  * Inputs : None
  *
@@ -404,13 +416,13 @@ SerialIO::SerialIO(const char *ComPortName, speed_t BR, Parity Pr,
  *                    variable.
  *
  ********************************************************************/
-unsigned char SerialIO::Read()
+unsigned char SerialIO::Read(void)
 {
     SET_DEBUG_STACK;
     unsigned char data[1];      // Data value.
     size_t rc;                  // return code from read.
     ClearError(__LINE__);
-    rc = read( port,            // Handle of file to read from.
+    rc = read( fPort,            // Handle of file to read from.
                data,            // Address of buffer that receives data 
                sizeof(data));   // Number of bytes to read.
 
@@ -428,9 +440,9 @@ unsigned char SerialIO::Read()
  *
  * Description : Get and return 1 bytes of data from the Serial port.
  *
- * Inputs : None
+ * Inputs : buffer to fill with byte of data. 
  *
- * Returns : character result
+ * Returns : true on success
  *
  * Error Conditions : 0xFF on error and puts error code in MyErrorCode
  *                    variable.
@@ -441,9 +453,9 @@ bool SerialIO::Read(unsigned char *buf)
     SET_DEBUG_STACK;
     size_t rc;                  // return code from read.
     ClearError(__LINE__);
-    rc = read( port, // Handle of file to read from.
-               buf,  // Address of buffer that receives data 
-               1);   // Number of bytes to read.
+    rc = read( fPort, // Handle of file to read from.
+               buf,   // Address of buffer that receives data 
+               1);    // Number of bytes to read.
 
     // Want 1 byte only!
     if(rc != 1) 
@@ -460,53 +472,73 @@ bool SerialIO::Read(unsigned char *buf)
  * Function Name : Read
  *
  * Description : Fill buffer until terminator is reached or buffer full.
+ *               This is really only applicable for canonical mode, not RAW
  *
- * Inputs : None
+ * Inputs : 
+ *     buf       - buffer to fill, allocated by user
+ *     buf_size  - size of the buffer to fill
+ *     CheckSize - check the size against the expected. 
  *
- * Returns : character result
+ * Returns : number of bytes read. (upgraded this 17-Feb-24)
  *
  * Error Conditions : 0xFF on error and puts error code in MyErrorCode
  *                    variable.
  *
  ********************************************************************/
-unsigned char SerialIO::Read(unsigned char *buf, const size_t buf_size, 
+int32_t SerialIO::Read(unsigned char *buf, const size_t buf_size, 
                                   const bool CheckSize)
 {
     SET_DEBUG_STACK;
-    unsigned long nread;            // number of bytes read.
+    unsigned char *ptr = buf;
+    size_t  bytes_left = buf_size;
+    int32_t nread;                  // number of bytes read.
+    int32_t ntotal = 0L;            // count until EAGIN. 
+    bool    run    = true;
     ClearError(__LINE__);
-    errno = 0;
 
-    nread = read( port,             // Handle of file to read from.
-                  buf,              // Address of buffer that receives data 
-                  buf_size) ;       // Number of bytes to read.
-
-    switch(errno)
-    {
-    case 0:
-	// Nothing to be done. 
-	break;
-    case ENODEV:
-	nread = 0;
-	break;
-    case EAGAIN:
-	// Nothing special about this case. 
-	nread = 0;
-	break;
-    default:
-       nread = 0;
-       break;
-    }
+    do {
+	nread = read( fPort,         // Handle of file to read from.
+		      ptr,           // Address of buffer that receives data 
+		      bytes_left) ;  // Number of bytes to read.
+    /*
+     * if nread is zero or -1 then we may or may not have an error. 
+     */
+	if(nread <= 0)
+	{
+	    switch(errno)
+	    {
+	    case 0:
+		// Nothing to be done. All is good. 
+		break;
+	    case EWOULDBLOCK: //same code as EAGAIN
+		run = false;
+		break;
+	    default:
+		break;
+	    }
+	}
+	else
+	{
+	    /*
+	     * Advance the pointer and the count 
+	     */
+	    ptr += nread;
+	    ntotal += nread;
+	    bytes_left = buf - ptr;
+	    run = (bytes_left <= 0);
+	}
+    } while (run);
 
     if ( CheckSize)
     {
-        // Errors only occur when the return code is zero.
-        if(nread != buf_size) {
-	  SetError(SerialIO::RxError, __LINE__);
-	    return 0;
-        }
+	// Errors only occur when the return code is not zero.
+	if(nread != (int32_t)buf_size) 
+	{
+	    SetError(SerialIO::RxError, __LINE__);
+	}
     }
-    return nread;
+
+    return ntotal;
 }
 
 /********************************************************************
@@ -530,7 +562,7 @@ int SerialIO::Write(const unsigned char *buf, const size_t size)
     size_t nwritten;   // Number of bytes actually written.
     SET_DEBUG_STACK;
     ClearError(__LINE__);
-    nwritten = write( port,        // Handle of file to read from.
+    nwritten = write( fPort,        // Handle of file to read from.
                       buf,         // Address of buffer that sends data 
                       size) ;      // Number of bytes to read.
 
@@ -541,7 +573,7 @@ int SerialIO::Write(const unsigned char *buf, const size_t size)
     }
     // IF we reach this spot, make sure we wait  until all of our data 
     // has been transmitted  before we continue.
-    tcdrain(port);
+    tcdrain(fPort);
     SET_DEBUG_STACK;
     return nwritten;
 }
@@ -672,8 +704,8 @@ int SerialIO::PutSingleWithCheck(const unsigned char *buf)
  ********************************************************************/
 SerialIO::~SerialIO()
 {
-    delete PortName;
-    close(port);
+    delete fPortName;
+    close(fPort);
     SET_DEBUG_STACK;
 }
 /********************************************************************
@@ -691,14 +723,14 @@ SerialIO::~SerialIO()
  ********************************************************************/
 void SerialIO::Break(void)
 {
-    tcsendbreak(port,0);
+    tcsendbreak(fPort,0);
     SET_DEBUG_STACK;
 }
 void SerialIO::Flush(void)
 {
     SET_DEBUG_STACK;
     ClearError(__LINE__);
-    if (tcflush(port, TCIOFLUSH)  == -1)
+    if (tcflush(fPort, TCIOFLUSH)  == -1)
     {
 	SetError(SerialIO::BadOpen, __LINE__);
     }
@@ -719,7 +751,7 @@ void SerialIO::Flush(void)
 bool SerialIO::GetDCD()
 {
     int rv = 0;
-    ioctl(port, TIOCMGET, &rv);
+    ioctl(fPort, TIOCMGET, &rv);
     SET_DEBUG_STACK;
     return (rv & TIOCM_CAR ? true:false);
 }
@@ -779,7 +811,7 @@ const char* SerialIO::GetErrorString(void)
 	break;
     }
     sprintf(ErrorString, "SerialIO Error Line %d, SerialPort: %s errno %d, %s %s",
-	    ErrorLine(), PortName, errno, strerror(errno), str);
+	    ErrorLine(), fPortName, errno, strerror(errno), str);
     SET_DEBUG_STACK;
     return ErrorString;
 }
@@ -804,13 +836,13 @@ bool SerialIO::SetAndCheck( struct termios *termios_p)
     bool rv = true;
     int  rc;
     SET_DEBUG_STACK;
-    if(tcsetattr(port, TCSANOW, termios_p) > -1)
+    if(tcsetattr(fPort, TCSANOW, termios_p) > -1)
     {
 	usleep(100000);
 	// Clear the termios structure. 
 	memset(&AsSet_p, 0, sizeof(struct termios));
 	// Get the current terminal characteristics into termios_p
-	rc = tcgetattr(port, &AsSet_p);
+	rc = tcgetattr(fPort, &AsSet_p);
 	if (rc<0)
 	{
 	    SetError(SerialIO::ErrorGetAttributes, __LINE__);
@@ -848,7 +880,7 @@ bool SerialIO::SetAndCheck( struct termios *termios_p)
 bool SerialIO::IsCTSEnabled(void)
 {
   int status;
-  status = ioctl(port, TIOCMGET, &status);
+  status = ioctl(fPort, TIOCMGET, &status);
 
   if(status&TIOCM_CTS) 
     return true;
