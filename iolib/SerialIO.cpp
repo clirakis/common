@@ -401,7 +401,7 @@ SerialIO::SerialIO(const char *ComPortName, speed_t BR, Parity Pr,
     SET_DEBUG_STACK;
 }
 
-
+#if 0
 /********************************************************************
  *
  * Function Name : Read
@@ -422,7 +422,7 @@ unsigned char SerialIO::Read(void)
     unsigned char data[1];      // Data value.
     size_t rc;                  // return code from read.
     ClearError(__LINE__);
-    rc = read( fPort,            // Handle of file to read from.
+    rc = read( fPort,           // Handle of file to read from.
                data,            // Address of buffer that receives data 
                sizeof(data));   // Number of bytes to read.
 
@@ -434,6 +434,7 @@ unsigned char SerialIO::Read(void)
     SET_DEBUG_STACK;
     return data[0];
 }
+#endif
 /********************************************************************
  *
  * Function Name : Read
@@ -451,21 +452,21 @@ unsigned char SerialIO::Read(void)
 bool SerialIO::Read(unsigned char *buf)
 {
     SET_DEBUG_STACK;
-    size_t rc;                  // return code from read.
+    bool rv = true;
+    int32_t nread;          // number of bytes on read. 
     ClearError(__LINE__);
-    rc = read( fPort, // Handle of file to read from.
+
+    if (!buf) return false;  // no buffer provided. 
+
+    nread = read( fPort, // Handle of file to read from.
                buf,   // Address of buffer that receives data 
                1);    // Number of bytes to read.
 
-    // Want 1 byte only!
-    if(rc != 1) 
-    {
-        SetError(SerialIO::RxError, __LINE__);
-	SET_DEBUG_STACK;
-	return false;
-    }
+    if((nread<=0) && (errno == EWOULDBLOCK))
+	rv = false;
+
     SET_DEBUG_STACK;
-    return true;
+    return rv;
 }
 /********************************************************************
  *
@@ -500,9 +501,9 @@ int32_t SerialIO::Read(unsigned char *buf, const size_t buf_size,
 	nread = read( fPort,         // Handle of file to read from.
 		      ptr,           // Address of buffer that receives data 
 		      bytes_left) ;  // Number of bytes to read.
-    /*
-     * if nread is zero or -1 then we may or may not have an error. 
-     */
+	/*
+	 * if nread is zero or -1 then we may or may not have an error. 
+	 */
 	if(nread <= 0)
 	{
 	    switch(errno)
@@ -657,7 +658,7 @@ int SerialIO::PutSingleWithCheck(const unsigned char *buf)
     if(Write(buf,1) == 1) 
     {
         // Read back data since it should have been echoed to us. 
-        val = Read();
+        Read(&val);
         if (!CheckError())
         {
             if (val == buf[0] ) 

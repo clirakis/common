@@ -18,11 +18,12 @@
 // System includes.
 #include <iostream>
 #include <string>
-#include <cmath>
+//#include <cmath>
 #include <ostream>
 #include <fstream>
 #include <cstring>
 #include <cstdlib>
+#include <iomanip>
 using namespace std;
 #ifdef __APPLE__
 #  include <sys/time.h>
@@ -83,7 +84,7 @@ Buffered::Buffered (unsigned short N)
  *
  *******************************************************************
  */
-Buffered::~Buffered ()
+Buffered::~Buffered (void)
 {
     SET_DEBUG_STACK;
     delete fdata;
@@ -92,13 +93,13 @@ Buffered::~Buffered ()
 /**
  ******************************************************************
  *
- * Function Name : 
+ * Function Name : Put
  *
- * Description :
+ * Description : Put a single character into the buffer and update everything
  *
- * Inputs :
+ * Inputs : val - byte to store. 
  *
- * Returns :
+ * Returns : current buffer pointer
  *
  * Error Conditions :
  * 
@@ -109,17 +110,23 @@ Buffered::~Buffered ()
  *
  *******************************************************************
  */
-int Buffered::Put(unsigned char val)
+int32_t Buffered::Put(unsigned char val)
 {
     SET_DEBUG_STACK;
-    fError = ERROR_NONE;
+    fError = kERROR_NONE;
 
-    UpdateNow();
+    // First character put, timestamp on this sentance. 
+    if (fFillIndex == 0)
+	UpdateNow();
+
+    // Last time buffer was touched. 
+    fTimeStamp = clock();
+    
     fdata[fFillIndex] = val;
-    fFillIndex       = (fFillIndex+1)%fSize;
+    fFillIndex        = (fFillIndex+1)%fSize;
     if (fFillIndex == 0)
     {
-	fError = BUFFER_OVERFLOW;
+	fError = kBUFFER_OVERFLOW;
     }
     SET_DEBUG_STACK;
     return fFillIndex;
@@ -127,9 +134,9 @@ int Buffered::Put(unsigned char val)
 /**
  ******************************************************************
  *
- * Function Name : 
+ * Function Name : PutBuffer
  *
- * Description :
+ * Description : put one big buffer into this format. 
  *
  * Inputs :
  *
@@ -147,7 +154,7 @@ int Buffered::Put(unsigned char val)
 int Buffered::PutBuffer(unsigned char *b, size_t s)
 {
     SET_DEBUG_STACK;
-    fError = ERROR_NONE;
+    fError = kERROR_NONE;
     UpdateNow();
     memcpy(fdata, b, s);
     fdrain = fdata;
@@ -175,10 +182,10 @@ int Buffered::PutBuffer(unsigned char *b, size_t s)
  *
  *******************************************************************
  */
-void Buffered::SetTime()
+void Buffered::SetTime(void)
 {
     SET_DEBUG_STACK;
-    fError = ERROR_NONE;
+    fError     = kERROR_NONE;
     UpdateNow();
     fTimeStamp = clock();
 }
@@ -202,22 +209,22 @@ void Buffered::SetTime()
  *
  *******************************************************************
  */
-float Buffered::GetSingle ()
+float Buffered::GetSingle(void)
 {
     SET_DEBUG_STACK;
     float rv;
     unsigned char *d  = (unsigned char *) &rv;
 
-    fError = ERROR_NONE;
+    fError = kERROR_NONE;
     if (!Check())
     {
-	fError = BUFFER_BUGGERED;
+	fError = kBUFFER_BUGGERED;
 	rv = 0.0;
     }
     else if (Remaining() < sizeof(float))
     {
 	rv = 0.0;
-	fError = BUFFER_EMPTY;
+	fError = kBUFFER_EMPTY;
     }
     else
     {
@@ -251,22 +258,22 @@ float Buffered::GetSingle ()
  *
  *******************************************************************
  */
-short Buffered::GetInt ()
+short Buffered::GetInt (void)
 {
     SET_DEBUG_STACK;
     short rv;
     unsigned char *d = (unsigned char *) &rv;
 
-    fError = ERROR_NONE;
+    fError = kERROR_NONE;
     if (!Check())
     {
-	fError = BUFFER_BUGGERED;
+	fError = kBUFFER_BUGGERED;
 	rv = 0;
     }
     else if (Remaining() < sizeof(short))
     {
 	rv = 0;
-	fError = BUFFER_EMPTY;
+	fError = kBUFFER_EMPTY;
     }
     else
     {
@@ -298,22 +305,22 @@ short Buffered::GetInt ()
  *
  *******************************************************************
  */
-int Buffered::GetLongInt ()
+int Buffered::GetLongInt (void)
 {
     SET_DEBUG_STACK;
     int rv;
     unsigned char *d = (unsigned char *) &rv;
 
-    fError = ERROR_NONE;
+    fError = kERROR_NONE;
     if (!Check())
     {
-	fError = BUFFER_BUGGERED;
+	fError = kBUFFER_BUGGERED;
 	rv = 0;
     }
     else if (Remaining() < sizeof(int))
     {
 	rv = 0;
-	fError = BUFFER_EMPTY;
+	fError = kBUFFER_EMPTY;
     }
     else
     {
@@ -347,22 +354,22 @@ int Buffered::GetLongInt ()
  *
  *******************************************************************
  */
-double Buffered::GetDouble ()
+double Buffered::GetDouble (void)
 {
     SET_DEBUG_STACK;
     double rv;
     unsigned char *d  = (unsigned char *) &rv;
 
-    fError = ERROR_NONE;
+    fError = kERROR_NONE;
     if (!Check())
     {
-	fError = BUFFER_BUGGERED;
+	fError = kBUFFER_BUGGERED;
 	rv = 0.0;
     }
     else if (Remaining() < sizeof(double))
     {
 	rv = 0.0;
-	fError = BUFFER_EMPTY;
+	fError = kBUFFER_EMPTY;
     }
     else
     {
@@ -401,21 +408,21 @@ double Buffered::GetDouble ()
  *
  *******************************************************************
  */
-unsigned char Buffered::GetChar ()
+unsigned char Buffered::GetChar (void)
 {
     SET_DEBUG_STACK;
     char rv;
 
-    fError = ERROR_NONE;
+    fError = kERROR_NONE;
     if (!Check())
     {
-	fError = BUFFER_BUGGERED;
+	fError = kBUFFER_BUGGERED;
 	rv = 0;
     }
     else if (Remaining() < sizeof(char))
     {
 	rv = 0;
-	fError = BUFFER_EMPTY;
+	fError = kBUFFER_EMPTY;
     }
     else
     {
@@ -450,16 +457,16 @@ int Buffered::Skip(unsigned i)
 {
     int rv = 0;
 
-    fError = ERROR_NONE;
+    fError = kERROR_NONE;
     if (!Check())
     {
-	fError = BUFFER_BUGGERED;
+	fError = kBUFFER_BUGGERED;
 	rv = -1;
     }
     else if ( Remaining() < i)
     {
 	rv    = -1;
-	fError = BUFFER_EMPTY;
+	fError = kBUFFER_EMPTY;
     }
     else
     {
@@ -467,13 +474,12 @@ int Buffered::Skip(unsigned i)
     }
     return rv;
 }
-#if 0
 /**
  ******************************************************************
  *
- * Function Name : 
+ * Function Name : ostream operator
  *
- * Description :
+ * Description : Dump hex data from buffer. 
  *
  * Inputs :
  *
@@ -488,179 +494,52 @@ int Buffered::Skip(unsigned i)
  *
  *******************************************************************
  */
-void Buffered::HexDump( ofstream *o)
+ostream& operator<<(ostream& output, const Buffered &n)
 {
-    int i, charcount, N;
-    unsigned char c;
+    SET_DEBUG_STACK;
+    unsigned short i;
+    output << "# Buffered ----------------------------------------" 
+	   << dec << endl;
+    output << "#         Size: " << n.fSize 
+	   << "    FillIndex: " << n.fFillIndex
+	   << "         Busy: " << n.fBusy
+	   << "        Error: " << n.fError
+	   << std::right << std::setw(2) << hex << endl;
+    for (i=0;i<n.fFillIndex;i++)
+    {
+        if (i%10 == 0)
+        {
+	    if (i>0) output << endl;
+            output << "# " << dec << std::setw(2) << i << ") " << hex;
+        }
+	output << hex << std::setw(2) << (int) n.fdata[i] << " ";
+    }
 
-    charcount = 0;
-    fError    = ERROR_NONE;
+    output << endl << dec 
+		   << "# ------------------------------------------" << endl;
 
-    if (fFillIndex >= fSize)
-    {
-	if (o == NULL)
-	{
-	    cout << "Fill Index bigger than size: " 
-		 << fFillIndex 
-		 << " " << fSize
-		 << endl;
-	}
-	else
-	{
-	    (*o) << "Fill Index bigger than size: " 
-		 << fFillIndex 
-		 << " " << fSize
-		 << endl;
-	}
-	N = fSize-1;
-    }
-    else
-    {
-	N = fFillIndex;
-    }
-    for (i=0;i<N;i++)
-    {
-	if (charcount%16 == 0)
-	{
-	    if (o == NULL)
-	    {
-		cout << endl << "0x" << charcount << ") ";
-	    }
-	    else
-	    {
-		(*o) << endl << "# 0x" << charcount << ") ";
-	    }
-	}
-	c = (0x000000FF)&fdata[i];
-	if (o == NULL)
-	{
-	    cout << hex << " " << (int)c;
-	}
-	else
-	{
-	    (*o) << hex << " " << (int)c;
-	}
-	charcount++;
-    }
-    if (o == NULL)
-    {
-	cout << dec << endl;
-    }
-    else
-    {
-	(*o) << dec << endl;
-    }
+
+    SET_DEBUG_STACK;
+    return output;
 }
-#else
-void Buffered::HexDump( ofstream *o)
-{
-    int i, charcount, N;
-    unsigned char c;
 
-    charcount = 0;
-    fError    = ERROR_NONE;
-
-    if (o == NULL)
-    {
-	cout << "=====================================" << endl;
-    }
-    else
-    {
-	(*o) << "# ================================== " << endl;
-    }
-
-    if (fFillIndex >= fSize)
-    {
-	if (o == NULL)
-	{
-	    cout << "Fill Index bigger than size: " 
-		 << fFillIndex 
-		 << " " << fSize
-		 << endl;
-	}
-	else
-	{
-	    (*o) << "Fill Index bigger than size: " 
-		 << fFillIndex 
-		 << " " << fSize
-		 << endl;
-	}
-	N = fSize-1;
-    }
-    else
-    {
-	N = fFillIndex;
-    }
-    if (o == NULL)
-    {
-	cout << "Bufferd dump , fill index " << fFillIndex 
-	     << " remaining " << Remaining() 
-	     << " :"<< endl;
-    }
-    else
-    {
-	(*o) << "# Buffered dump, 8 per line " 
-	     << fFillIndex << " :"
-	     << endl << "# ";
-    }
-
-    for (i=0;i<N;i++)
-    {
-	c = (0x000000FF)&fdata[i];
-	if (o == NULL)
-	{
-	    cout << hex << "0x" << (int)c << ",";
-	}
-	else
-	{
-	    (*o) << hex << "0x" << (int)c << ",";
-	}
-	charcount++;
-	if (charcount%8 == 0)
-	{
-	    if (o == NULL)
-	    {
-		cout << endl << "0x" << charcount << ") ";
-	    }
-	    else
-	    {
-		(*o) << endl << "# ";
-	    }
-	}
-    }
-    if (o == NULL)
-    {
-	cout << dec << endl;
-    }
-    else
-    {
-	(*o) << dec << endl;
-    }
-    if (o == NULL)
-    {
-	cout << "=====================================" << endl;
-    }
-    else
-    {
-	(*o) << "# ================================== " << endl;
-    }
-}
-#endif
 void Buffered::Reset()
 { 
-    fError     = ERROR_NONE;
-    fFillIndex = 0;         // Nothing has been put into the buffer.
+    fError     = kERROR_NONE;
+    fFillIndex = 0;          // Nothing has been put into the buffer.
     fdrain     = fdata;      // drain starts at beginning of buffer. 
-    fBusy      = false;     // buffer is not busy.
+    fBusy      = false;      // buffer is not busy.
     memset(fdata, 0, fSize); // Zero buffer.
+    UpdateNow();
 }
+
 unsigned char Buffered::Char(unsigned i)
 {
     unsigned char rc = 0;
-    fError = ERROR_NONE;
+    fError = kERROR_NONE;
     if (!Check())
     {
-	fError = BUFFER_BUGGERED;
+	fError = kBUFFER_BUGGERED;
 	rc = 0;
     }
     else if (i<fSize)
@@ -669,11 +548,13 @@ unsigned char Buffered::Char(unsigned i)
     }
     return rc;
 } 
-void Buffered::ClearBusy()  
+
+void Buffered::ClearBusy(void)  
 {
     fBusy = false;
     SetTime();
 }
+
 const char *Buffered::StatusBuf(void) const
 {
     static char StatusB[256];
@@ -711,7 +592,7 @@ int Buffered::GetLine(char *p, size_t n)
 	s    = (char )GetChar();
 	p[i] = s;
 	i++;
-    } while ((i<n) && (fError==ERROR_NONE) && ((s!='\n')|| (s!='\r')));
+    } while ((i<n) && (fError==kERROR_NONE) && ((s!='\n')|| (s!='\r')));
     
     return i;
 }

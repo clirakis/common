@@ -75,12 +75,14 @@ public:
     ~SerialIO(void);
 
     /// Get a  single byte of data.
-    unsigned char Read(void);
+	//unsigned char Read(void);
+
     /**
      * Get a  single byte of data. returns true if a single character 
      * was received. 
      */
     bool Read(unsigned char *buf);
+
     /** 
      * Get a buffer of data, check against size. 
      * returns the number of characters retreived. 

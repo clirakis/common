@@ -22,47 +22,61 @@
 # define __BUFFERED_h_
 # include <time.h>
 # include <ostream>
+# include <stdint.h>
 
 class Buffered {
 public:
+    // Construct a buffer of size N
     Buffered(unsigned short N);
+
     ~Buffered();
+
     /// Put a character into the buffer with checks, advance pointer.
-    int                    Put(unsigned char val);
+    int32_t                Put(unsigned char val);
+
     /// Put a batch of data in
-    int                    PutBuffer(unsigned char *b, size_t s);
+    int32_t                PutBuffer(unsigned char *b, size_t s);
+
     /// Set the time on the buffer to NOW
-    void                   SetTime();
+    void                   SetTime(void);
+
     /// Get the declared size of the buffer. 
-    inline unsigned short  GetSize()  const {return fSize;};
+    inline unsigned short  GetSize(void)  const {return fSize;};
+
     /// Get the last timestamp on the buffer. 
-    inline struct timespec GetTime()  const {return fnow;};
+    inline struct timespec GetTime(void)  const {return fnow;};
     /**
      *  Get the fill index. Usually used to see how many characters
      * there are in the buffer.
      */
-    inline unsigned short  GetFill()  const {return fFillIndex;};
+    inline unsigned short  GetFill(void)  const {return fFillIndex;};
+
     /// Return the error from the last operation.
-    inline int             GetError() const {return fError;};
+    inline int             GetError(void) const {return fError;};
+
     /// Check to see if the buffer is in use. 
-    inline bool            Busy() const {return fBusy;};
+    inline bool            Busy(void) const {return fBusy;};
+
     /// Set the in use flag for this buffer.
-    inline void            SetBusy()    {fBusy = true;};
+    inline void            SetBusy(void)    {fBusy = true;};
+
     /// Clear the in use flag for this buffer.
-    void                   ClearBusy();
+    void                   ClearBusy(void);
+
     /**
      * How many bytes are left in the buffer? Typically
      * when doing a drain on the buffer, the difference between
      * the read pointer and the beginning of the buffer.
      */
-    inline unsigned Remaining() const {return (fFillIndex - (unsigned)(fdrain-fdata));};
+    inline uint32_t Remaining(void) const 
+	{return (fFillIndex - (unsigned)(fdrain-fdata));};
 
-    /// Dump all the data in the buffer in hex format.
-    void HexDump( ofstream *o);
+
     /**
-     * Reset all flags, clear the buffer. 
+     * Reset all flags, clear the buffer. Clear CLEAR
      */
-    void Reset(); 
+    void Reset(void); 
+
     /// Advance the drain pointer by i bytes in the buffer. 
     int Skip(unsigned i);
 
@@ -71,30 +85,37 @@ public:
     /// Get a character at location i, no change to drain pointer. 
     unsigned char Char(unsigned i);
     /// Get a character from the buffer and advance drain by 1
-    unsigned char GetChar();
+    unsigned char GetChar(void);
     /// Get a float from the buffer and advance drain by sizeof(float)
-    float         GetSingle ();
+    float         GetSingle (void);
     /// Get a short from the buffer and advance drain by sizeof(short)
-    short         GetInt();
+    short         GetInt(void);
     /// Get a int from the buffer and advance drain by sizeof(int)
-    int           GetLongInt();
+    int           GetLongInt(void);
     /// Get a double from the buffer and advance drain by sizeof(double)
-    double        GetDouble();
+    double        GetDouble(void);
     int           GetLine(char *p, size_t n);
 
     /// Use the next carefully.
-    inline unsigned char* GetData() {return fdata;};
-    inline void           FillIndex(unsigned short f) {fFillIndex = f;};
+    inline unsigned char* GetData(void) {return fdata;};
+    inline void           SetFillIndex(unsigned short f) {fFillIndex = f;};
+    inline unsigned short GetFillIndex(void) {return fFillIndex;};
+
     /// and this one too.
-    inline void DecrementFillCount() { fFillIndex--;};
-    inline clock_t TimeStamp() const {return fTimeStamp;};
+    inline void    DecrementFillCount(void) { fFillIndex--;};
+    inline clock_t TimeStamp (void) const {return fTimeStamp;};
     const  char    *StatusBuf(void) const;
 
-    enum {ERROR_NONE, BUFFER_EMPTY, BUFFER_OVERFLOW, BUFFER_BUGGERED};
+    inline bool    IsFull(void) {return (fFillIndex>fSize-1);};
+
+
+    friend ostream& operator<<(ostream& output, const Buffered &n);
+
+    enum {kERROR_NONE, kBUFFER_EMPTY, kBUFFER_OVERFLOW, kBUFFER_BUGGERED};
 
 private:
     /// Check to see if Fill index is buggered.
-    inline bool Check() const {return (fFillIndex<fSize);};
+    inline bool Check(void) const {return (fFillIndex<fSize);};
 
     /// update fnow.
     void UpdateNow(void);
