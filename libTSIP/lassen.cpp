@@ -28,6 +28,8 @@
  * Restrictions/Limitations :
  *
  * Change Descriptions :
+ * 03-Mar-24 CBL Changed buffered and removed hex dump in favor of << 
+ *               operator overload
  *
  * Classification : Unclassified
  *
@@ -288,7 +290,8 @@ int Lassen::DecodeMessage (Buffered *buf)
 	if (pLogger)
 	{
 	    pLogger->LogTime(" 0x4C -- LastID: 0x%X\n", fLastMessageID);
-	    fBuffer->HexDump(pLogger->LogPtr()); 
+//	    fBuffer->HexDump(pLogger->LogPtr()); 
+	    *pLogger->LogPtr() << fBuffer;
 	}
 	break;
     case ETX:
@@ -335,7 +338,8 @@ int Lassen::DecodeMessage (Buffered *buf)
 	{
 	    pLogger->LogTime(" Unknown message: 0x%X LastID: 0x%X\n",
 			     MessageID, fLastMessageID);
-	    fBuffer->HexDump(pLogger->LogPtr()); 
+	    //fBuffer->HexDump(pLogger->LogPtr()); 
+	    *pLogger->LogPtr() << fBuffer;
 	}
 	fBuffer->Reset();
 	SET_DEBUG_STACK;
@@ -383,7 +387,8 @@ int Lassen::DecodeMessage (Buffered *buf)
 		"DIFFERENCE: %d ID: 0x%X LastID: 0x%X Expected %d Got %d\n",
 		delta, MessageID, fLastMessageID, ExpectedBytes, 
 		fBuffer->GetFill());
-	    fBuffer->HexDump(pLogger->LogPtr()); 
+	    //fBuffer->HexDump(pLogger->LogPtr()); 
+	    *pLogger->LogPtr() << fBuffer;
 	}
     }
 
@@ -594,7 +599,8 @@ int Lassen::Decode_GPS_Time (void)
 			     fGPStime->GPSTimeOfWeek(), 
 			     fGPStime->ExtendedGPSWeek(),
 			     fGPStime->UTC_Delta());
-	    fBuffer->HexDump(pLogger->LogPtr());
+	    //fBuffer->HexDump(pLogger->LogPtr());
+	    *pLogger->LogPtr() << fBuffer;
 	}
     }
     SET_DEBUG_STACK;
