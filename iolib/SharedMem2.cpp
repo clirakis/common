@@ -26,6 +26,8 @@
  * Restrictions/Limitations : 
  *
  * Change Descriptions :
+ * 19-Feb-24 Changed permissions from 644 to ? If i do this it may present 
+ *           a security leak. 
  *
  * Classification : Unclassified
  *
@@ -70,7 +72,7 @@ using namespace std;
 #include "CLogger.hh"
 // 01-Nov-22
 //static const int kPERM  = 0600;
-static const int kPERM  = 0644;
+static const int kPERM    = 0644;
 static const size_t kSHM_Size = 4096; // Size of shared memory at initial 
 
 
