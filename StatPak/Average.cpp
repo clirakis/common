@@ -9,6 +9,7 @@
  * Restrictions/Limitations :
  *
  * Change Descriptions :
+ * 03-Mar-24 changed over to CPP vector template
  *
  * Classification : Unclassified
  *
@@ -20,6 +21,7 @@
 #include <cmath>
 #include <string.h>
 using namespace std;
+#include <cstdint>
 
 // Local Includes.
 #include "debug.h"
@@ -48,15 +50,12 @@ using namespace std;
 Average::Average(size_t Nele)
 {
     SET_DEBUG_STACK;
-    fCurrentPointer = 0;
-    fFirstFill      = false;
+    cout << "AVERAGE " << Nele << endl;
     fRejectCount    = 0;
-    fData           = 0;
-    if (Nele > 0)
-    {
-        fData       = new double[Nele];
-    }
-    fSize           = Nele;
+    // allocate vector to full size if Nele>0
+    fData = vector<double>(Nele, 0.0);
+    fCurrentPointer = 0;
+    fFull           = false;       // the vector array has not been filled. 
 }
 /**
  ******************************************************************
@@ -83,10 +82,10 @@ Average::Average(size_t Nele)
 void Average::AddElement( double val)
 {
     SET_DEBUG_STACK;
-    if (fFirstFill)
+    if (fCurrentPointer>5)
     {
         // Protect against temporary fliers.
-        double sig  = GetSigma();
+        double sig  = Sigma();
         double avg  = Get();
         double diff = fabs(val)-fabs(avg);
         if ((fabs(diff) < 3.0*sig) || (fRejectCount > 5))
@@ -128,17 +127,15 @@ void Average::AddElement( double val)
 void Average::Add( double val)
 {
     SET_DEBUG_STACK;
-    fData[fCurrentPointer] = val;
     //
     // roll the pointer as necessary, kind of a windowed low pass filter
     // without weight. 
     //
-    fCurrentPointer        = (fCurrentPointer+1)%fSize;
-    fNEntries++;
-    if (fCurrentPointer == 0)
-    {
-        fFirstFill = true;
-    }
+    fData[fCurrentPointer] = val;
+    fCurrentPointer        = (fCurrentPointer+1)%fData.size();
+
+    fFull = (fCurrentPointer == 0); // its ok if we set it multiple times. 
+
     SET_DEBUG_STACK;
 }
 
@@ -162,35 +159,35 @@ void Average::Add( double val)
  *
  *******************************************************************
  */
-double Average::GetSigma(double *avg)
+double Average::Sigma(double *avg)
 {
-    size_t i;
-    double sum, sum2, rc, x;
+    size_t i, N;
+    double sum  = 0.0;
+    double sum2 = 0.0;
+    double rc   = 0.0;
+    double x    = 0.0;
 
-    rc  = 0.0;
-    sum = sum2 = 0.0;
 
-    if (fFirstFill)
+    if (fFull)
     {
-        for(i=0;i<fSize;i++)
-        {
-            x     = fData[i];
-            sum  += x;
-            sum2 += x*x;
-        }
-        if (avg != NULL)
-        {
-            *avg = sum/((double) fSize);
-        }
-        rc = sqrt(fabs(pow(sum,2.0) - sum2))/((double) fSize);
+	N = fData.size();
     }
     else
     {
-        if (avg != NULL)
-        {
-            *avg = 9999.99;
-        }
+	N = fCurrentPointer;
     }
+    for(i=0;i<N;i++)
+    {
+	x     = fData[i];
+	sum  += x;
+	sum2 += x*x;
+    }
+    if (avg != NULL)
+    {
+	*avg = sum/((double) N);
+    }
+    rc = sqrt(fabs(pow(sum,2.0) - sum2))/((double) N);
+
     return rc;
 }
 /**
@@ -219,15 +216,25 @@ double Average::GetSigma(double *avg)
  */
 double Average::Get(void)
 {
-    double rc = 9999.99;
-    if (fFirstFill)
+    double   rc  = 9999.99;
+    uint32_t N;
+
+    if (fFull)
     {
-        double sum = 0;
-        for (size_t i=0;i<fSize;i++)
+	N = fData.size();
+    }
+    else
+    {
+	N = fCurrentPointer;
+    }
+    if (N>2)
+    {
+        double sum = 0.0;
+        for (size_t i=0;i<N;i++)
         {
             sum += fData[i];
         }
-        rc = sum/((double)fSize);
+        rc = sum/((double)N);
     }
     return rc;
 }
@@ -235,7 +242,7 @@ double Average::Get(void)
 /**
  ******************************************************************
  *
- * Function Name :VReset
+ * Function Name :Reset
  *
  * Description : Reset the current system.
  *
@@ -252,19 +259,25 @@ double Average::Get(void)
  *
  *******************************************************************
  */
-void Average::VReset()
+void Average::Reset(void)
 {
     fCurrentPointer = 0;
-    fFirstFill      = false;
-    memset( fData, 0, fSize*sizeof(double));
+    fFull = false;
+    for (size_t i=0;i<fData.size();i++)
+    {
+	fData[i] = 0.0;
+    }
 }
-ostream& operator<<(ostream& output, const Average &n)
+ostream& operator<<(ostream& output, Average &n)
 {
-    output << "Average Data "
-           << " Current Pointer: " << n.fCurrentPointer
-           << " Reject Count: "    << n.fRejectCount
-           << " First Fill: "      << n.fFirstFill
-           << " Total Entries: "   << n.fNEntries
+    double avg;
+    double sigma = n.Sigma(&avg);
+    output << "Average Data ----------------------------" << endl
+           << " Current Pointer: "  << n.fCurrentPointer << endl
+           << "    Reject Count: "  << n.fRejectCount    << endl
+           << "   Total Entries: "  << n.fData.size()    << endl
+	   << "         Average: "  << avg               << endl
+	   << "           Sigma: "  << sigma
            << endl;
     return output;
 }

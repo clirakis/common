@@ -16,9 +16,10 @@ TARGET = regression
 #
 # Compile time resolution.
 #
-INCLUDE = -I$(DRIVE)/common/RT_Tools -I$(DRIVE)/common/iolib \
+INCLUDE = -I$(DRIVE)/common/StatPak -I$(DRIVE)/common/RT_Tools \
+	-I$(DRIVE)/common/iolib \
 	-I$(DRIVE)/common/utility
-LIBS = -lRT_tools -lio  -lutility 
+LIBS = -lStatPak -lRT_tools -lio  -lutility 
 
 # Rules to make the object files depend on the sources.
 SRC     = 

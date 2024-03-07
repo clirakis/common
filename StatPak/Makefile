@@ -33,10 +33,10 @@ LDFLAGS= -shared
 
 # Rules to make the object files depend on the sources.
 SRC     = 
-SRCCPP  = Average.cpp
+SRCCPP  = Average.cpp hist1D.cpp
 SRCS    = $(SRC) $(SRCCPP)
 
-HEADERS = Average.hh
+HEADERS = Average.hh hist1D.hh
 
 .cpp.o:
 	$(CPP) $(CFLAGS) -c $<
@@ -49,7 +49,7 @@ OBJSCPP = ${SRCCPP:.cpp=.o}
 OBJS    = $(OBJSC) $(OBJSCPP)
 
 
-$(LIBRARY): $(OBJS)
+$(LIBRARY): $(OBJS) $(HEADERS)
 	$(LD) $(LDFLAGS) -o $(LIBRARY) $(OBJS)
 
 # When we build all, what do we build?

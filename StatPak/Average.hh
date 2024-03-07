@@ -10,6 +10,7 @@
  * Restrictions/Limitations :
  *
  * Change Descriptions :
+ * 03-Mar-24 Change to std:vector
  *
  * Classification : Unclassified
  *
@@ -19,28 +20,27 @@
  */
 #ifndef  __AVERAGE_hh_
 # define __AVERAGE_hh_
+# include <vector>
 
 class Average
 {
-
-    friend ostream& operator<<(ostream& output, const Average &n); 
 public:
     Average(size_t Nele);
     void   AddElement(double val);
-    double GetSigma(double *avg=NULL);
+    double Sigma(double *avg = NULL);
     double Get(void);
-    void   VReset();
-    inline bool FirstFill() {return fFirstFill;};
-    inline int  CurrentPointer() {return fCurrentPointer;};
+    void   Reset(void);
+    inline int  CurrentPointer(void) {return fCurrentPointer;};
+    friend ostream& operator<<(ostream& output, Average &n); 
+
+protected:
+    vector<double> fData;
 
 private:
     void    Add(double val);
 
-    size_t  fNEntries;
-    size_t  fCurrentPointer, fRejectCount;
-    bool    fFirstFill;
-    double* fData;
-    size_t  fSize;
+    size_t  fRejectCount, fCurrentPointer;
+    bool    fFull;
 };
 
 #endif

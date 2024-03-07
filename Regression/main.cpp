@@ -37,6 +37,7 @@ using namespace std;
 #include "SimpleCommand.hh"
 #include "Timeout.hh"
 #include "TimeUtil.hh"
+#include "hist1D.hh"
 
 /** Control the verbosity of the program output via the bits shown. */
 static unsigned int VerboseLevel = 0;
@@ -234,6 +235,34 @@ static void TestMidnight(void)
     cout << "Finish: " << ctime(&current);
 
 }
+static void TestH1D(void)
+{
+    Hist1D *hid = new Hist1D("TestMe", 100, 0.0, 1.0);
+    time_t now;
+    time(&now);
+    srand(now);
+    uint32_t N = 1000;
+    double x, y;
+    double sigma = 0.1;
+    double sigma2 = sigma *sigma;
+    double mean  = 0.5;
+    double Norm  = 1.0/sqrt(2.0 * M_PI * sigma2)/2.0;
+
+    cout << "TEST H1D, filling with normal distribution." << endl;
+    for (uint32_t i=0;i<N;i++)
+    {
+	x = rand();
+	x = x/((double) RAND_MAX);
+	//cout << "X: " << x << endl;
+	y = Norm * exp( -0.5*pow(x-mean,2.0)/sigma2);
+	//cout << y << endl;
+	hid->Fill(y);
+    }
+    cout << "DONE" << endl;
+    hid->Print(1);
+    cout << *hid;
+    delete hid;
+}
 /**
  ******************************************************************
  *
@@ -265,7 +294,8 @@ int main(int argc, char **argv)
     {
 	//TestSimpleCommand();
 	//TimeoutTest();
-	TestMidnight();
+	//TestMidnight();
+	TestH1D();
     }
     Terminate(0);
 }
