@@ -11,6 +11,8 @@
  *
  * Change Descriptions :
  * 03-Mar-24 Change to std:vector
+ * 09-Mar-24 Don't really want to provide a vector here, pass in 
+ *           from above. Act as a general format. 
  *
  * Classification : Unclassified
  *
@@ -20,27 +22,98 @@
  */
 #ifndef  __AVERAGE_hh_
 # define __AVERAGE_hh_
-# include <vector>
 
 class Average
 {
 public:
-    Average(size_t Nele);
-    void   AddElement(double val);
+    /*!
+     * Description: 
+     *   
+     *
+     * Arguments:
+     *   
+     *
+     * Returns:
+     *
+     * Errors:
+     *
+     */
+    Average(void);
+    
+    /*!
+     * Description: 
+     *   
+     *
+     * Arguments:
+     *   
+     *
+     * Returns:
+     *
+     * Errors:
+     *
+     */
+    void   Add(double val);
+    /*!
+     * Description: 
+     *   
+     *
+     * Arguments:
+     *   
+     *
+     * Returns:
+     *
+     * Errors:
+     *
+     */
     double Sigma(double *avg = NULL);
+    /*!
+     * Description: 
+     *   
+     *
+     * Arguments:
+     *   
+     *
+     * Returns:
+     *
+     * Errors:
+     *
+     */
     double Get(void);
+    /*!
+     * Description: 
+     *   
+     *
+     * Arguments:
+     *   
+     *
+     * Returns:
+     *
+     * Errors:
+     *
+     */
     void   Reset(void);
-    inline int  CurrentPointer(void) {return fCurrentPointer;};
+
+    /*!
+     * Description: 
+     *   
+     *
+     * Arguments:
+     *   
+     *
+     * Returns:
+     *
+     * Errors:
+     *
+     */
     friend ostream& operator<<(ostream& output, Average &n); 
 
 protected:
-    vector<double> fData;
+    uint32_t fN;        // Total entries
+    double   fSum;      // Sum of entries
+    double   fSum2;     // Sum^2 of entries
 
 private:
-    void    Add(double val);
 
-    size_t  fRejectCount, fCurrentPointer;
-    bool    fFull;
 };
 
 #endif

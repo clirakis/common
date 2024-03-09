@@ -3,7 +3,7 @@
  *
  * Module Name : hist1D.h
  *
- * Author/Date : C.B. Lirakis / 23-May-21
+ * Author/Date : C.B. Lirakis / 3-Mar-24
  *
  * Description : 
  *
@@ -20,6 +20,7 @@
 #ifndef __HIST1D_hh_
 #    define __HIST1D_hh_
 #    include <stdint.h>
+#    include <vector>
 #    include "Average.hh"
 
 /// Hist1D documentation here. 
@@ -48,14 +49,17 @@ public:
 
     void Print(uint32_t type=0);
 
+    bool WriteJSON(const char *Filename);
+
+
     friend ostream& operator<<(ostream& output, Hist1D &n); 
 
 private:
-
-    char     *fName;
-    double   fMin, fMax;
-    uint32_t fUnder, fOver;
-    double   fBinSize;
+    vector<double> fData;
+    char           *fName;
+    double         fMin, fMax;
+    uint32_t       fUnder, fOver;
+    double         fBinSize;
 
 };
 #endif

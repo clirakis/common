@@ -10,6 +10,7 @@
  *
  * Change Descriptions :
  * 03-Mar-24 changed over to CPP vector template
+ * 09-Mar-24 major rework, no local storage. 
  *
  * Classification : Unclassified
  *
@@ -40,84 +41,59 @@ using namespace std;
  *
  * Error Conditions : NONE
  * 
- * Unit Tested on: 28-June-08
+ * Unit Tested on: 09-Mar-24
  *
  * Unit Tested by: CBL
  *
  *
  *******************************************************************
  */
-Average::Average(size_t Nele)
+Average::Average(void)
 {
     SET_DEBUG_STACK;
-    cout << "AVERAGE " << Nele << endl;
-    fRejectCount    = 0;
-    // allocate vector to full size if Nele>0
-    fData = vector<double>(Nele, 0.0);
-    fCurrentPointer = 0;
-    fFull           = false;       // the vector array has not been filled. 
+    Reset();
 }
 /**
  ******************************************************************
  *
- * Function Name : AddElement
+ * Function Name :Reset
  *
- * Description : Add value, but not without first doing some
- * flier rejection. It has to be within 3 sigma or rejected more
- * than 5 times, or within the FirstFill (First NElements)
+ * Description : Reset the current system.
  *
- * Inputs : value to put in array
+ * Inputs : NONE
  *
  * Returns : NONE
  *
  * Error Conditions : NONE
  * 
- * Unit Tested on:  28-June-08
- *
+ * Unit Tested on: 09-Mar-24 
+*
  * Unit Tested by: CBL
  *
  *
  *******************************************************************
  */
-void Average::AddElement( double val)
+void Average::Reset(void)
 {
-    SET_DEBUG_STACK;
-    if (fCurrentPointer>5)
-    {
-        // Protect against temporary fliers.
-        double sig  = Sigma();
-        double avg  = Get();
-        double diff = fabs(val)-fabs(avg);
-        if ((fabs(diff) < 3.0*sig) || (fRejectCount > 5))
-        {
-            Add(val);
-            fRejectCount = 0;
-        }
-        else
-        {
-            fRejectCount++;
-        }
-    }
-    else
-    {
-        Add(val);
-    }
-    SET_DEBUG_STACK;
+    fN    = 0; 
+    fSum  = 0.0;
+    fSum2 = 0.0;
 }
+
 /**
  ******************************************************************
  *
  * Function Name : Add
  *
- * Description : Add raw element into array
+ * Description : Add an element
  *
- * Inputs : value to put in array
+ * Inputs : value to track
  *
  * Returns : NONE
  *
  * Error Conditions : NONE
  * 
- * Unit Tested on:  06-Aug-10
+ * Unit Tested on: 09-Mar-24  
  *
  * Unit Tested by: CBL
  *
@@ -127,15 +103,9 @@ void Average::AddElement( double val)
 void Average::Add( double val)
 {
     SET_DEBUG_STACK;
-    //
-    // roll the pointer as necessary, kind of a windowed low pass filter
-    // without weight. 
-    //
-    fData[fCurrentPointer] = val;
-    fCurrentPointer        = (fCurrentPointer+1)%fData.size();
-
-    fFull = (fCurrentPointer == 0); // its ok if we set it multiple times. 
-
+    fN++;
+    fSum  += val;
+    fSum2 += val*val;
     SET_DEBUG_STACK;
 }
 
@@ -152,7 +122,7 @@ void Average::Add( double val)
  *
  * Error Conditions : NONE
  * 
- * Unit Tested on: 28-June-08
+ * Unit Tested on: 09-Mar-24
  *
  * Unit Tested by: CBL
  *
@@ -161,32 +131,15 @@ void Average::Add( double val)
  */
 double Average::Sigma(double *avg)
 {
-    size_t i, N;
-    double sum  = 0.0;
-    double sum2 = 0.0;
     double rc   = 0.0;
-    double x    = 0.0;
+    double den  = ((double) fN);
+    double xbar = fSum/den;
 
-
-    if (fFull)
-    {
-	N = fData.size();
-    }
-    else
-    {
-	N = fCurrentPointer;
-    }
-    for(i=0;i<N;i++)
-    {
-	x     = fData[i];
-	sum  += x;
-	sum2 += x*x;
-    }
     if (avg != NULL)
     {
-	*avg = sum/((double) N);
+	*avg = xbar;
     }
-    rc = sqrt(fabs(pow(sum,2.0) - sum2))/((double) N);
+    rc = sqrt(fSum2/den - xbar*xbar);
 
     return rc;
 }
@@ -196,10 +149,6 @@ double Average::Sigma(double *avg)
  * Function Name : Get
  *
  * Description : Return average of array
- *               Conditions: 
- *               If number of entries > size full array is used.
- *               Else only entries are used
- *               If no entries have been made return 0
  *
  * Inputs : NONE
  *
@@ -207,7 +156,7 @@ double Average::Sigma(double *avg)
  *
  * Error Conditions : NONE
  * 
- * Unit Tested on: 28-June-08
+ * Unit Tested on: 09-Mar-24 
  *
  * Unit Tested by: CBL
  *
@@ -216,66 +165,15 @@ double Average::Sigma(double *avg)
  */
 double Average::Get(void)
 {
-    double   rc  = 9999.99;
-    uint32_t N;
-
-    if (fFull)
-    {
-	N = fData.size();
-    }
-    else
-    {
-	N = fCurrentPointer;
-    }
-    if (N>2)
-    {
-        double sum = 0.0;
-        for (size_t i=0;i<N;i++)
-        {
-            sum += fData[i];
-        }
-        rc = sum/((double)N);
-    }
-    return rc;
+    return (fSum/((double)fN));
 }
 
-/**
- ******************************************************************
- *
- * Function Name :Reset
- *
- * Description : Reset the current system.
- *
- * Inputs : NONE
- *
- * Returns : NONE
- *
- * Error Conditions : NONE
- * 
- * Unit Tested on: 28-June-08
- *
- * Unit Tested by: CBL
- *
- *
- *******************************************************************
- */
-void Average::Reset(void)
-{
-    fCurrentPointer = 0;
-    fFull = false;
-    for (size_t i=0;i<fData.size();i++)
-    {
-	fData[i] = 0.0;
-    }
-}
 ostream& operator<<(ostream& output, Average &n)
 {
     double avg;
     double sigma = n.Sigma(&avg);
     output << "Average Data ----------------------------" << endl
-           << " Current Pointer: "  << n.fCurrentPointer << endl
-           << "    Reject Count: "  << n.fRejectCount    << endl
-           << "   Total Entries: "  << n.fData.size()    << endl
+           << "   Total Entries: "  << n.fN              << endl
 	   << "         Average: "  << avg               << endl
 	   << "           Sigma: "  << sigma
            << endl;

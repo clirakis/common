@@ -1,11 +1,11 @@
 /**
  ******************************************************************
  *
- * Module Name : 
+ * Module Name : main.cpp
  *
- * Author/Date : C.B. Lirakis / 05-Mar-19
+ * Author/Date : C.B. Lirakis / 27-Feb-24
  *
- * Description :
+ * Description : regression testing of various library funcitons. 
  *
  * Restrictions/Limitations :
  *
@@ -27,6 +27,7 @@ using namespace std;
 #include <time.h>
 #include <fstream>
 #include <cstdlib>
+#include <random>
 
 /// Local Includes.
 #include "debug.h"
@@ -237,30 +238,47 @@ static void TestMidnight(void)
 }
 static void TestH1D(void)
 {
-    Hist1D *hid = new Hist1D("TestMe", 100, 0.0, 1.0);
-    time_t now;
-    time(&now);
-    srand(now);
+    Hist1D *hid = new Hist1D("TestMe", 30, 0.0, 1.0);
     uint32_t N = 1000;
     double x, y;
     double sigma = 0.1;
     double sigma2 = sigma *sigma;
     double mean  = 0.5;
-    double Norm  = 1.0/sqrt(2.0 * M_PI * sigma2)/2.0;
+#if 0
+    time_t now;
+    time(&now);
+    srand(now);
+#else
+    /*
+     * https://en.cppreference.com/w/cpp/numeric/random/normal_distribution
+     *
+     * make a normal distribution. 
+     */
+    std::random_device rd{};   // self explainatory
+    std::mt19937 gen{rd()};    // helps mix the random numbers better
+    std::normal_distribution d{mean,sigma};
+
+#endif
+
 
     cout << "TEST H1D, filling with normal distribution." << endl;
     for (uint32_t i=0;i<N;i++)
     {
+#if 0
 	x = rand();
 	x = x/((double) RAND_MAX);
 	//cout << "X: " << x << endl;
-	y = Norm * exp( -0.5*pow(x-mean,2.0)/sigma2);
+	//y = Norm * exp( -0.5*pow(x-mean,2.0)/sigma2);
 	//cout << y << endl;
+#else
+	y = d(gen);
+#endif
 	hid->Fill(y);
     }
     cout << "DONE" << endl;
     hid->Print(1);
     cout << *hid;
+    hid->WriteJSON("test.json");
     delete hid;
 }
 /**

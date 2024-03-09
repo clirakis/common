@@ -2,7 +2,7 @@
  *
  * Module Name : hist1D.cpp
  *
- * Author/Date : C.B. Lirakis / 23-May-21
+ * Author/Date : C.B. Lirakis / 03-Mar-24
  *
  * Description : Generic hist1D
  *
@@ -13,6 +13,11 @@
  * Classification : Unclassified
  *
  * References :
+ * https://linux.tips/programming/how-to-install-and-use-json-cpp-library-on-ubuntu-linux-os
+ * https://subscription.packtpub.com/book/web-development/9781785286902/1/ch01lvl1sec12/reading-and-writing-json-in-c
+ *
+ * https://github.com/open-source-parsers/jsoncpp
+ * https://stackoverflow.com/questions/4289986/jsoncpp-writing-to-files
  *
  ********************************************************************/
 // System includes.
@@ -23,6 +28,10 @@ using namespace std;
 #include <cmath>
 #include <cstring> 
 #include <iomanip>
+#include <fstream>
+#include <limits.h>
+
+#include <jsoncpp/json/json.h>
 
 // Local Includes.
 #include "debug.h"
@@ -41,7 +50,7 @@ using namespace std;
  *
  * Error Conditions :
  * 
- * Unit Tested on: 
+ * Unit Tested on: 09-Mar-24
  *
  * Unit Tested by: CBL
  *
@@ -49,8 +58,9 @@ using namespace std;
  *******************************************************************
  */
 Hist1D::Hist1D (const char *name, uint32_t NBins, double min, double max) :
-    Average(NBins)
+    Average()
 {
+    fData    = vector<double>(NBins);
     fName    = strdup(name);
     fMin     = min;
     fMax     = max;
@@ -71,7 +81,7 @@ Hist1D::Hist1D (const char *name, uint32_t NBins, double min, double max) :
  *
  * Error Conditions :
  * 
- * Unit Tested on: 
+ * Unit Tested on: 9-Mar-24 
  *
  * Unit Tested by: CBL
  *
@@ -97,7 +107,7 @@ Hist1D::~Hist1D (void)
  *
  * Error Conditions :
  * 
- * Unit Tested on: 
+ * Unit Tested on: 9-Mar-24 
  *
  * Unit Tested by: CBL
  *
@@ -108,6 +118,9 @@ void Hist1D::Fill(double val, double weight)
 {
     uint32_t bin = 0;
     double   x;
+
+    // Keep track of statistics
+    Add(val*weight);
 
     if (val<fMin)
     {
@@ -125,6 +138,26 @@ void Hist1D::Fill(double val, double weight)
     }
 
 }
+/**
+ ******************************************************************
+ *
+ * Function Name : hist1D function
+ *
+ * Description :
+ *
+ * Inputs :
+ *
+ * Returns :
+ *
+ * Error Conditions :
+ * 
+ * Unit Tested on: 09-Mar-24 
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
 void Hist1D::Print(uint32_t type)
 {
     // Find max bin. 
@@ -181,15 +214,73 @@ void Hist1D::Print(uint32_t type)
 	cout << endl;
 	break;
     }
+    SET_DEBUG_STACK;
 }
+/**
+ ******************************************************************
+ *
+ * Function Name : hist1D function
+ *
+ * Description :
+ *
+ * Inputs :
+ *
+ * Returns :
+ *
+ * Error Conditions :
+ * 
+ * Unit Tested on: 09-Mar-24 
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+bool Hist1D::WriteJSON(const char *Filename)
+{
+    SET_DEBUG_STACK;
+    bool rv = false;
+
+    ofstream out(Filename);
+
+    if (!out.fail())
+    {
+	out << "TESTME" << endl;
+	out.close();
+    }
+
+    SET_DEBUG_STACK;
+    return rv;
+}
+
+/**
+ ******************************************************************
+ *
+ * Function Name : hist1D function
+ *
+ * Description :
+ *
+ * Inputs :
+ *
+ * Returns :
+ *
+ * Error Conditions :
+ * 
+ * Unit Tested on: 09-Mar-24 
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
 ostream& operator<<(ostream& output, Hist1D &n)
 {
     output << "Hist1D - Name: " << n.fName << " ----------------" << endl
-	//super::<< n
+	   << (Average &) n
 	   << "      Min: " << n.fMin << " Max: " << n.fMax 
 	   << " Bin size: " << n.fBinSize
 	   << endl
-	   << "    Under: " << n.fUnder << " Over: " << n.fOver << endl
+	   << "      Under: " << n.fUnder << " Over: " << n.fOver << endl
            << endl;
     return output;
 }

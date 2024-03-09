@@ -6,6 +6,7 @@
 #	Modified	by	Reason
 # 	--------	--	------
 #	27-Feb-24       CBL     Original
+#       07-Mar-24       CBL     Added in libjsoncpp
 #
 #
 ######################################################################
@@ -19,7 +20,7 @@ TARGET = regression
 INCLUDE = -I$(DRIVE)/common/StatPak -I$(DRIVE)/common/RT_Tools \
 	-I$(DRIVE)/common/iolib \
 	-I$(DRIVE)/common/utility
-LIBS = -lStatPak -lRT_tools -lio  -lutility 
+LIBS = -lStatPak -lRT_tools -lio  -lutility -ljsoncpp
 
 # Rules to make the object files depend on the sources.
 SRC     = 
