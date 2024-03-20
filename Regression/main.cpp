@@ -39,6 +39,7 @@ using namespace std;
 #include "Timeout.hh"
 #include "TimeUtil.hh"
 #include "hist1D.hh"
+#include "queryTimeServer.hh"
 
 /** Control the verbosity of the program output via the bits shown. */
 static unsigned int VerboseLevel = 0;
@@ -158,7 +159,7 @@ static bool Initialize(void)
 
     return true;
 }
-
+#if 0
 static void TimeoutTest(void)
 {
     bool trun; 
@@ -281,6 +282,66 @@ static void TestH1D(void)
     hid->WriteJSON("test.json");
     delete hid;
 }
+#endif
+static void TestTS(void)
+{
+    struct timespec host_now;
+    
+    QueryTS TS("time.nist.gov");
+    struct timespec value = TS.GetTime();
+    time_t sec = value.tv_sec;
+    struct tm *tme = localtime(&sec);  
+    sec -= tme->tm_gmtoff;
+
+    // Offset for NTP time
+    struct tm NTP;
+    memset( &NTP, 0, sizeof(struct tm));
+    NTP.tm_mday = 1;
+    time_t offset0 = mktime(&NTP);
+    cout << "NTP OFFSET 0: " << offset0 << " "  << ctime(&offset0);
+
+    // now calculat epoch. 
+    NTP.tm_year = 70;
+    time_t offset1 = mktime(&NTP);
+    cout << "NTP OFFSET 1: " << offset1 << " "  << ctime(&offset1);
+
+    cout << "Factor: " << offset1 - offset0 << endl;
+
+    clock_gettime(CLOCK_REALTIME, &host_now);   // Host time
+    double delta = (double)(host_now.tv_sec - value.tv_sec) + 
+	1.0e-9 * (double)(host_now.tv_nsec - value.tv_nsec);
+
+    cout << "TIME TEST " << endl
+	 << "   NIST SEC: " << value.tv_sec << endl
+	 << "  Formatted: " << ctime(&value.tv_sec)
+	 << "     offset: " << tme->tm_gmtoff/3600
+	 << endl
+	 << "   hosttime: " << ctime(&host_now.tv_sec) 
+	 << "         DT: " << delta
+	 << endl;
+
+    cout << TS;
+}
+static void Testntp(void)
+{
+    // Test NTP time storage class. 
+    ntp_ts ts;
+    cout << "Test one: " << ts << endl;
+
+    ntp_ts ts2(1,2);
+    cout << "Test two: " << ts2 << endl;
+
+    ts.GetSystemTime();
+    cout << "Test three: " << ts << endl;
+
+    cout << " TIME : " << ts.fmt();
+
+    QueryTS qts("time.nist.gov", true);
+    qts.GetTime();
+    cout << qts;
+
+  
+}
 /**
  ******************************************************************
  *
@@ -313,7 +374,9 @@ int main(int argc, char **argv)
 	//TestSimpleCommand();
 	//TimeoutTest();
 	//TestMidnight();
-	TestH1D();
+	//TestH1D();
+	//TestTS();
+	Testntp();
     }
     Terminate(0);
 }

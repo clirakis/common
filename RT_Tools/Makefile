@@ -7,6 +7,7 @@
 # 	--------	--	------
 #	26-Feb-24       CBL     Original
 #       28-Feb-24	CBL	Added in time utilities
+#       17-Mar-24       CBL     Added in queryTimeServer
 #
 ######################################################################
 #
@@ -34,10 +35,10 @@ LDFLAGS= -shared
 
 # Rules to make the object files depend on the sources.
 SRC     = 
-SRCCPP  = SimpleCommand.cpp TimeUtil.cpp Timeout.cpp
+SRCCPP  = SimpleCommand.cpp TimeUtil.cpp Timeout.cpp queryTimeServer.cpp
 SRCS    = $(SRC) $(SRCCPP)
 
-HEADERS = SimpleCommand.hh TimeUtil.hh Timeout.hh
+HEADERS = SimpleCommand.hh TimeUtil.hh Timeout.hh queryTimeServer.hh
 
 .cpp.o:
 	$(CPP) $(CFLAGS) -c $<

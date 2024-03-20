@@ -42,11 +42,16 @@ using namespace std;
  *
  * Function Name : hist1D constructor
  *
- * Description :
+ * Description : Create the 1D histogram building on the averaage
+ * class. 
  *
- * Inputs :
+ * Inputs : 
+ *           Name of histogram
+ *           NBins - number of bins in histogram. bin size = max-min/NBins
+ *           min   - minimum bin edge
+ *           max   - maximum bin edge
  *
- * Returns :
+ * Returns : xxx
  *
  * Error Conditions :
  * 
@@ -73,11 +78,11 @@ Hist1D::Hist1D (const char *name, uint32_t NBins, double min, double max) :
  *
  * Function Name : hist1D destructor
  *
- * Description :
+ * Description : Cleans up 
  *
- * Inputs :
+ * Inputs : NONE
  *
- * Returns :
+ * Returns : NONE
  *
  * Error Conditions :
  * 
@@ -97,15 +102,18 @@ Hist1D::~Hist1D (void)
 /**
  ******************************************************************
  *
- * Function Name : hist1D function
+ * Function Name : Fill
  *
- * Description :
+ * Description : Fill a value with a weight. 
  *
  * Inputs :
+ *           val    - value to determine what the bin number is. 
+ *           weight - weight on that value
+ *           E.G. bin number increments by weight. 
  *
- * Returns :
+ * Returns : NONE
  *
- * Error Conditions :
+ * Error Conditions : NONE
  * 
  * Unit Tested on: 9-Mar-24 
  *
@@ -141,15 +149,16 @@ void Hist1D::Fill(double val, double weight)
 /**
  ******************************************************************
  *
- * Function Name : hist1D function
+ * Function Name : Print
  *
- * Description :
+ * Description : Print a Vertical histogram for debugging. Super
+ *               Simple. Someday do the horizontal one
  *
- * Inputs :
+ * Inputs : type 0 - horizontal, 1 - vertical
  *
- * Returns :
+ * Returns : NONE
  *
- * Error Conditions :
+ * Error Conditions : NONE
  * 
  * Unit Tested on: 09-Mar-24 
  *
@@ -219,9 +228,9 @@ void Hist1D::Print(uint32_t type)
 /**
  ******************************************************************
  *
- * Function Name : hist1D function
+ * Function Name : Write JSON
  *
- * Description :
+ * Description : A way to interface to a HTML for plotting
  *
  * Inputs :
  *
@@ -245,7 +254,25 @@ bool Hist1D::WriteJSON(const char *Filename)
 
     if (!out.fail())
     {
-	out << "TESTME" << endl;
+	double x = 0.0;
+	Json::Value BinData;
+	Json::Value vecX(Json::arrayValue);
+	Json::Value vecY(Json::arrayValue);
+
+	Json::StreamWriterBuilder builder;
+	builder["commentStyle"] = "None";
+	builder["indentation"]  = "    ";
+	std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
+	for (uint32_t i=0;i<fData.size();i++)
+	{
+	    vecY.append(Json::Value(fData[i]));
+	    vecX.append(Json::Value(x));
+	    x = x + fBinSize;
+	}
+	BinData["Y"] = vecY;
+	BinData["X"] = vecX;
+	writer->write(BinData, &out);
+
 	out.close();
     }
 
