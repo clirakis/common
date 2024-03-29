@@ -385,11 +385,16 @@ public:
     friend std::ostream& operator<<(std::ostream& output, const QueryTS &n);
 
 private:
+    struct timespec    PerformQuery(void);
+    bool               OpenServer(void);
+    void               CloseServer(void);
+
     double             Subtract(const uint32_t *fp2, const uint32_t *fp1);
     void               Calculate(void);
 
     char               *fHostAddressName;
     int                fSockfd;
+    bool               fVerbose;
     struct sockaddr_in fServaddr;
     struct pkt         *fMSG;      // Full NTP server response. 
     uint32_t           fT4[2];     // time of response from NTP server

@@ -63,6 +63,11 @@
  *
  * References
  *    https://stackoverflow.com/questions/29112071/how-to-convert-ntp-time-to-unix-epoch-time-in-c-language-linux
+ *
+ * 28-Mar-24    It appears that querying the serer sometimes hangs. 
+ *              can try moving the open into the query and
+ *              establishing a timeout on recvfrom
+ *
  ***********************************************************************/
 #include <iostream>
 using namespace std;
@@ -72,7 +77,10 @@ using namespace std;
 #include <netdb.h>        // gethostbyname
 #include <unistd.h>
 
+// Local includes
 #include "queryTimeServer.hh"
+#include "debug.h"
+#include "CLogger.hh"
 
 /*
  * Time of day conversion constant.  Ntp's time scale starts in 1900,
@@ -107,66 +115,14 @@ extern int h_errno;
  */
 QueryTS::QueryTS( const char *TargetAddress, bool verbose) : CObject()
 {
-    char               **pptr;
-    char               str[64];
-    struct hostent*    hptr;
 
     SetVersion(1,1);
     ClearError(__LINE__);
     if (verbose) SetDebug(HIGH);
 
     fHostAddressName = strdup(TargetAddress);
+    fVerbose         = verbose;
 
-    if ((hptr = gethostbyname(TargetAddress)) == NULL) 
-    {
-	SetError(-1,__LINE__);
-	if (verbose)
-	{
-	    fprintf(stderr, " gethostbyname error for host: %s: %s",
-		    TargetAddress, hstrerror(h_errno));
-	}
-	return;
-    }
-
-    if ((hptr->h_addrtype == AF_INET) && (pptr = hptr->h_addr_list) != NULL) 
-    {
-
-	inet_ntop(hptr->h_addrtype, *pptr, str, sizeof(str));
-    } 
-    else
-    {
-	SetError(-2,__LINE__);
-	if (verbose)
-	{
-	    fprintf(stderr, "Error call inet_ntop \n");
-	}
-	return;
-    }
-
-    fSockfd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (fSockfd == -1)
-    {
-	SetError( -3, __LINE__);
-	if (verbose)
-	{
-	    fprintf(stderr,"Error in socket \n");
-	}
-	return;
-    }
-    bzero(&fServaddr, sizeof(fServaddr));
-    fServaddr.sin_family = AF_INET;
-    fServaddr.sin_port = htons(123);
-    inet_pton(AF_INET, str, &fServaddr.sin_addr);
-
-    if (connect(fSockfd, (SA *) & fServaddr, sizeof(fServaddr)) == -1 )
-    {
-	SetError(-4, __LINE__);
-	if(verbose)
-	{
-	    fprintf(stderr, "Error in connect \n");
-	}
-	return;
-    }
 
     // Much simplier way to allocate this. 
     fMSG= (struct pkt *) calloc( 1, sizeof(struct pkt));
@@ -195,11 +151,113 @@ QueryTS::QueryTS( const char *TargetAddress, bool verbose) : CObject()
  */
 QueryTS::~QueryTS(void)
 {
-    close(fSockfd);
     free(fMSG);
     free(fHostAddressName);
 }
+/**
+ ******************************************************************
+ *
+ * Function Name : OpenServer
+ *
+ * Description :
+ *
+ * Inputs : NONE
+ *
+ * Returns : NONE
+ *
+ * Error Conditions : NONE
+ * 
+ * Unit Tested on: 
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+bool QueryTS::OpenServer(void)
+{
+    SET_DEBUG_STACK;
+    CLogger *pLog = CLogger::GetThis();
+    char               **pptr;
+    char               str[64];
+    struct hostent*    hptr;
+    struct timeval timeout = {1,0};
 
+    fSockfd = -1;
+    if ((hptr = gethostbyname(fHostAddressName)) == NULL) 
+    {
+	SetError(-1,__LINE__);
+	pLog->LogTime(" gethostbyname error for host: %s: %s",
+		    fHostAddressName, hstrerror(h_errno));
+	return false;
+    }
+
+    if ((hptr->h_addrtype == AF_INET) && (pptr = hptr->h_addr_list) != NULL) 
+    {
+
+	inet_ntop(hptr->h_addrtype, *pptr, str, sizeof(str));
+    } 
+    else
+    {
+	SetError(-2,__LINE__);
+	pLog->LogTime("Error call inet_ntop \n");
+
+	return false;
+    }
+
+    fSockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (fSockfd == -1)
+    {
+	SetError( -3, __LINE__);
+	pLog->LogTime("Error in socket \n");
+	return false;
+    }
+    bzero(&fServaddr, sizeof(fServaddr));
+    fServaddr.sin_family = AF_INET;
+    fServaddr.sin_port = htons(123);
+    inet_pton(AF_INET, str, &fServaddr.sin_addr);
+
+    if (connect(fSockfd, (SA *) & fServaddr, sizeof(fServaddr)) == -1 )
+    {
+	SetError(-4, __LINE__);
+	pLog->LogTime("Error in connect \n");
+	return false;
+    }
+
+    if (setsockopt(fSockfd, SOL_SOCKET, SO_RCVTIMEO, &timeout, 
+		   sizeof(timeout)) <0)
+	pLog->LogTime("Error setting recieve timeout\n");
+    
+    SET_DEBUG_STACK;
+    return true;
+}
+
+/**
+ ******************************************************************
+ *
+ * Function Name : OpenServer
+ *
+ * Description :
+ *
+ * Inputs : NONE
+ *
+ * Returns : NONE
+ *
+ * Error Conditions : NONE
+ * 
+ * Unit Tested on: 
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+void QueryTS::CloseServer(void)
+{
+    SET_DEBUG_STACK;
+    close(fSockfd);
+    fSockfd = -1;
+}
 /**
  ******************************************************************
  *
@@ -255,13 +313,23 @@ QueryTS::~QueryTS(void)
  */
 struct timespec QueryTS::GetTime(void)
 {
+    struct timespec rv = {0,0};
+    if(OpenServer())
+    {
+	rv = PerformQuery();
+	CloseServer();
+    }
+    return rv;
+}
+struct timespec QueryTS::PerformQuery(void)
+{
     /* 
      * Overall packet length, 
      * See: https://www.meinbergglobal.com/english/info/ntp-packet.htm
      * 12 x 32bit words for 48 bytes total. 
      */
     const int len     = 48;
-    struct timespec   rv;   // return value
+    struct timespec   rv = {0,0};   // return value
     int servlen       = sizeof(fServaddr);
     struct sockaddr *pcliaddr = (struct sockaddr *) &fServaddr;
 
@@ -288,36 +356,39 @@ struct timespec QueryTS::GetTime(void)
      * see how well this unpacks - 18-Mar-24, unpacks well into the structure
      * upto the long values. not sure what is going on there. 
      */
-    recvfrom(fSockfd, fMSG, len, 0, NULL, NULL);
-    // Do some swaps. 
-    // rootdelay and rootdispersion apparently don't need the conversion. 
-    // fMSG->rootdelay      = ntohl(fMSG->rootdelay);
-    // fMSG->rootdispersion = ntohl(fMSG->rootdispersion);
-
-    fMSG->ref[0] = ntohl(fMSG->ref[0]);
-    fMSG->ref[1] = ntohl(fMSG->ref[1]);
-    fMSG->rec[0] = ntohl(fMSG->rec[0]);
-    fMSG->rec[1] = ntohl(fMSG->rec[1]);
-    fMSG->xmt[0] = ntohl(fMSG->xmt[0]);
-    fMSG->xmt[1] = ntohl(fMSG->xmt[1]);
-
-    // Put in origin clock.  
-    fMSG->org[0] = val.Seconds();
-    fMSG->org[1] = val.Fractional();
-
-    ntp_ts tt;
-    tt.GetSystemTime();
-    fT4[0] = tt.Seconds();
-    fT4[1] = tt.Fractional();
-
-    // Calculate the offset between the host and server.
-    Calculate();
-
-    if(Debug(CObject::LOW))
+    size_t rbytes = recvfrom(fSockfd, fMSG, len, 0, NULL, NULL);
+    if (rbytes>0)
     {
-	char buffer[30];
-	strftime(buffer,30,"%m-%d-%Y  %T",localtime(&rv.tv_sec));
-	fprintf(stderr,"xmt: %s.%u\n",buffer,(unsigned)rv.tv_nsec);
+	// Do some swaps. 
+	// rootdelay and rootdispersion apparently don't need the conversion. 
+	// fMSG->rootdelay      = ntohl(fMSG->rootdelay);
+	// fMSG->rootdispersion = ntohl(fMSG->rootdispersion);
+
+	fMSG->ref[0] = ntohl(fMSG->ref[0]);
+	fMSG->ref[1] = ntohl(fMSG->ref[1]);
+	fMSG->rec[0] = ntohl(fMSG->rec[0]);
+	fMSG->rec[1] = ntohl(fMSG->rec[1]);
+	fMSG->xmt[0] = ntohl(fMSG->xmt[0]);
+	fMSG->xmt[1] = ntohl(fMSG->xmt[1]);
+
+	// Put in origin clock.  
+	fMSG->org[0] = val.Seconds();
+	fMSG->org[1] = val.Fractional();
+
+	ntp_ts tt;
+	tt.GetSystemTime();
+	fT4[0] = tt.Seconds();
+	fT4[1] = tt.Fractional();
+
+	// Calculate the offset between the host and server.
+	Calculate();
+
+	if(Debug(CObject::LOW))
+	{
+	    char buffer[30];
+	    strftime(buffer,30,"%m-%d-%Y  %T",localtime(&rv.tv_sec));
+	    fprintf(stderr,"xmt: %s.%u\n",buffer,(unsigned)rv.tv_nsec);
+	}
     }
     return rv;
 }

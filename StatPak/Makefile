@@ -6,6 +6,7 @@
 #	Modified	by	Reason
 # 	--------	--	------
 #	27-Feb-24       CBL     Original
+#       23-Mar-24       CBL     added RTGraph
 #
 ######################################################################
 #
@@ -33,10 +34,10 @@ LDFLAGS= -shared
 
 # Rules to make the object files depend on the sources.
 SRC     = 
-SRCCPP  = Average.cpp hist1D.cpp
+SRCCPP  = Average.cpp hist1D.cpp RTGraph.cpp
 SRCS    = $(SRC) $(SRCCPP)
 
-HEADERS = Average.hh hist1D.hh
+HEADERS = Average.hh hist1D.hh RTGraph.hh
 
 .cpp.o:
 	$(CPP) $(CFLAGS) -c $<
