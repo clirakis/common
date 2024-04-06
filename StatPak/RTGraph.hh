@@ -76,9 +76,13 @@ public:
      * Errors:
      *
      */
-    double MeanX(void);
+    inline double MeanX(void)  {return Mean(fX);};
 
-    double Sigma(void);
+    inline double SigmaX(void) {return Sigma(fX);};
+
+    inline double MeanY(void)  {return Mean(fY);};
+
+    inline double SigmaY(void) {return Sigma(fY);};
 
     /*!
      * Description: 
@@ -118,7 +122,7 @@ public:
      * Errors:
      *
      */
-    inline void SetLabelX(const char *label) {fLabelX = label;};
+    inline void XLabel(const char *label) {fLabelX = label;};
 
     /*!
      * Description: 
@@ -132,7 +136,8 @@ public:
      * Errors:
      *
      */
-    inline void SetLabelY(const char *label) {fLabelY = label;};
+    inline void YLabel(const char *label) {fLabelY = label;};
+
 
 
     /*!
@@ -160,5 +165,11 @@ private:
     // Data arrays. 
     vector <double> fX;
     vector <double> fY;
+
+    double Mean(vector<double> &X);
+
+    double Sigma(vector<double> &X);
+
+
 };
 #endif

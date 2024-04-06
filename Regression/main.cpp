@@ -40,6 +40,7 @@ using namespace std;
 #include "TimeUtil.hh"
 #include "hist1D.hh"
 #include "queryTimeServer.hh"
+#include "RTGraph.hh"
 
 /** Control the verbosity of the program output via the bits shown. */
 static unsigned int VerboseLevel = 0;
@@ -283,6 +284,7 @@ static void TestH1D(void)
     delete hid;
 }
 #endif
+#if 0
 static void TestTS(void)
 {
     struct timespec host_now;
@@ -340,7 +342,36 @@ static void Testntp(void)
     qts.GetTime();
     cout << qts;
 
+
+    // Check DST.
+    time_t myclock;
+    time(&myclock);
+    struct tm *local;
+    local = localtime(&myclock);
+    
+    // daylight is set IFF this timezone has a daylight, otherwise use offset
+    // raw
+    cout << "DST? " << local->tm_isdst << endl;
+
+
   
+}
+#endif
+static void TestGraph(void)
+{
+    double x,y;
+    RTGraph rtg("MyName","MyTitle");
+    rtg.XLabel("Time");
+    rtg.YLabel("Amplitude");
+    x = 0.0;
+    while (x<20.0)
+    {
+	y = sin(x/10.0 * M_PI);
+	rtg.AddPoint(x,y);
+	x += 1.0;
+    }
+    cout << rtg;
+    rtg.WriteJSON("sine.json");
 }
 /**
  ******************************************************************
@@ -376,7 +407,8 @@ int main(int argc, char **argv)
 	//TestMidnight();
 	//TestH1D();
 	//TestTS();
-	Testntp();
+	//Testntp();
+	TestGraph();
     }
     Terminate(0);
 }

@@ -83,20 +83,20 @@ RTGraph::RTGraph (const char *Name, const char *Title)
 RTGraph::~RTGraph (void)
 {
 }
-double RTGraph::MeanX(void)
+double RTGraph::Mean(vector<double> &X)
 {
-    return std::accumulate(fX.begin(), fX.end(), 0.0/fX.size());
+    return std::accumulate(X.begin(), X.end(), 0.0)/X.size();
 }
-double RTGraph::Sigma(void)
+double RTGraph::Sigma(vector<double> &X)
 {
     vector<double>::iterator it;
-    double xbar = accumulate(fX.begin(), fX.end(), 0.0/fX.size());
+    double xbar = accumulate(X.begin(), X.end(), 0.0)/X.size();
     double xsigma2 = 0.0;
-    for (it=fX.begin(); it!= fX.end(); it++)
+    for (it=X.begin(); it!= X.end(); it++)
     {
 	xsigma2 += pow((*it - xbar), 2.0);
     }
-    return sqrt(xsigma2);
+    return sqrt(xsigma2)/X.size();
 }
 
 /**
@@ -151,8 +151,8 @@ bool RTGraph::WriteJSON(const char *Filename)
 	BinData["X"]       = vecX;
 	Attribute["Name"]  = Name;
 	Attribute["Title"] = Title;
+	writer->write(Attribute, &out);
 	writer->write(BinData, &out);
-
 	out.close();
     }
 
@@ -184,8 +184,23 @@ ostream& operator<<(ostream& output, RTGraph &n)
 {
     output << "RTGraph, Name: " << n.fName
 	   << " Title: "        << n.fTitle << endl
-	   << "    size: "      << n.fX.size()
+	   << "    size: "      << n.fX.size() << endl
+	   << "     <x>: "      << n.MeanX() << " +/- " << n.SigmaX() << endl
+	   << "     <y>: "      << n.MeanY() << " +/- " << n.SigmaY() << endl
+	   << "  LabelX: "      << n.fLabelX << endl
+	   << "  LabelY: "      << n.fLabelY 
 	   << endl;
+    output << " X: " << endl;
+    for (auto & element : n.fX)
+    {
+	output << element << " ";
+    }
+    output <<endl << " Y: " << endl;
+    for (auto & element : n.fY)
+    {
+	output << element << " ";
+    }
+    output << endl;
     return output;
 }
 
