@@ -133,8 +133,8 @@ bool RTGraph::WriteJSON(const char *Filename)
 	Json::Value vecX(Json::arrayValue);
 	Json::Value vecY(Json::arrayValue);
 	Json::Value Attribute;
-	Json::Value Name(Json::string);
-	Json::Value Title(Json::string);
+	Json::Value Name(Json::stringValue);
+	Json::Value Title(Json::stringValue);
 
 	Json::StreamWriterBuilder builder;
 	builder["commentStyle"] = "None";
