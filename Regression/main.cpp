@@ -360,11 +360,11 @@ static void Testntp(void)
 static void TestGraph(void)
 {
     double x,y;
-    RTGraph rtg("MyName","MyTitle");
+    RTGraph rtg("MyName","MyTitle", 20);
     rtg.XLabel("Time");
     rtg.YLabel("Amplitude");
     x = 0.0;
-    while (x<20.0)
+    while (x<22.0)
     {
 	y = sin(x/10.0 * M_PI);
 	rtg.AddPoint(x,y);

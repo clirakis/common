@@ -33,15 +33,14 @@ public:
      * Arguments:
      *   Name - name, for finding graph
      *   Title for the graph
-     *   NPTS - number of points if pre-allocate
+     *   NPTS - number of points if pre-allocate, makes it wrap. 
      *
      * Returns:
      *
      * Errors:
      *
      */
-    RTGraph(const char *Name=NULL, const char *Title=NULL);
-
+    RTGraph(const char *Name=NULL, const char *Title=NULL,uint32_t NEntries=0);
 
     /// Default destructor
     ~RTGraph(void);
@@ -59,8 +58,7 @@ public:
      * Errors:
      *
      */
-    inline void AddPoint(double x, double y) 
-	{fX.push_back(x); fY.push_back(y);};
+    void AddPoint(double x, double y); 
 
 
 
@@ -161,6 +159,7 @@ private:
     string          fTitle;
     string          fLabelX;
     string          fLabelY;
+    uint32_t        fNEntries;
 
     // Data arrays. 
     vector <double> fX;

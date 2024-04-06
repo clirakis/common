@@ -52,12 +52,13 @@ using namespace std;
  *
  *******************************************************************
  */
-RTGraph::RTGraph (const char *Name, const char *Title)
+RTGraph::RTGraph (const char *Name, const char *Title,uint32_t NEntries)
 {
     if (Name)
 	fName  = Name;
     if (Title)
 	fTitle = Title;
+    fNEntries = NEntries;
 }
 
 /**
@@ -159,7 +160,40 @@ bool RTGraph::WriteJSON(const char *Filename)
     SET_DEBUG_STACK;
     return rv;
 }
-
+/**
+ ******************************************************************
+ *
+ * Function Name : AddPoint
+ *
+ * Description :
+ *
+ * Inputs :
+ *
+ * Returns :
+ *
+ * Error Conditions :
+ * 
+ * Unit Tested on: 
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+void RTGraph::AddPoint(double x, double y)
+{
+    SET_DEBUG_STACK;
+    if ((fNEntries>0) && (fX.size()>=fNEntries))
+    {
+	// rotate vector left and add. 
+	// do this by erasing elements. Save a little by
+	// not doing this every time
+	fX.erase(fX.begin(), fX.begin()+5);
+	fY.erase(fY.begin(), fY.begin()+5);
+    }
+    fX.push_back(x); 
+    fY.push_back(y);
+}
 /**
  ******************************************************************
  *
@@ -185,6 +219,7 @@ ostream& operator<<(ostream& output, RTGraph &n)
     output << "RTGraph, Name: " << n.fName
 	   << " Title: "        << n.fTitle << endl
 	   << "    size: "      << n.fX.size() << endl
+	   << " Entries: "      << n.fNEntries << endl
 	   << "     <x>: "      << n.MeanX() << " +/- " << n.SigmaX() << endl
 	   << "     <y>: "      << n.MeanY() << " +/- " << n.SigmaY() << endl
 	   << "  LabelX: "      << n.fLabelX << endl
