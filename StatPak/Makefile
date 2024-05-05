@@ -7,6 +7,7 @@
 # 	--------	--	------
 #	27-Feb-24       CBL     Original
 #       23-Mar-24       CBL     added RTGraph
+#       05-May-24       CBL	added in call to make doxygen files. 
 #
 ######################################################################
 #
@@ -15,7 +16,7 @@ LIBRARY = $(LIBDIR)/libStatPak.so
 #
 # Setup
 #
-COMMON  = $(DRIVE)/common
+COMMON  = $(HOME)/common
 #
 # Compilier defs.
 #
@@ -52,6 +53,9 @@ OBJS    = $(OBJSC) $(OBJSCPP)
 
 $(LIBRARY): $(OBJS) $(HEADERS)
 	$(LD) $(LDFLAGS) -o $(LIBRARY) $(OBJS)
+
+document: $(OBJSCPP)
+	doxygen StatPak.cfg
 
 # When we build all, what do we build?
 all:      $(LIBRARY) make.depend

@@ -75,6 +75,7 @@ Average::Average(void)
  */
 void Average::Reset(void)
 {
+    SET_DEBUG_STACK;
     fN    = 0; 
     fSum  = 0.0;
     fSum2 = 0.0;
@@ -112,7 +113,7 @@ void Average::Add( double val)
 /**
  ******************************************************************
  *
- * Function Name : GetSigma
+ * Function Name : Sigma
  *
  * Description : return the sigma of the array.
  *
@@ -131,6 +132,7 @@ void Average::Add( double val)
  */
 double Average::Sigma(double *avg)
 {
+    SET_DEBUG_STACK;
     double rc   = 0.0;
     double den  = ((double) fN);
     double xbar = fSum/den;
@@ -152,7 +154,7 @@ double Average::Sigma(double *avg)
  *
  * Inputs : NONE
  *
- * Returns : Avergage
+ * Returns : Average \f$ \bar{x} \f$
  *
  * Error Conditions : NONE
  * 
@@ -165,11 +167,13 @@ double Average::Sigma(double *avg)
  */
 double Average::Get(void)
 {
+    SET_DEBUG_STACK;
     return (fSum/((double)fN));
 }
 
 ostream& operator<<(ostream& output, Average &n)
 {
+    SET_DEBUG_STACK;
     double avg;
     double sigma = n.Sigma(&avg);
     output << "Average Data ----------------------------" << endl
