@@ -11,6 +11,8 @@
 #       19-May-05       CBL     Added in /usr/local/include for include path
 #       10-Feb-06       CBL     Using cpp as preprocessor with M option for
 #                               creating dependencies.
+#       06-Aug-25       CBL     something changed in how dependencies are 
+#                               dealt with. 
 ######################################################################
 # Machine specific stuff
 #
@@ -31,7 +33,7 @@ CFLAGS = -Wall -DPOSIX $(INCLUDE) $(DEFINES) $(EXT_CFLAGS)
 LDFLAGS = -L$(LIBDIR) $(LIBPATH) $(LIBS) $(EXT_LDFLAGS) -lm -lpthread -lrt
 
 # Rules to make the object files depend on the sources.
-SRCS    = $(SRC) $(SRCCPP)
+  SRCS    = $(SRC) $(SRCCPP)
 
 # Rules to make the object files depend on the sources.
 OBJSC   = ${SRC:.c=.o}
@@ -44,15 +46,27 @@ OBJS    = $(OBJSC) $(OBJSCPP)
 	$(CC) $(CFLAGS) -c $<
 
 # Rules to make dependencies. seems a little better
+# see the following: https://wiki.c2.com/?MakeDepend
+#
+DEPFILE = .depends
+DEPTOKEN = '\# MAKEDEPENDS'
+DEPFLAGS = -Y -f $(DEPFILE) -s $(DEPTOKEN) -p $(OUTDIR)/
+OBJS_O = $(foreach obj, $(OBJS), $(OUTDIR)/$(obj) )
+
 %.d: %.c
-	$(CPP) $(CFLAGS) -M $< > $@
-%.d: %.cpp
 	$(CC) $(CFLAGS) -M $< > $@
+%.d: %.cpp
+	$(CCP) $(CFLAGS) -M $< > $@
 
 DEPENDS   = ${OBJS:.o=.d} 
 
-make.depend: $(DEPENDS)
-	cat *.d > make.depend
+depend: 
+	rm -f $(DEPFILE)
+	make  $(DEPFILE)
+
+$(DEPFILE):
+	@echo $(DEPTOKEN) > $(DEPFILE)
+	makedepend $(DEPFLAGS) -- $(CFLAGS) -- $(SRCS) >&/dev/null
 
 $(LIBRARY): $(OBJS)
 	$(AR) $(ARFLAGS) $(LIBRARY) $(OBJS)
@@ -60,6 +74,8 @@ $(LIBRARY): $(OBJS)
 $(TARGET): $(OBJS) 
 	echo "External Compliation flags were $(EXT_CFLAGS) \n" 
 	$(LD) $(OBJS) $(LDFLAGS) -o $(TARGET)
+
+sinclude $(DEPFILE)
 
 makedoc:
 	doc++ -H -p -u -d ../html *.h
@@ -69,7 +85,6 @@ makedoc:
 clean:
 	\rm -f *.d
 	\rm -f *.o
-	\rm -f make.depend
 	\rm -f *.bak
 	\rm -f *~
 	\rm -f *Dict*
