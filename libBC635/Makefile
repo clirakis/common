@@ -26,5 +26,5 @@ all:      $(LIBRARY)
 include $(COMMON)/makefiles/makefile.inc
 
 #dependencies
-include make.depend 
+#include make.depend 
 # DO NOT DELETE
