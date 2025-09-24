@@ -5,27 +5,31 @@
  *
  * Author/Date : C.B. Lirakis / 09-Feb-06
  *
- * Description : Wrapper around the proj-4 projection library
- * so that we can use the Root physics vectors.
+ * Description : Wrapper around the proj projection library
  *
  * Restrictions/Limitations :
  *
  * Change Descriptions :
+ * 10-Sep-25    CBL Updated to proj9 requirements!
+ *              projPJ goes to PJ
+ *              and now must be declared as a pointer
  *
  * Classification : Unclassified
  *
- * References : https://geographiclib.sourceforge.io/1.49/C/geodesic_8h.html
+ * References : 
+ * https://geographiclib.sourceforge.io/1.49/C/geodesic_8h.html
  * http://proj4.org/index.html
+ * https://proj.org/en/stable/development/quickstart.html
  *
  *******************************************************************
  */
-#ifndef __GEODETIC_h_
-#define __GEODETIC_h_
+#ifndef __GEODETIC_hh_
+#define __GEODETIC_hh_
 #    include <stdint.h>
 /*
- * Include file from proj.4
+ * Include file from proj.9
  */
-#    include <proj_api.h>
+#    include <proj.h>
 
 /*
  * my include files.
@@ -37,16 +41,16 @@ class Geodetic
 public: // public access methods.
 
 
-    enum PROJECTION {MERCATOR=0, UTM};
+    enum PROJECTION {kMERCATOR=0, kUTM, kTEST};
 
     /*!
      * This is the constructor for the Geodetic utilities. 
-     * It represents a c++ wrapper around the proj4 library. 
+     * It represents a c++ wrapper around the proj9 library. 
      * The inputs are in decimal degrees as shown by the default. 
      */
-	Geodetic(const double &LatDegrees = 41.5, 
-		 const double &LonDegree=-71.2, 
-		 PROJECTION p=UTM);
+    Geodetic(const double &LatDegrees = 41.5, 
+	     const double &LonDegree=-71.2, 
+	     PROJECTION p=kUTM);
 
     /*!
      * This closes the proj library and cleans up after ourselves.
@@ -116,6 +120,9 @@ public: // public access methods.
     /*! Return the current projection center. */
     inline const Point &XY0(void) const {return fXY;};
 
+    /*! Regression test case from website. */
+    void TestCase(void);
+
 private:  // Private data and methods.
 
     void SetProjection(const double &LatDegrees, const double &LonDegree, 
@@ -123,7 +130,8 @@ private:  // Private data and methods.
 
     double   fLat, fLon;        // Current projection center in radians.
     Point    fXY;               // Current projection center in meters
-    projPJ   fProjection;       // Pointer to projection in use
+    PJ       *fProjection;      // Pointer to projection in use
+    PJ_CONTEXT *fC;             // Context for projection. 
     uint8_t  fZone;
 
     static Geodetic* fGeo;

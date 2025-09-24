@@ -3,5 +3,5 @@
 *.depend
 *.json
 *.log
-*.depend
+*.depends
 *~

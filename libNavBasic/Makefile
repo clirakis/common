@@ -11,6 +11,7 @@
 #	30-Oct-22	CBL     Geodetic is no longer necessary. 
 #                               system upgraded to Proj8. This is C++
 #                               based. 
+#      10-Sep-25        CBL     updated proj to V9.1
 #
 ######################################################################
 # Machine specific stuff
@@ -25,11 +26,11 @@ LIBS =
 
 # Rules to make the object files depend on the sources.
 SRC     = 
-SRCCPP  = NavPoint.cpp NavPointList.cpp NavUtility.cpp
+SRCCPP  = Geodetic.cpp NavPoint.cpp NavPointList.cpp NavUtility.cpp
 
 SRCS    = $(SRC) $(SRCCPP)
 
-HEADERS = NavPoint.hh NavPointList.hh NavUtility.hh 
+HEADERS = Geodetic.hh  NavPoint.hh NavPointList.hh NavUtility.hh 
 
 # When we build all, what do we build?
 all:      $(LIBRARY)
