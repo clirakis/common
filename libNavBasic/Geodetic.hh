@@ -26,6 +26,7 @@
 #ifndef __GEODETIC_hh_
 #define __GEODETIC_hh_
 #    include <stdint.h>
+#    include <ostream>
 /*
  * Include file from proj.9
  */
@@ -123,16 +124,19 @@ public: // public access methods.
     /*! Regression test case from website. */
     void TestCase(void);
 
+    friend std::ostream& operator << (std::ostream &os, const Geodetic&);
+
 private:  // Private data and methods.
 
     void SetProjection(const double &LatDegrees, const double &LonDegree, 
 		       PROJECTION p);
 
-    double   fLat, fLon;        // Current projection center in radians.
-    Point    fXY;               // Current projection center in meters
-    PJ       *fProjection;      // Pointer to projection in use
-    PJ_CONTEXT *fC;             // Context for projection. 
-    uint8_t  fZone;
+    double        fLat, fLon;        // Current projection center in radians.
+    Point         fXY;               // Current projection center in meters
+    PJ            *fProjection;      // Pointer to projection in use
+    PJ_CONTEXT    *fC;               // Context for projection. 
+    uint8_t       fZone;
+    std::string   *fIn, *fOut;       // Strings of in and out 
 
     static Geodetic* fGeo;
 };

@@ -55,6 +55,8 @@ Geodetic::Geodetic(const double &LatDegree, const double &LonDegree, PROJECTION 
     fGeo = this;
     fC   = NULL;
     fProjection = NULL;
+    fIn = NULL;
+    fOut = NULL;
 
     SetProjection(LatDegree, LonDegree, p);
 }
@@ -80,6 +82,8 @@ Geodetic::Geodetic(const double &LatDegree, const double &LonDegree, PROJECTION 
  */
 Geodetic::~Geodetic(void)
 { 
+    delete fIn;
+    delete fOut;
     proj_destroy(fProjection);
     proj_context_destroy(fC);
 }
@@ -125,6 +129,7 @@ void Geodetic::SetProjection(const double &LatDegree, const double &LonDegree,
     // Calculate zone, don't really need this in the EPSG format. 
     fZone = ceil((LonDegree+180.0)/6.0);
 
+
     /*
      *  Store projection center in Degrees
      */
@@ -157,6 +162,13 @@ void Geodetic::SetProjection(const double &LatDegree, const double &LonDegree,
 	break;
     }
     log->Log("# User Selection, src: %s dest: %s\n", src, dest);
+    /*
+     * store the projection data. 
+     */
+    delete fIn;
+    fIn = new string(src);
+    delete fOut;
+    fOut = new string(dest);
 
     /* Step 1 */
     fC = proj_context_create();
@@ -437,4 +449,38 @@ void Geodetic::TestCase(void)
     /* Clean up */
     proj_destroy(P);
     proj_context_destroy(C); /* may be omitted in the single threaded case */
+}
+
+/**
+ ******************************************************************
+ *
+ * Function Name : ostream overload
+ *
+ * Description : friendly output to ostream. 
+ *
+ * Inputs : NONE
+ *
+ * Returns : NONE
+ *
+ * Error Conditions : NONE
+ * 
+ * Unit Tested on: 
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+ostream& operator << (ostream &output, const Geodetic& ptr)
+{
+    SET_DEBUG_STACK;
+    output << "Geodetic projection:" << endl
+	   << "    Center Latitude: " << ptr.fLat 
+	   << " Longitude: " << ptr.fLon << endl
+	   << "    Center X: " << ptr.fXY.X() << " Y: " << ptr.fXY.Y() << endl
+	   << "    Projection In: " << *ptr.fIn  << " Out: " << *ptr.fOut << endl 
+	   << endl;
+
+    SET_DEBUG_STACK;
+    return output;
 }
