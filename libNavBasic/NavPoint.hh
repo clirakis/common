@@ -16,6 +16,9 @@
  *
  * Change Descriptions :
  * 13-Jan-18    CBL        Really need to deal with X/Y vs decimal degree
+ * 17-Oct-25    CBL        only ever store LL in these files. For Robot
+ *                         create a different set of save and put it
+ *                         into the Point class superset. 
  *
  * Classification : Unclassified
  *
@@ -42,19 +45,31 @@ public:
     enum PointFormat  {kFORMAT_NONE, kFORMAT_RADIANS, kFORMAT_DEGREES};
     /*! What type of point is this? */
     enum NavPointType {kPOINT_NONE=0, kWAYPOINT, kEVENT};
-    /**
+    /*!
+     * \brief NavPoint - constructor with XYZ input
      * the navigation point is the base class for all points created 
      * on the screen. X typically will be Longitude, and Y will typically
      * be Latitude. n is some name. 
+     * \param X - Longitude or X
+     * \param Y - Latitude or Y
+     * \param Z - in meters
+     * \param type - see above PointFormat
+     * \param n - any comments associated with this point. 
+     * \param Radians - true if input data is in radians. 
      */
     NavPoint(double X, double Y, double Z=0.0, 
 	     int type=NavPoint::kWAYPOINT,
-	     double dt=0.0, const char *n=NULL);
+	     double dt=0.0, const char *n=NULL, PointFormat fmt = kFORMAT_RADIANS);
 
-    /*! Constructor from a Point */
+    /*! \brief NavPoint - Constructor from a Point
+     * \param pt - Point input
+     * \param type - see above PointFormat
+     * \param n - any comments associated with this point. 
+     * \param Radians - true if input data is in radians.   
+     */
     NavPoint(Point& pt, int type=NavPoint::kWAYPOINT,
-	     double dt=0.0, const char *n=NULL) {
-	NavPoint(pt.X(), pt.Y(), pt.Z(), type, dt, n);
+	     double dt=0.0, const char *n=NULL, PointFormat fmt = kFORMAT_RADIANS) {
+	NavPoint(pt.X(), pt.Y(), pt.Z(), type, dt, n, fmt);
     };
     /*! Constructor from another NavPoint. */
     NavPoint(const NavPoint&);
@@ -109,7 +124,7 @@ private:
     std::string* fComment;
     /// Integration time, where applicable. 
     double       fdt;
-    /*! Set the format of the point, */
+    /*! Set the format of the point, see above enum. */
     PointFormat  fFormat;
 };
 #endif

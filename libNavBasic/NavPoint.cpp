@@ -55,10 +55,10 @@ unsigned int NavPoint::fCount = 0;
  *******************************************************************
  */
 NavPoint::NavPoint (double X, double Y, double Z, int Type,
-		    double dt, const char *n) : Point(X,Y,Z)
+		    double dt, const char *n, PointFormat fmt) : Point(X,Y,Z)
 {
     SET_DEBUG_STACK;
-    fFormat  = kFORMAT_RADIANS; /* by default, store data in radians. */
+    fFormat  = fmt;
     fComment = NULL;
     fType    = Type;
     if (n)
@@ -201,13 +201,11 @@ void NavPoint::SetData(const char *n)
 	else if (substring.compare(0,2,"X=")==0)
 	{
 	    XX = atof(substring.substr(2,substring.length()).c_str());
-	    // Convert to radians. 
 	    X(XX);
 	}
 	else if (substring.compare(0,2,"Y=")==0)
 	{
 	    XX = atof(substring.substr(2,substring.length()).c_str());
-	    // Convert to radians. 
 	    Y(XX);
 	}
 	else if (substring.compare(0,2,"Z=") == 0)

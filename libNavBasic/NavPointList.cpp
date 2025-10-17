@@ -441,6 +441,7 @@ bool NavPointList::AppendCurrent(void)
     if (fFirst)
     {
 	return Write(NULL, false);
+	fFirst = false;
     }
     else
     {
