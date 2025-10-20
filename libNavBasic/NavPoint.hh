@@ -44,7 +44,7 @@ public:
     /*! are the points saved in radians or not? */
     enum PointFormat  {kFORMAT_NONE, kFORMAT_RADIANS, kFORMAT_DEGREES};
     /*! What type of point is this? */
-    enum NavPointType {kPOINT_NONE=0, kWAYPOINT, kEVENT};
+    enum NavPointType {kPOINT_NONE=0, kWAYPOINT, kEVENT, kTRACK};
     /*!
      * \brief NavPoint - constructor with XYZ input
      * the navigation point is the base class for all points created 
@@ -58,7 +58,7 @@ public:
      * \param Radians - true if input data is in radians. 
      */
     NavPoint(double X, double Y, double Z=0.0, 
-	     int type=NavPoint::kWAYPOINT,
+	     int type=NavPointType::kWAYPOINT,
 	     double dt=0.0, const char *n=NULL, PointFormat fmt = kFORMAT_RADIANS);
 
     /*! \brief NavPoint - Constructor from a Point
@@ -67,7 +67,7 @@ public:
      * \param n - any comments associated with this point. 
      * \param Radians - true if input data is in radians.   
      */
-    NavPoint(Point& pt, int type=NavPoint::kWAYPOINT,
+    NavPoint(Point& pt, int type=NavPointType::kWAYPOINT,
 	     double dt=0.0, const char *n=NULL, PointFormat fmt = kFORMAT_RADIANS) {
 	NavPoint(pt.X(), pt.Y(), pt.Z(), type, dt, n, fmt);
     };
@@ -85,6 +85,9 @@ public:
     inline void   SetDt(double v) {fdt=v;};
     inline double GetDt(void) const {return fdt;};
     inline int    Type(void)  const {return fType;};
+
+    inline void   SetTime(time_t sec, time_t nsec) 
+	{fTime.tv_sec=sec; fTime.tv_nsec = nsec;};
 
     /*! 
      * Range
@@ -124,6 +127,7 @@ private:
     std::string* fComment;
     /// Integration time, where applicable. 
     double       fdt;
+    struct timespec fTime;
     /*! Set the format of the point, see above enum. */
     PointFormat  fFormat;
 };
