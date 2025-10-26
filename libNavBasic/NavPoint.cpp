@@ -81,7 +81,15 @@ NavPoint::NavPoint(const NavPoint& p) : Point(p.X(), p.Y(),p.Z())
     fComment = NULL;
     fType    = p.Type();
     fdt      = p.GetDt();
-    fName    = new string(p.GetName());
+    const string *name = p.GetName();
+    if (name) 
+    {
+	fName    = new string(*name);
+    }
+    else
+    {
+	fName = NULL;
+    }
 
     if (p.CommentData())
     {
@@ -331,7 +339,7 @@ bool NavPoint::SameName(const char *name)
 ostream& operator<<( ostream& output, const NavPoint &in)
 {
     SET_DEBUG_STACK;
-    char *prefix;
+    const char *prefix = (const char *)"NONE";
     
     // It is 1852 m per arc minute of latitude. 
     // This allows us to calculate our digit precision
@@ -340,10 +348,13 @@ ostream& operator<<( ostream& output, const NavPoint &in)
     switch(in.fType)
     {
     case NavPoint::kWAYPOINT:
-	prefix = (char *) "WPT";
+	prefix = (const char *) "WPT";
 	break;
     case NavPoint::kEVENT:
-	prefix = (char *) "EVT";
+	prefix = (const char *) "EVT";
+	break;
+    case NavPoint::kTRACK:
+	prefix = (const char *) "TRK";
 	break;
     }
     output.setf(ios::floatfield,ios::fixed);
@@ -351,7 +362,8 @@ ostream& operator<<( ostream& output, const NavPoint &in)
     if (in.fFormat == NavPoint::kFORMAT_RADIANS)
     {
 	/* Convert prior to output. */
-	output << prefix << NAV_SEPARATOR << "LON=" << in.X() * RadToDeg 
+	output << "NavPoint, Prefix: " 
+	       << prefix << NAV_SEPARATOR << "LON=" << in.X() * RadToDeg 
 	       << NAV_SEPARATOR << "LAT=" << in.Y() * RadToDeg;
     }
     else
@@ -359,7 +371,7 @@ ostream& operator<<( ostream& output, const NavPoint &in)
 	output << prefix << NAV_SEPARATOR << "X=" << in.X() 
 	       << NAV_SEPARATOR << "Y=" << in.Y();
     }
-    if (in.fType == NavPoint::kEVENT)
+    if ((in.fType == NavPoint::kEVENT) || (in.fType == NavPoint::kTRACK))
     {
 	output.precision(2);
 	output << NAV_SEPARATOR << "Z="

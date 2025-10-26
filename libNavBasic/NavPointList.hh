@@ -78,7 +78,11 @@ public:
     inline std::list<NavPoint*> GetList(void) {return fNavPoints;};
 
     /*! Access the filename if necessary. */
+    inline void SetFilename(const std::string& fn)
+	{delete fFilename; fFilename = new std::string(fn);};
     inline const std::string& Filename(void) const {return *fFilename;};
+
+    void SetCommentField(const std::string& comment);
 
 protected:
     /*! A list of TVector3, these are 3 dimensional and contain text. */
@@ -89,6 +93,8 @@ protected:
     bool         fIsXY;
     /*! Current filename assigned. */
     std::string* fFilename;
+    /*! Comments to place in header? */
+    std::string* fComments;
     /*! tell the program to save now. False - we are up to date. */
     bool         fSave;
     /*! Has the file ever been written to? */

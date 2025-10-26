@@ -80,7 +80,7 @@ public:
 
     void SetName(const char*);
 
-    const char* GetName(void) const {if (fName) return fName->c_str(); else return NULL;};
+    inline const std::string* GetName(void) const {return fName;};
     bool SameName(const char *);
     inline void   SetDt(double v) {fdt=v;};
     inline double GetDt(void) const {return fdt;};

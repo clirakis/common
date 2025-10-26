@@ -73,6 +73,10 @@ NavPointList::NavPointList (const char *f, int type)
 	SensorName   = (char *)"EVT";
 	suffix       = (char *)"evt";
 	break;
+    case NavPoint::kTRACK:
+	SensorName = (char *)"TRK";
+	suffix     = (char *)"trk";
+	break;
     }
     fFileName = new FileName(SensorName, suffix, One_Hour);
     if (f)
@@ -90,6 +94,7 @@ NavPointList::NavPointList (const char *f, int type)
     fNavPointCount = 0;
     fTitle    = NULL;
     fIsXY     = false;
+    fComments = NULL; // no comments at start. 
     SET_DEBUG_STACK;
 }
 
@@ -113,7 +118,7 @@ NavPointList::NavPointList (const char *f, int type)
  *
  *******************************************************************
  */
-NavPointList::~NavPointList ()
+NavPointList::~NavPointList (void)
 {
     SET_DEBUG_STACK;
     //NavPoint *pNP;
@@ -128,6 +133,7 @@ NavPointList::~NavPointList ()
     delete fFileName;
     delete fFilename;
     delete fTitle;
+    delete fComments;
     SET_DEBUG_STACK;
 }
 
@@ -355,6 +361,14 @@ bool NavPointList::WriteHeader(ofstream &output)
     {
 	output << "# Title: None" << endl;
     }
+    if (fComments)
+    {
+	output << "# Comment: " << *fComments << endl;
+    }
+    else
+    {
+	output << "# Comment: None" << endl;
+    }
     output << "# ***************************************************" << endl;
     SET_DEBUG_STACK;
     return true;
@@ -551,6 +565,8 @@ void NavPointList::Add (const NavPoint &p)
     NavPoint* m = new NavPoint( p);
     //cout << "NavPointList:Add " << p
     //<< " " << *m << endl;
+
+
     m->SetUniqueID(fNavPointCount);
     fNavPointCount++;
     fNavPoints.push_back(m);
@@ -564,6 +580,13 @@ int NavPointList::Size(void)
     SET_DEBUG_STACK;
     return fNavPoints.size();
 }
+
+void NavPointList::SetCommentField(const string& val)
+{
+    delete fComments;
+    fComments = new string(val);
+}
+
 #ifdef USE_MAIN
 int main(int argc, char **argv)
 {
