@@ -381,7 +381,7 @@ ostream& operator<<( ostream& output, const NavPoint &in)
     }
     if (in.GetName())
     {
-	output << NAV_SEPARATOR << "TITLE=" << in.GetName();
+	output << NAV_SEPARATOR << "TITLE=" << *in.GetName();
     }
     else
     {
