@@ -7,6 +7,9 @@
 # 	--------	--	------
 #	24-Feb-22       CBL     Original
 #       28-Apr-24       CBL     part of common and SO now. 
+#       02-Nov-25       CBL     breaking into smaller files. I'll 
+#                               eventually add more NMEA messages into
+#                               the mix, and want to add writing. 
 #
 ######################################################################
 # Machine specific stuff
@@ -33,10 +36,12 @@ LDFLAGS= -shared
 
 # Rules to make the object files depend on the sources.
 SRC     = 
-SRCCPP  = NMEA_GPS.cpp 
+SRCCPP  = NMEA_GPS.cpp GGA.cpp RMC.cpp VTG.cpp GSA.cpp NMEA_Position.cpp \
+	NMEA_helper.cpp
 SRCS    = $(SRC) $(SRCCPP)
 
-HEADERS = NMEA_GPS.hh
+HEADERS = NMEA_GPS.hh GGA.hh RMC.hh VTG.hh GSA.hh NMEA_Position.hh \
+	NMEA_helper.hh
 
 # When we build all, what do we build?
 all:      $(LIBRARY)
@@ -58,13 +63,10 @@ $(LIBRARY): $(OBJS) $(HEADERS)
 # When we build all, what do we build?
 all:      $(LIBRARY) 
 
-.PHONY : clean make.depend
+.PHONY : clean 
 
 clean:
 	\rm -f *.d
 	\rm -f *.o
-	\rm -f make.depend
 	\rm -f *.bak
 	\rm -f *~
-	\rm -f *Dict*
-	\rm -f $(TARGET)
