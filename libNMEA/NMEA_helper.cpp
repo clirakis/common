@@ -13,6 +13,8 @@
  * Classification : Unclassified
  *
  * References :
+ * https://receiverhelp.trimble.com/alloy-gnss/en-us/NMEA-0183messages_GGA.html
+ * 
  *
  ********************************************************************/
 // System includes.
@@ -26,6 +28,7 @@ using namespace std;
 
 // Local Includes.
 #include "debug.h"
+#include "tools.h"
 #include "NMEA_helper.hh"
 #include "Constants.h"
 
@@ -136,6 +139,26 @@ time_t DecodeDate(const char *p, struct tm *now)
     return mktime(now);
 }
 
+/**
+ ******************************************************************
+ *
+ * Function Name : 
+ *
+ * Description :
+ *
+ * Inputs :
+ *
+ * Returns :
+ *
+ * Error Conditions :
+ * 
+ * Unit Tested on: 03-Nov-25
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
 double DecodeDegMin(const char *p)
 {
     SET_DEBUG_STACK;
@@ -163,4 +186,206 @@ double DecodeDegMin(const char *p)
 
     SET_DEBUG_STACK;
     return (Degrees * DegToRad);   // Return radians
+}
+/**
+ ******************************************************************
+ *
+ * Function Name : 
+ *
+ * Description :
+ *
+ * Inputs :
+ *
+ * Returns :
+ *
+ * Error Conditions :
+ * 
+ * Unit Tested on: 03-Nov-25
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+string EncodeUTCTime(const time_t &now, uint32_t ms)
+{
+    SET_DEBUG_STACK;
+    char txt[128],str[256];
+    struct tm *val = localtime(&now);
+    strftime( txt, sizeof(txt), "%H%M%S", val);
+    snprintf( str, sizeof(str), "%s.%2.2d", txt, ms/10);
+    string rv(str);
+    return rv;
+}
+/**
+ ******************************************************************
+ *
+ * Function Name : 
+ *
+ * Description :
+ *
+ * Inputs :  Latitude in radians with sign. 
+ *
+ * Returns : string formatted in NMEA style including hemisphere. 
+ *           using 8 decimal places, down to ~1mm. 
+ *
+ * Error Conditions :
+ * 
+ * Unit Tested on: 03-Nov-25
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+string EncodeLatitude(const double &L)
+{
+    SET_DEBUG_STACK;
+    char txt[256];
+    char NS = 'N';
+
+    double Latitude = fabs(L * RadToDeg); // take the sign away
+    if (L<0.0)
+	NS = 'S';
+
+    /*
+     * Get the three fields to make it look like:
+     * 4129.0793,N
+     * DDMM.xxxx
+     * small change use upto 8 decimal places. 
+     * 
+     */
+    double deg = floor(Latitude);
+    double min = (Latitude - deg) * 60.0;
+    // move the degrees over in the field and add in the minutes 
+    deg = 100.0*deg + min;
+    // format string
+    snprintf(txt, sizeof(txt), "%12.8f,%c", deg, NS);
+
+    return string(txt);
+}
+/**
+ ******************************************************************
+ *
+ * Function Name : EncodeLongitude
+ *
+ * Description : Encode NMEA Longitude
+ *
+ * Inputs : Longitude in radians. 
+ *
+ * Returns : NMEA0183 message format with 8 decimal places (1mm)
+ *
+ * Error Conditions :
+ * 
+ * Unit Tested on: 03-Nov-25
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+string EncodeLongitude(const double &L)
+{
+    SET_DEBUG_STACK;
+    char txt[256];
+    char EW = 'E';
+
+    double Longitude = fabs(L * RadToDeg); // take the sign away
+    if (L<0.0)
+	EW = 'W';
+
+    /*
+     * Get the three fields to make it look like:
+     * 07116.4541
+     * DDDMM.xxxx
+     * small change use upto 8 decimal places. 
+     * 
+     */
+    double deg = floor(Longitude);
+    double min = (Longitude - deg) * 60.0;
+    // move the degrees over in the field and add in the minutes 
+    //deg = 100.0*deg + min;
+    uint32_t ideg = (uint32_t) deg;
+    uint32_t imin = (uint32_t) min;
+    double sec    = fabs((min - ceil(min)));
+    // format string
+    snprintf(txt, sizeof(txt), "%03d%2d%.8f,%c", ideg,imin,sec,EW);
+
+    return string(txt);
+}
+/**
+ ******************************************************************
+ *
+ * Function Name : EncodeUTCSeconds
+ *
+ * Description : return an encoded string with the number of
+ *               seconds into the current day relative to UTC. 
+ *
+ * Inputs : 
+ *        now - seconds since epoch. 
+ *        ms  - milliseconds field. 
+ *
+ * Returns :
+ *
+ * Error Conditions :
+ * 
+ * Unit Tested on: 04-Nov-25
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+string EncodeUTCSeconds(const time_t& now, float ms)
+{
+    SET_DEBUG_STACK;
+    char txt[32];
+    // get the details of the day. 
+    struct tm det;
+    localtime_r(&now, &det); // no offset
+    // Zero out h,m,s
+    det.tm_hour = 0;
+    det.tm_min  = 0;
+    det.tm_sec  = 0;
+    time_t day = mktime(&det);   // midnight
+    // set to time since midnight into the day and add on the ms. 
+    float result = (float)(now - day) + ms/1000.0;   
+    snprintf( txt, sizeof(txt), "%6.3f", result);
+    return string(txt);
+}
+/**
+ ******************************************************************
+ *
+ * Function Name : 
+ *
+ * Description :
+ *
+ * Inputs : NMEA sentance
+ *
+ * Returns : NMEA checksum of sentance provided
+ *
+ * Error Conditions : None
+ * 
+ * Unit Tested on: 04-Nov-25
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+uint8_t Checksum(const string &val)
+{
+    uint8_t rv = 0;
+    uint8_t bb;
+
+    // exclude the begin and end of sentance $ and *
+    uint32_t i = 0;
+    do
+    {
+	bb = (uint8_t)val[i];
+	if ((bb != '$') && (bb !='*'))
+	    rv ^= bb;
+	i++;
+    } while((i<val.length()) && (val[i] != '*'));  // kicks out if handed a fully formed sentance. 
+    return rv;
 }

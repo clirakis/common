@@ -21,10 +21,13 @@
 using namespace std;
 #include <string>
 #include <cmath>
+#include <sys/time.h>
 
 // Local Includes.
 #include "debug.h"
 #include "NMEA_Position.hh"
+#include "NMEA_helper.hh"
+#include "tools.h"
 
 /**
  ******************************************************************
@@ -55,12 +58,10 @@ NMEA_Position::NMEA_Position(void)
     fMilliseconds = 0.0;
     SET_DEBUG_STACK;
 }
-
-
 /**
  ******************************************************************
  *
- * Function Name : module destructor
+ * Function Name : SetUTCNow
  *
  * Description :
  *
@@ -77,12 +78,53 @@ NMEA_Position::NMEA_Position(void)
  *
  *******************************************************************
  */
+void NMEA_Position::SetUTCNow(void)
+{
+    SET_DEBUG_STACK;
+    struct timeval  now;
+    struct timezone tz;
+    gettimeofday(&now, &tz); 
+    fUTC = now.tv_sec + tz.tz_minuteswest*60;
+    fMilliseconds = now.tv_usec/100;
+}
 
 
 /**
  ******************************************************************
  *
- * Function Name : module function
+ * Function Name : 
+ *
+ * Description :
+ *
+ * Inputs :
+ *
+ * Returns :
+ *
+ * Error Conditions :
+ * 
+ * Unit Tested on: 
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+ostream& operator<<(ostream& output, const NMEA_Position &n)
+{
+
+    string UTC = EncodeUTCSeconds(n.fUTC, n.fMilliseconds);
+    output << "NMEA_Position::" << endl
+	   << "         Latitude: " << n.fLatitude * RadToDeg << endl
+	   << "        Longitude: " << n.fLongitude * RadToDeg << endl
+	   << " Seconds into day: " << UTC << endl;
+    return output;
+}
+
+
+/**
+ ******************************************************************
+ *
+ * Function Name : 
  *
  * Description :
  *

@@ -68,41 +68,6 @@ public:
     inline static size_t DataSize(void) 
 	{return (4*sizeof(uint8_t)+4*sizeof(float) + NMEA_Position::DataSize());};
 
-    inline void SetGeoidHeight(float val) {fGeoidheight = val;};
-    inline void SetAltitude(float val)    {fAltitude = val;};
-    inline void SetFix(uint8_t val)       {fFixIndicator = val;};
-    inline void SetNSat(uint8_t val)      {fSatellites = val;};
-    inline void SetHDOP(float val)        {fHDOP = val;};
-
-
-    /*! operator overload to output contents of class for inspection
-     * this data is in character format. 
-     */
-    friend ostream& operator<<(ostream& output, const GGA &n); 
-
-private:
-    /** Height of Geoid above mean sea level WGS84 */
-    float   fGeoidheight;  
-    /** altitude relative to mean geoid */ 
-    float   fAltitude;
-    /** 
-     * Fix Indicator made up of:
-     *   0 - Invalid
-     *   1 GNSS fix (SPS)
-     *   2 DGPS fix
-     *   3 PPS  fix
-     *   4 RTK
-     *   5 - UNASSIGNED
-     *   6 - DR
-     *   7 - Manual input mode
-     *   8 - Simulation Mode
-     */
-    uint8_t fFixIndicator; 
-    uint8_t fSatellites;   // number in fix.
-    uint8_t fspace1;
-    uint8_t fspace2;
-    float   fHDOP;
-};
     /*!
      * Description: 
      *   
@@ -115,5 +80,54 @@ private:
      * Errors:
      *
      */
+    inline void SetGeoidHeight(float val) {fGeoidheight = val;};
+    inline void SetAltitude(float val)    {fAltitude = val;};
+    inline void SetFix(uint8_t val)       {fFixIndicator = val;};
+    inline void SetNSat(uint8_t val)      {fSatellites = val;};
+    inline void SetHDOP(float val)        {fHDOP = val;};
+    /*!
+     * Description: 
+     *   
+     *
+     * Arguments:
+     *   
+     *
+     * Returns:
+     *
+     * Errors:
+     *
+     */
+    std::string Encode(void);
+
+    /*! operator overload to output contents of class for inspection
+     * this data is in character format. 
+     */
+    friend ostream& operator<<(ostream& output, const GGA &n); 
+
+private:
+    /** Height of Geoid above mean sea level WGS84 */
+    float    fGeoidheight;  
+    /** altitude relative to mean geoid */ 
+    float    fAltitude;
+    /** 
+     * Fix Indicator made up of:
+     *   0 - Invalid
+     *   1 GNSS fix (SPS)
+     *   2 DGPS fix
+     *   3 PPS  fix
+     *   4 RTK
+     *   5 - UNASSIGNED
+     *   6 - DR
+     *   7 - Manual input mode
+     *   8 - Simulation Mode
+     */
+    uint8_t  fFixIndicator; 
+    uint8_t  fSatellites;   // number in fix.
+    uint8_t  fspace1;
+    uint8_t  fspace2;
+    float    fHDOP;
+    float    fAge;
+    uint32_t fStationID;
+};
 
 #endif

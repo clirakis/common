@@ -62,6 +62,12 @@ public:
     inline void SetUTC(time_t val)             {fUTC = val;};
     inline void SetMilliseconds(float val)     {fMilliseconds = val;};
 
+    /*!
+     * set the internal times to the PC time
+     * in UTC. 
+     */
+    void SetUTCNow(void);
+
     /*! 
      * operator overload to output contents of class for inspection
      * this data is in character format. 
