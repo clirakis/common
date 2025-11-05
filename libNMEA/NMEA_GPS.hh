@@ -1,26 +1,3 @@
-/**
- * *********************************
-This is the Adafruit GPS library - the ultimate GPS library
-for the ultimate GPS module!
-
-Tested and works great with the Adafruit Ultimate GPS module
-using MTK33x9 chipset
-    ------> http://www.adafruit.com/products/746
-Pick one up today at the Adafruit electronics shop 
-and help support open source hardware & software! -ada
-
-Adafruit invests time and resources providing this open source code, 
-please support Adafruit and open-source hardware by purchasing 
-products from Adafruit!
-
-Written by Limor Fried/Ladyada  for Adafruit Industries.  
-BSD license, check license.txt for more information
-All text above must be included in any redistribution
-*
-* Modified to work on PI. 
-****************************************/
-// Fllybob added lines 34,35 and 40,41 to add 100mHz logging capability 
-// 20-Feb-22 CBL Modified to add in features for output, datasize and pointers
 
 #ifndef _NMEA_GPS_HH_
 #define _NMEA_GPS_HH_

@@ -26,6 +26,9 @@
  *     https://www.adafruit.com/product/790
  *     GlobalTop+MT3339+PC+Tool+Operation+Manual+v1.1.pdf
  * 
+ * https://receiverhelp.trimble.com/alloy-gnss/en-us/NMEA-0183messages_GGA.html
+ * 
+ * https://docs.fixposition.com/fd/nmea-gp-gsa
  *
  *
  *******************************************************************
@@ -107,6 +110,7 @@ uint8_t NMEA_GPS::parseHex(char c)
     SET_DEBUG_STACK;
     return 0;
 }
+
 
 bool NMEA_GPS::CheckSum(const char *line)
 {

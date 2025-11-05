@@ -260,7 +260,7 @@ string EncodeLatitude(const double &L)
     // move the degrees over in the field and add in the minutes 
     deg = 100.0*deg + min;
     // format string
-    snprintf(txt, sizeof(txt), "%12.8f,%c", deg, NS);
+    snprintf(txt, sizeof(txt), "%12.8f,%c,", deg, NS);
 
     return string(txt);
 }
@@ -309,7 +309,7 @@ string EncodeLongitude(const double &L)
     uint32_t imin = (uint32_t) min;
     double sec    = fabs((min - ceil(min)));
     // format string
-    snprintf(txt, sizeof(txt), "%03d%2d%.8f,%c", ideg,imin,sec,EW);
+    snprintf(txt, sizeof(txt), "%03d%2d%.8f,%c,", ideg,imin,sec,EW);
 
     return string(txt);
 }

@@ -229,7 +229,7 @@ string GGA::Encode(void)
     string utime = EncodeUTCSeconds(fUTC, fMilliseconds);
     string rv = string("$GPGGA,") + utime + string(",") + 
 	EncodeLatitude(fLatitude) +
-	EncodeLongitude(fLongitude) + "," +
+	EncodeLongitude(fLongitude) +
 	to_string(fFixIndicator) + "," +
 	to_string(fSatellites) + ",";
     snprintf(txt,sizeof(txt),"%4.2f",fHDOP);
