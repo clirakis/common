@@ -322,3 +322,14 @@ string RMC::Encode(void)
  *
  *******************************************************************
  */
+void RMC::SetPosition(const NMEA_Position &p)
+{
+    SET_DEBUG_STACK;
+    fPCTime    = p.PCTime();
+    fLatitude  = p.Latitude();
+    fLongitude = p.Longitude();   // In radians. 
+    fSeconds   = p.Seconds();     // epoch if decoded correctly
+    fUTC       = p.UTC();         // seconds in current day, UTC
+    fMilliseconds = p.Milli();         // ms on time of fix
+
+}

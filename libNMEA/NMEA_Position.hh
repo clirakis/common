@@ -71,6 +71,8 @@ public:
      */
     void SetUTCNow(void);
 
+    NMEA_Position& operator=(const NMEA_Position &in);
+
     /*! 
      * operator overload to output contents of class for inspection
      * this data is in character format. 

@@ -157,3 +157,15 @@ ostream& operator<<(ostream& output, const NMEA_Position &n)
  *
  *******************************************************************
  */
+NMEA_Position& NMEA_Position::operator=(const NMEA_Position &in)
+{
+    SET_DEBUG_STACK;
+    fPCTime    = in.fPCTime;
+    fLatitude  = in.fLatitude;
+    fLongitude = in.fLongitude;   // In radians. 
+    fSeconds   = in.fSeconds;     // epoch if decoded correctly
+    fUTC       = in.fUTC;         // seconds in current day, UTC
+    fMilliseconds = in.fMilliseconds;         // ms on time of fix
+    
+    return *this;
+}

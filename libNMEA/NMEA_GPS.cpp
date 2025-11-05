@@ -243,4 +243,3 @@ bool NMEA_GPS::parse(const char *nmea)
 }
 
 
-

@@ -41,7 +41,7 @@ public:
      * Speed in Knots
      */
     inline float Speed(void)  const {return fSpeed;};
-    inline void SetSpeed(float v) {fSpeed = v;};
+    inline void  SetSpeed(float v)  {fSpeed = v;};
 
     /*!
      * Course made good in degrees.
@@ -52,18 +52,24 @@ public:
      * Magnetic variation in degrees 
      */
     inline float MagVar(void) const {return fMagVariation * RadToDeg;};
-    inline void SetMagVar(float v) {fMagVariation = v*DegToRad;};
+    inline void  SetMagVar(float v) {fMagVariation = v*DegToRad;};
 
     /*!
      * Mode:
      */
     inline char  Mode(void)   const {return fMode;};
+    inline void  SetMode(char c) {fMode=c;};
     /*!
      * time difference between fix and PC time of fix. 
      */
     inline float Delta(void)  const {return fDelta;};
 
     std::string Encode(void);
+
+    /*! 
+     * Copy position data from elsewhere.
+     */
+    void SetPosition(const NMEA_Position &p);
 
     /*! Get a pointer to the beginning of the data storage. */
     inline void* DataPointer(void) {return (void*)&fPCTime;};
