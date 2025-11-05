@@ -84,8 +84,24 @@ void NMEA_Position::SetUTCNow(void)
     struct timeval  now;
     struct timezone tz;
     gettimeofday(&now, &tz); 
-    fUTC = now.tv_sec + tz.tz_minuteswest*60;
+    // fSeconds is the number of seconds since the epoch in UTC
+    fSeconds = now.tv_sec + tz.tz_minuteswest*60;
     fMilliseconds = now.tv_usec/100;
+    /*
+     * UTC is time into the current day. 
+     * figure this out by subtracting from the epoch.
+     *
+     * first go to struct tm. 
+     */
+    struct tm det;
+    localtime_r(&fSeconds, &det);
+    // Zero out h,m,s
+    det.tm_hour = 0;
+    det.tm_min  = 0;
+    det.tm_sec  = 0;
+    time_t day = mktime(&det);   // midnight
+    // fUTC is the time into the current day
+    fUTC = fSeconds - day;
 }
 
 
@@ -112,7 +128,7 @@ void NMEA_Position::SetUTCNow(void)
 ostream& operator<<(ostream& output, const NMEA_Position &n)
 {
 
-    string UTC = EncodeUTCSeconds(n.fUTC, n.fMilliseconds);
+    string UTC = EncodeUTCSeconds(n.fSeconds, n.fMilliseconds);
     output << "NMEA_Position::" << endl
 	   << "         Latitude: " << n.fLatitude * RadToDeg << endl
 	   << "        Longitude: " << n.fLongitude * RadToDeg << endl

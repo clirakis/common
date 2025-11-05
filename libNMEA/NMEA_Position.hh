@@ -22,6 +22,7 @@
 #define __NMEA_POSITION_hh_
 #  include <stdint.h>
 #  include <time.h>
+#  include "tools.h"
 
 /*!
  * NMEA_Position - all the information associated with position information
@@ -56,8 +57,8 @@ public:
 
     // Helper funcitons to make this more generic
     inline void SetPCTime(struct timespec &ts) {fPCTime = ts;};
-    inline void SetLatitude(float val)         {fLatitude = val;};
-    inline void SetLongitude(float val)        {fLongitude = val;};
+    inline void SetLatitude(float val)         {fLatitude = val*DegToRad;};
+    inline void SetLongitude(float val)        {fLongitude = val*DegToRad;};
     inline void SetTime(time_t val)            {fSeconds = val;};
     inline void SetUTC(time_t val)             {fUTC = val;};
     inline void SetMilliseconds(float val)     {fMilliseconds = val;};

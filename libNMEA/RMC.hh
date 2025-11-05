@@ -19,21 +19,51 @@
  */
 #ifndef __RMC_hh_
 #define __RMC_hh_
-#include "NMEA_Position.hh"
-
+#  include <string>
+#  include "NMEA_Position.hh"
+#  include "tools.h"
 /*!
  * RMC Recommended minimum information class
  */
 class RMC : public NMEA_Position
 {
 public:
+    /*!
+     * RMC constructor
+     */
     RMC(void);
+    /*!
+     * Given a RMC NMEA string, decode it and put it into the structure 
+     * elements. 
+     */
     bool Decode(const char *);
+    /*!
+     * Speed in Knots
+     */
     inline float Speed(void)  const {return fSpeed;};
-    inline float CMG(void)    const {return fCMG;};
-    inline float MagVar(void) const {return fMagVariation;};
+    inline void SetSpeed(float v) {fSpeed = v;};
+
+    /*!
+     * Course made good in degrees.
+     */
+    inline float CMG(void)    const {return fCMG * RadToDeg;};
+    inline void  SetCMG(float v) {fCMG = v * DegToRad;};
+    /*! 
+     * Magnetic variation in degrees 
+     */
+    inline float MagVar(void) const {return fMagVariation * RadToDeg;};
+    inline void SetMagVar(float v) {fMagVariation = v*DegToRad;};
+
+    /*!
+     * Mode:
+     */
     inline char  Mode(void)   const {return fMode;};
+    /*!
+     * time difference between fix and PC time of fix. 
+     */
     inline float Delta(void)  const {return fDelta;};
+
+    std::string Encode(void);
 
     /*! Get a pointer to the beginning of the data storage. */
     inline void* DataPointer(void) {return (void*)&fPCTime;};

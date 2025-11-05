@@ -14,6 +14,10 @@
  *
  * References :
  *
+ * https://receiverhelp.trimble.com/alloy-gnss/en-us/nmea0183-messages-rmc.html?tocpath=Output%20Messages%7CNMEA-0183%20messages%7C_____23
+ *
+ * https://docs.fixposition.com/fd/nmea-gp-rmc
+ * 
  ********************************************************************/
 // System includes.
 
@@ -194,3 +198,127 @@ bool RMC::Decode(const char *line)
     SET_DEBUG_STACK;
     return true;
 }
+/**
+ ******************************************************************
+ *
+ * Function Name :  
+ *
+ * Description : 
+ *
+ * Inputs : NONE
+ *
+ * Returns : none
+ *
+ * Error Conditions : none
+ *
+ * Unit Tested on:
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+ostream& operator<<(ostream& output, const RMC &n)
+{
+    SET_DEBUG_STACK;
+
+    string UTC = EncodeUTCTime(n.fSeconds, n.fMilliseconds);
+    output << "NMEA_Position::" << endl
+	   << "         Latitude: " << n.fLatitude * RadToDeg << endl
+	   << "        Longitude: " << n.fLongitude * RadToDeg << endl
+	   << "              UTC: " << UTC << endl
+           << "              Fix: " << (uint32_t) n.fMode << endl;
+    output << "RMC:" << endl
+	   << "      Speed (KTS): " << n.fSpeed << endl
+	   << "              CMG: " << n.fCMG * RadToDeg << endl
+	   << "        Mag. Var.: " << n.fMagVariation * RadToDeg << endl
+	   << "             Mode: " << (int) n.fMode 
+	   << endl;
+    return output;
+}
+/**
+ ******************************************************************
+ *
+ * Function Name :  Encode RMC value in NMEA format
+ *
+ * Description : 
+ *
+ * Inputs : NONE
+ *
+ * Returns : none
+ *
+ * Error Conditions : none
+ *
+ * Unit Tested on:
+ *
+ * Unit Tested by: CBL
+ *
+ * GTOP line:
+ *
+ * $GPRMC,003936.000,A,4129.0793,N,07116.4541,W,0.10,12.71,011125,,,D*42
+ *
+ *******************************************************************
+ */
+string RMC::Encode(void)
+{
+    SET_DEBUG_STACK;
+    char txt[16];
+
+    string rv("$GPRMC,");
+    string UTC = EncodeUTCTime( fSeconds, fMilliseconds);
+    rv = rv + UTC + ",A," + 
+	EncodeLatitude(fLatitude) + 
+	EncodeLongitude(fLongitude);
+
+    snprintf(txt,sizeof(txt),"%5.2f,",fSpeed);
+    rv += txt;
+    
+    snprintf(txt,sizeof(txt),"%5.2f,",fCMG*RadToDeg);
+    rv += txt;
+    
+    struct tm tme;
+    localtime_r(&fSeconds, &tme);
+    strftime( txt, sizeof(txt), "%d%m%y", &tme);
+    rv = rv + txt + ",";
+    
+    float var = fabs(fMagVariation);
+    snprintf(txt,sizeof(txt),"%3.2f,", var);
+    rv += txt;
+    
+    if(fMagVariation>0.0)
+    {
+	rv += "E,";
+    }
+    else
+    {
+	rv += "W,";
+    }
+
+    rv += fMode;
+    rv += "*";
+
+    snprintf(txt,sizeof(txt),"%2.2X",Checksum(rv));
+    rv += txt;
+
+    return rv;
+}
+/**
+ ******************************************************************
+ *
+ * Function Name :  
+ *
+ * Description : 
+ *
+ * Inputs : NONE
+ *
+ * Returns : none
+ *
+ * Error Conditions : none
+ *
+ * Unit Tested on:
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
