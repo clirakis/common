@@ -39,9 +39,9 @@ private:
 class NMEA_GPS 
 {
  public:
-    enum ErrorCodes{ERROR_NONE=0, SERIAL_OPEN_FAIL};
-    enum MessageID {MESSAGE_NONE=0,MESSAGE_GGA, MESSAGE_RMC, MESSAGE_VTG, 
-		    MESSAGE_GSA, MESSAGE_GSV, MESSAGE_LOG, MESSAGE_AWAKE};
+    enum ErrorCodes{kERROR_NONE=0, kSERIAL_OPEN_FAIL};
+    enum MessageID {kMESSAGE_NONE=0,kMESSAGE_GGA, kMESSAGE_RMC, kMESSAGE_VTG, 
+		    kMESSAGE_GSA, kMESSAGE_GSV, kMESSAGE_LOG, kMESSAGE_AWAKE};
  
     // Constructor - calls serial port open for us. 
     NMEA_GPS( void);
@@ -50,8 +50,9 @@ class NMEA_GPS
     static NMEA_GPS* GetThis(void) {return fNMEA;};
 
     inline int  ErrorCode(void) {return fErrorCode;};
-    inline bool Error(void)     {return !(fErrorCode == ERROR_NONE);};
+    inline bool Error(void)     {return !(fErrorCode == kERROR_NONE);};
     inline int  LastID(void)    {return fLastID;};
+    inline void SetLastID(MessageID m) {fLastID = m;};
     inline GGA* pGGA(void)      {return fGGA;};
     inline RMC* pRMC(void)      {return fRMC;};
     inline VTG* pVTG(void)      {return fVTG;};
@@ -81,7 +82,7 @@ private:
 
     bool paused;    
     int  fErrorCode;
-    int  fLastID;
+    MessageID  fLastID;
     bool fRecvdflag;
 };
 

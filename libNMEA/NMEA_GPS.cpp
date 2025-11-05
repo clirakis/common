@@ -86,6 +86,26 @@ NMEA_GPS::NMEA_GPS( void)
     fGSA = new GSA();
     SET_DEBUG_STACK;
 }
+/**
+ ******************************************************************
+ *
+ * Function Name : NMEA_GPS
+ *
+ * Description : Destructor
+ *
+ * Inputs :
+ *
+ * Returns :
+ *
+ * Error Conditions :
+ * 
+ * Unit Tested on: 
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
 NMEA_GPS::~NMEA_GPS(void)
 {
     SET_DEBUG_STACK;
@@ -112,6 +132,26 @@ uint8_t NMEA_GPS::parseHex(char c)
 }
 
 
+/**
+ ******************************************************************
+ *
+ * Function Name : 
+ *
+ * Description : 
+ *
+ * Inputs :
+ *
+ * Returns :
+ *
+ * Error Conditions :
+ * 
+ * Unit Tested on: 
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
 bool NMEA_GPS::CheckSum(const char *line)
 {
     SET_DEBUG_STACK;
@@ -139,6 +179,26 @@ bool NMEA_GPS::CheckSum(const char *line)
     SET_DEBUG_STACK;
     return true;
 }
+/**
+ ******************************************************************
+ *
+ * Function Name : 
+ *
+ * Description : 
+ *
+ * Inputs :
+ *
+ * Returns :
+ *
+ * Error Conditions :
+ * 
+ * Unit Tested on: 
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
 bool NMEA_GPS::parse(const char *nmea) 
 {
     SET_DEBUG_STACK;
@@ -151,30 +211,30 @@ bool NMEA_GPS::parse(const char *nmea)
     // look for a few common sentences
     if (strstr(nmea, "$GPGGA")) {
 	// found GGA
-	fLastID = MESSAGE_GGA; // Position
+	fLastID = kMESSAGE_GGA; // Position
 	rc = fGGA->Decode(nmea);
     }
     else if (strstr(nmea, "$GPRMC")) 
     {
-	fLastID = MESSAGE_RMC; // Recommended navigation data.
+	fLastID = kMESSAGE_RMC; // Recommended navigation data.
 	rc = fRMC->Decode(nmea);
     }
     else if (strstr(nmea, "$GPVTG"))
     {
 	// Course and speed. 
-	fLastID = MESSAGE_VTG;
+	fLastID = kMESSAGE_VTG;
 	rc = fVTG->Decode(nmea);
     }
     else if (strstr(nmea, "$GPGSA"))
     {
 	// Active satellite data.
-	fLastID = MESSAGE_GSA;
+	fLastID = kMESSAGE_GSA;
 	rc = fGSA->Decode(nmea);
     }
     else if (strstr(nmea, "$GPGSV"))
     {
 	// GNSS Satellites in view.
-	fLastID = MESSAGE_GSV;
+	fLastID = kMESSAGE_GSV;
 	rc = true;
     }
     SET_DEBUG_STACK;
