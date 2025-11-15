@@ -58,8 +58,8 @@ class NMEA_GPS
     inline VTG* pVTG(void)      {return fVTG;};
     inline GSA* pGSA(void)      {return fGSA;};
 
-    // See if anything is available. 
-    bool Read(void);
+
+    bool parse(const char *);
 
     
 private:
@@ -69,7 +69,6 @@ private:
     uint8_t parseResponse(char *response);
     uint8_t parseHex(char c);
     bool parseNMEA(char *response);    
-    bool parse(const char *);
     bool CheckSum(const char *line);
     bool ParseGGA(const char *line);
     bool ParseRMC(const char *line);
