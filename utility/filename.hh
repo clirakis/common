@@ -43,6 +43,11 @@ public:
 	     const struct timespec &update = Zero, ostream *output=NULL);
     /// Destructor for filename class to make sure cleanup exists. 
     ~FileName();
+
+    /**
+     * Return the currently applied filespec. 
+     */
+    inline const char *GetCurrentFilespec(void) {return Filespec;};
     /**
      *  A method to get the fully constructed and qualified name. 
      * Kind of raw with no real checks of any kind. 
