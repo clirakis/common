@@ -1028,9 +1028,9 @@ bool SharedMem2::PutData(double Val)
 }
 /********************************************************************
  *
- * Function Name : PutData
+ * Function Name : GetData
  *
- * Description : Put the double data in the header. 
+ * Description : Get the double data in the header. 
  *
  * Inputs : none
  *
@@ -1100,7 +1100,7 @@ double SharedMem2::GetData(void)
  * Unit Tested by: CBL
  *
  ********************************************************************/
-bool SharedMem2::PutData(void *UserData)
+bool SharedMem2::PutData(const void *UserData)
 {
     SET_DEBUG_STACK;
     CLogger *pLogger = CLogger::GetThis();

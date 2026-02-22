@@ -14,6 +14,9 @@
  * Restrictions/Limitations :
  *
  * Change Descriptions :
+ * 22-Feb-26   CBL    changed PutData to a const input since it is 
+ *                    technically only copied into the SM segment 
+ *                    and the memcpy is const
  *
  * Classification : Unclassified
  *
@@ -92,7 +95,7 @@ public:
      * This takes in a pointer to the user data stream and copies it
      * to the shared memory segment. 
      */
-    bool PutData(void *UserData = 0);
+    bool PutData(const void *UserData = 0);
     /**
      * Get a copy of the pointer to the user SM segment. 
      * The user is responsible for locks!
