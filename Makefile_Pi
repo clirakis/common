@@ -31,9 +31,6 @@ $(MYLIB)/libutility.a:
 $(MYLIB)/libNavBasic.a:
 	\cd $(COMMON)/libNavBasic; make
 
-$(MYLIB)/libRT_Tools.so:
-	\cd $(COMMON)/RT_Tools; make
-
 $(MYLIB)/libStatPak.so:
 	\cd $(COMMON)/StatPak; make
 
