@@ -69,9 +69,7 @@ $(MYLIB)/libNMEA.so:
 
 
 clean:
-	\cd $(COMMON)/libBC635; make clean
 	\cd $(COMMON)/iolib; make clean
-	\cd $(COMMON)/Keithley; make clean
 	\cd $(COMMON)/GPIB; make clean
 	\cd $(COMMON)/HP; make clean
 	\cd $(COMMON)/NavLib; make clean
