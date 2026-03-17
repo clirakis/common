@@ -31,9 +31,6 @@ $(MYLIB)/libutility.a:
 $(MYLIB)/libNavBasic.a:
 	\cd $(COMMON)/libNavBasic; make
 
-$(MYLIB)/libStatPak.so:
-	\cd $(COMMON)/StatPak; make
-
 $(MYLIB)/libNMEA.so:
 	\cd $(COMMON)/libNMEA; make
 
@@ -43,6 +40,4 @@ clean:
 	\cd $(COMMON)/utility; make clean
 	\cd $(COMMON)/libNavBasic; make clean
 	\cd $(COMMON)/SignalProcessing; make clean
-	\cd $(COMMON)/RT_Tools; make clean
-	\cd $(COMMON)/StatPak; make clean
 	\cd $(COMMON)/libNMEA; make clean
