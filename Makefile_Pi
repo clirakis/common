@@ -1,0 +1,86 @@
+##################################################################
+#
+#	master Makefile for libraries  using gcc on Linux. 
+#
+#
+#	Modified	by	Reason
+# 	--------	--	------
+#       16-Sep-17	CBL	Original, do clean and full build 
+# 				of libraries. 
+#       14-Jan-23       CBL     Added in libDSA602
+#       21-Dec-23       CBL     Added in libSignal
+#       06-Mar-24       CBL     libRT_Tools and libStatPak
+#       19-May-24       CBL     added libNMEA parsing tools. 
+#       17-Mar-26       CBL     Makefile for Pi, don't need it all
+#
+##################################################################
+
+MYLIB = $(HOME)/lib_Linux
+COMMON = $(HOME)/common
+#
+all: $(MYLIB)/libio.a $(MYLIB)/libutility.a $(MYLIB)/libNavBasic.a 
+	$(MYLIB)/libSignal.so $(MYLIB)/libRT_Tools.so $(MYLIB)/libStatPak.so \
+	$(MYLIB)/libNMEA.so
+
+$(MYLIB)/libio.a:
+	\cd $(COMMON)/iolib; make
+
+$(MYLIB)/libKeithly.a: 
+	\cd $(COMMON)/Keithley; make
+
+$(MYLIB)/libmygpib.a:
+	\cd $(COMMON)/GPIB; make
+
+$(MYLIB)/libhp.a:
+	\cd $(COMMON)/HP; make
+
+$(MYLIB)/libNav.a:
+	\cd $(COMMON)/NavLib; make
+
+$(MYLIB)/libTSIP.a:
+	\cd $(COMMON)/libTSIP; make
+
+$(MYLIB)/libutility.a:
+	\cd $(COMMON)/utility; make
+
+$(MYLIB)/libBC635.a:
+	\cd $(COMMON)/libBC635; make
+
+$(MYLIB)/libNavBasic.a:
+	\cd $(COMMON)/libNavBasic; make
+
+$(COMMON)/nmealib/lib/libnmea.a:
+	\cd $(COMMON)/nmealib; make
+
+$(MYLIB)/libDSA602.a:
+	\cd $(COMMON)/DSA602; make
+
+$(MYLIB)/libSignal.so:
+	\cd $(COMMON)/SignalProcessing; make
+
+$(MYLIB)/libRT_Tools.so:
+	\cd $(COMMON)/RT_Tools; make
+
+$(MYLIB)/libStatPak.so:
+	\cd $(COMMON)/StatPak; make
+
+$(MYLIB)/libNMEA.so:
+	\cd $(COMMON)/libNMEA; make
+
+
+clean:
+	\cd $(COMMON)/libBC635; make clean
+	\cd $(COMMON)/iolib; make clean
+	\cd $(COMMON)/Keithley; make clean
+	\cd $(COMMON)/GPIB; make clean
+	\cd $(COMMON)/HP; make clean
+	\cd $(COMMON)/NavLib; make clean
+	\cd $(COMMON)/libTSIP; make clean
+	\cd $(COMMON)/utility; make clean
+	\cd $(COMMON)/nmealib; make clean
+	\cd $(COMMON)/libNavBasic; make clean
+	\cd $(COMMON)/DSA602; make clean
+	\cd $(COMMON)/SignalProcessing; make clean
+	\cd $(COMMON)/RT_Tools; make clean
+	\cd $(COMMON)/StatPak; make clean
+	\cd $(COMMON)/libNMEA; make clean
