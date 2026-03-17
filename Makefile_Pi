@@ -18,8 +18,7 @@
 MYLIB = $(HOME)/lib_Linux
 COMMON = $(HOME)/common
 #
-all: $(MYLIB)/libio.a $(MYLIB)/libutility.a $(MYLIB)/libNavBasic.a 
-	$(MYLIB)/libRT_Tools.so $(MYLIB)/libStatPak.so \
+all: $(MYLIB)/libio.a $(MYLIB)/libutility.a $(MYLIB)/libNavBasic.a \
 	$(MYLIB)/libNMEA.so
 
 $(MYLIB)/libio.a:
