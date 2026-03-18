@@ -421,7 +421,9 @@ bool H5Logger::WriteDataTags(const char *TagNames)
 	    // Create a simple dataspace
 	    DataSpace    DS_Strings( RANK, dims);
 
-	    StrType strdatatype(PredType::C_S1, (const size_t )kSSIZ); 
+	    // 18-Mar-26 change
+	    //StrType strdatatype(PredType::C_S1, (const size_t )kSSIZ); 
+	    StrType strdatatype(PredType::C_S1, strlen(Names));
 
 	    /*
 	     * Create the dataset
