@@ -12,6 +12,8 @@
  * printError is replaced by printErrorStack for versions > 1.10.2
  * All the catch really needed to be (const whatever &error)
  *
+ * 18-Mar-26 Error in limiting namesize
+ * 
  * Classification : Unclassified
  *
  * References : https://support.hdfgroup.org/HDF5/doc/cpplus_RM/classes.html
@@ -390,13 +392,16 @@ bool H5Logger::WriteDataTags(const char *TagNames)
 {
     SET_DEBUG_STACK;
     ClearError(__LINE__);
-
+#if 0
     char Names[kSSIZ];
 
     /* Make a local copy of the names array for storing in the file. */
     memset(Names, 0, kSSIZ);
     strncpy(Names, TagNames, kSSIZ);
-
+#else
+    // 18-Mar-26 fix
+    char *Names=strdup(TagNames);
+#endif
     fVariableNames = new Split(TagNames,':');
 
     if (fVariableNames->NTokens()>0)
@@ -458,6 +463,7 @@ bool H5Logger::WriteDataTags(const char *TagNames)
 	SetError(-5, __LINE__);
 	return false;
     }
+    free(Names);
     return true;
 }
 
