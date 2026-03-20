@@ -495,7 +495,7 @@ bool H5Logger::ReadDataTags(void)
 {
     SET_DEBUG_STACK;
     ClearError(__LINE__);
-    char Names[kSSIZ];
+    char Names[kNAMESIZ];
 
     try
     {
@@ -506,8 +506,10 @@ bool H5Logger::ReadDataTags(void)
 	 */
 	DataSpace filespace = dataset.getSpace();
 
-	StrType strdatatype(PredType::C_S1, (const size_t )kSSIZ); 
-	memset (Names, 0, kSSIZ);
+	//StrType strdatatype(PredType::C_S1, (const size_t )kNAMESIZ); 
+	//memset (Names, 0, kSSIZ);
+	StrType strdatatype(PredType::C_S1, sizeof(Names)); 
+	memset (Names, 0, sizeof(Names));
 	dataset.read( Names, strdatatype);
 
 	fVariableNames = new Split(Names,':');

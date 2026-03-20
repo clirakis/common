@@ -177,6 +177,7 @@ private:
      */
     static const size_t kCOLS = 4;
     static const size_t kSSIZ = 80;
+    static const size_t kNAMESIZ = 2048;
     /*! 
      * Actual data stored for the user header. 
      */
