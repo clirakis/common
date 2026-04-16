@@ -166,7 +166,6 @@ bool RMC::Decode(const char *line)
 		break;
 	    case 8:
 		fCMG = stof(token);
-		cout << "CMG: " << token << " " << fCMG << endl;
 		break;
 	    case 9:
 		/*
