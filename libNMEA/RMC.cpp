@@ -26,6 +26,9 @@ using namespace std;
 #include <string>
 #include <cmath>
 #include <cstring>
+#include <string>
+#include <sstream>
+#include <vector>
 
 // Local Includes.
 #include "debug.h"
@@ -114,7 +117,7 @@ bool RMC::Decode(const char *line)
     struct tm now;
     // Capture the PC time of the message. 
     clock_gettime( CLOCK_REALTIME, &fPCTime);
-
+#if 0
     // found RMC
     char *p = (char *) line;
 
@@ -195,8 +198,125 @@ bool RMC::Decode(const char *line)
 	/* Super simple LPF */
 	fDelta = k*fDelta + (1.0-k)*dt;
     }
+#else
+    string         token;
+    istringstream  sstream(line);
+
+    // Clear out contents
+    Clear();
+
+    // loop over all fields and put the result into token. 
+    uint32_t i = 0;
+    while (getline(sstream, token, ','))
+    {
+        cout << i << " " << token << " " << token.size() << endl;
+	if(token.size()>0)
+	{
+	    switch(i)
+	    {
+	    case 0:
+		// Should be the $GPRMC 
+		break;
+	    case 1:
+		// Time field
+		/*
+		 * Return the seconds into the UTC day AND
+		 * fill H,M,S portion of struct time.
+		 * The remainder will be filled below 
+		 */
+		fUTC     = atof(token.c_str());
+		fSeconds = DecodeUTCFixTime( token.c_str(), &fMilliseconds, &now);
+		break;
+	    case 2:
+		fMode = token[0];
+		break;
+	    case 3:
+		fLatitude = DecodeDegMin(token.c_str());
+		break;
+	    case 4:
+		if (token[0] == 'S') fLatitude *= -1.0;
+		break;
+	    case 5:
+		fLongitude = DecodeDegMin(token.c_str());
+		break;
+	    case 6:
+		if (token[0] == 'W') fLongitude *= -1.0;
+		break;
+	    case 7:
+		fSpeed = stof(token);
+		break;
+	    case 8:
+		fCMG = stof(token);
+		cout << "CMG: " << token << " " << fCMG << endl;
+		break;
+	    case 9:
+		/*
+		 * Pass in the partially filled UTC message, from above
+		 * H,M,S should be filled. 
+		 * This decode should provide DDMMYY
+		 */
+		fSeconds = DecodeDate(token.c_str(), &now);
+		/* PC Time is local, convert to UTC */
+		float dt   = (float) (fPCTime.tv_sec - fSeconds + timezone);
+		dt  -= fMilliseconds/100.0;
+		tmp     = fPCTime.tv_nsec;
+		tmp     /= 1.0e9;
+		dt  += tmp;
+		/* Super simple LPF */
+		fDelta = k*fDelta + (1.0-k)*dt;
+		break;
+	    }
+	}
+	i++;
+    }
+
+
+#endif
     SET_DEBUG_STACK;
     return true;
+}
+/**
+ ******************************************************************
+ *
+ * Function Name :  
+ *
+ * Description : 
+ *
+ * Inputs : NONE
+ *
+ * Returns : none
+ *
+ * Error Conditions : none
+ *
+ * Unit Tested on:
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+void RMC::Clear(void)
+{
+    SET_DEBUG_STACK;
+    /** difference between PC time and GPS time  in seconds */
+    fDelta = 0.0;
+    /**
+     * Speed in knots
+     */
+    fSpeed = 0.0;
+    /**
+     * Course made good
+     */
+    fCMG = 0.0; 
+    /**
+     * Magnetic Variation. 
+     */
+    fMagVariation = 0.0;
+    /**
+     * FIX MODE
+     */
+    fMode = 'V';
+    memset(fPlaceholder, 0, 3);
 }
 /**
  ******************************************************************
@@ -230,9 +350,9 @@ ostream& operator<<(ostream& output, const RMC &n)
            << "              Fix: " << (uint32_t) n.fMode << endl;
     output << "RMC:" << endl
 	   << "      Speed (KTS): " << n.fSpeed << endl
-	   << "              CMG: " << n.fCMG * RadToDeg << endl
-	   << "        Mag. Var.: " << n.fMagVariation * RadToDeg << endl
-	   << "             Mode: " << (int) n.fMode 
+	   << "              CMG: " << n.fCMG << endl
+	   << "        Mag. Var.: " << n.fMagVariation << endl
+	   << "             Mode: " << n.fMode 
 	   << endl;
     return output;
 }

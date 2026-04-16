@@ -66,6 +66,11 @@ public:
 
     std::string Encode(void);
 
+    /*!
+     * Clear out contents
+     */
+    void Clear(void);
+
     /*! 
      * Copy position data from elsewhere.
      */
