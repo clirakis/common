@@ -9,6 +9,7 @@
  * Restrictions/Limitations :
  *
  * Change Descriptions :
+ * 16-Apr-26 changed how decoding is done and added a clear function. 
  *
  * Classification : Unclassified
  *
@@ -51,6 +52,7 @@ using namespace std;
 #include <string>
 #include <cmath>
 #include <cstring> 
+#include <sstream>
 
 // Local Includes.
 #include "debug.h"
@@ -82,11 +84,7 @@ using namespace std;
 VTG::VTG(void)
 {
     SET_DEBUG_STACK;
-    fTrue       = 0.0;  // Course True
-    fMagnetic   = 0.0;  // course magnetic
-    fSpeedKnots = 0.0;
-    fSpeedKPH   = 0.0; 
-    fMode       = 'N';  // Data no set
+    Clear();
     SET_DEBUG_STACK;
 }
 
@@ -138,38 +136,68 @@ VTG::~VTG (void)
 bool VTG::Decode(const char *line)
 {
     SET_DEBUG_STACK;
-    char *p = (char *) line;
+    string         token, token2;
+    istringstream  sstream(line);
+    istringstream  ss2;
 
-    p = strchr(p, ',')+1;
-    fTrue = atof(p) * DegToRad;      // Course True, stored as radians
 
-    p = strchr(p, ',')+1;
-    if (*p != 'T')
-	return false;
+    // loop over all fields and put the result into token. 
+    uint32_t i = 0;
+    while (getline(sstream, token, ','))
+    {
+        //cout << i << " " << token << " " << token.size() << endl;
+	if(token.size()>0)
+	{
+	    switch(i)
+	    {
+	    case 0:
+		// Should be VTG preamble. 
+		break;
+	    case 1:
+		// CMG True
+		fTrue = stof(token) * DegToRad;
+		break;
+	    case 2:
+		// should be T meaning true
+		if (token[0] != 'T')
+		    return false;
+		break;
+	    case 3:
+		fMagnetic = stof(token) * DegToRad; // CMG
+		break;
+	    case 4:
+		if (token[0] != 'M')
+		    return false;
+		break;
+	    case 5:
+		fSpeedKnots = stof(token);
+		break;
+	    case 6:
+		if (token[0] != 'N')
+		    return false;
+		break;
+	    case 7:
+		fSpeedKPH = stof(token);
+		break;
+	    case 8:
+		if (token[0] != 'K')
+		    return false;
+		break;
+	    case 9:
+		ss2.str(token);
+		getline(ss2, token2, '*');
 
-    p = strchr(p, ',')+1;
-    fMagnetic = atof(p) * DegToRad;  // course magnetic, stored as radians
+		// mode and no space checksum
+		fMode = token2[0];
 
-    p = strchr(p, ',')+1;
-    if (*p != 'M')
-	return false;
-
-    p = strchr(p, ',')+1;
-    fSpeedKnots = atof(p);
-
-    p = strchr(p, ',')+1;
-    if (*p != 'N')
-	return false;
-
-    p = strchr(p, ',')+1;
-    fSpeedKPH = atof(p); 
-
-    p = strchr(p, ',')+1;
-    if (*p != 'K')
-	return false;
-
-    p = strchr(p, ',')+1;
-    fMode = *p;
+		// Checksum FIXME
+		break;
+	    default:
+		break;
+	    }
+	}
+	i++;
+    }
     SET_DEBUG_STACK;
     return true;
 }
@@ -342,6 +370,7 @@ string VTG::ModeStr(void) const
 {
     SET_DEBUG_STACK;
     string rv;
+    //cout << fMode << endl;
     switch(fMode)
     {
     case kAUTONOMOUS:
@@ -365,4 +394,35 @@ string VTG::ModeStr(void) const
 	break;
     }
     return rv;
+}
+
+/**
+ ******************************************************************
+ *
+ * Function Name :  Clear
+ *
+ * Description : 
+ *
+ * Inputs : NONE
+ *
+ * Returns : none
+ *
+ * Error Conditions : none
+ *
+ * Unit Tested on: 16-Apr-26
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+void VTG::Clear(void)
+{
+    SET_DEBUG_STACK;
+    fTrue       = 0.0;  // Course True
+    fMagnetic   = 0.0;  // course magnetic
+    fSpeedKnots = 0.0;
+    fSpeedKPH   = 0.0; 
+    fMode       = 'N';  // Data no set
+    SET_DEBUG_STACK;
 }

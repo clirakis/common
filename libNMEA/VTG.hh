@@ -10,6 +10,7 @@
  * Restrictions/Limitations :
  *
  * Change Descriptions :
+ * 16-Apr-26 changed how decoding is done and added a clear function. 
  *
  * Classification : Unclassified
  *
@@ -31,7 +32,8 @@ public:
      */
     VTG(void);
     ~VTG(void);
-    enum MODES{kAUTONOMOUS=0, kDIFFERENTIAL, kDR, kMANUAL, kSIMULATION, kNONE};
+    enum MODES{kAUTONOMOUS='A', kDIFFERENTIAL='D', kDR='E', 
+	       kMANUAL='M', kSIMULATION='S', kNONE='N'};
 
     bool Decode(const char *);
     inline float True(void)  const {return fTrue;};
@@ -54,6 +56,8 @@ public:
 
     string Encode(void);
     std::string ModeStr(void) const;
+
+    void Clear(void);
 
     /*! operator overload to output contents of class for inspection
      * this data is in character format. 

@@ -28,7 +28,6 @@ using namespace std;
 #include <cstring>
 #include <string>
 #include <sstream>
-#include <vector>
 
 // Local Includes.
 #include "debug.h"
@@ -115,92 +114,12 @@ bool RMC::Decode(const char *line)
     SET_DEBUG_STACK;
     double tmp;
     struct tm now;
+    float dt;
     // Capture the PC time of the message. 
     clock_gettime( CLOCK_REALTIME, &fPCTime);
-#if 0
-    // found RMC
-    char *p = (char *) line;
-
-    // get time
-    p = strchr(p, ',')+1;
-    /*
-     * Return the seconds into the UTC day AND
-     * fill H,M,S portion of struct time.
-     * The remainder will be filled below 
-     */
-    fUTC     = atof(p);
-    fSeconds = DecodeUTCFixTime( p, &fMilliseconds, &now);
-
-    p = strchr(p, ',')+1;
-    fMode = p[0];
-#if 0
-    //if (p[0] == 'A') 
-//	fix = true;
-    else if (p[0] == 'V')
-	fix = false;
-    else
-	return false;
-#endif
-    // parse out latitude
-    p = strchr(p, ',')+1;
-    if (',' != *p)
-    {
-	fLatitude = DecodeDegMin(p);
-    }
-    
-    p = strchr(p, ',')+1;
-    if (',' != *p)
-    {
-	if (p[0] == 'S') fLatitude *= -1.0;
-    }
-    
-    // parse out longitude
-    p = strchr(p, ',')+1;
-    if (',' != *p)
-    {
-	fLongitude = DecodeDegMin(p);
-    }
-    
-    p = strchr(p, ',')+1;
-    if (',' != *p)
-    {
-	if (p[0] == 'W') fLongitude *= -1.0;
-    }
-    // speed
-    p = strchr(p, ',')+1;
-    if (',' != *p)
-    {
-	fSpeed = atof(p);
-    }
-    
-    // angle
-    p = strchr(p, ',')+1;
-    if (',' != *p)
-    {
-	fCMG = atof(p);
-    }
-    
-    p = strchr(p, ',')+1;
-    if (',' != *p)
-    {
-	/*
-	 * Pass in the partially filled UTC message, from above
-	 * H,M,S should be filled. 
-	 * This decode should provide DDMMYY
-	 */
-	fSeconds = DecodeDate(p, &now);
-	/* PC Time is local, convert to UTC */
-	float dt   = (float) (fPCTime.tv_sec - fSeconds + timezone);
-	dt  -= fMilliseconds/100.0;
-	tmp     = fPCTime.tv_nsec;
-	tmp     /= 1.0e9;
-	dt  += tmp;
-	/* Super simple LPF */
-	fDelta = k*fDelta + (1.0-k)*dt;
-    }
-#else
-    string         token;
+    string         token, token2;
     istringstream  sstream(line);
+    istringstream  ss2;
 
     // Clear out contents
     Clear();
@@ -209,7 +128,7 @@ bool RMC::Decode(const char *line)
     uint32_t i = 0;
     while (getline(sstream, token, ','))
     {
-        cout << i << " " << token << " " << token.size() << endl;
+        //cout << i << " " << token << " " << token.size() << endl;
 	if(token.size()>0)
 	{
 	    switch(i)
@@ -228,7 +147,7 @@ bool RMC::Decode(const char *line)
 		fSeconds = DecodeUTCFixTime( token.c_str(), &fMilliseconds, &now);
 		break;
 	    case 2:
-		fMode = token[0];
+		fMode = token[0];  // Active or Void
 		break;
 	    case 3:
 		fLatitude = DecodeDegMin(token.c_str());
@@ -257,7 +176,7 @@ bool RMC::Decode(const char *line)
 		 */
 		fSeconds = DecodeDate(token.c_str(), &now);
 		/* PC Time is local, convert to UTC */
-		float dt   = (float) (fPCTime.tv_sec - fSeconds + timezone);
+		dt   = (float) (fPCTime.tv_sec - fSeconds + timezone);
 		dt  -= fMilliseconds/100.0;
 		tmp     = fPCTime.tv_nsec;
 		tmp     /= 1.0e9;
@@ -265,13 +184,25 @@ bool RMC::Decode(const char *line)
 		/* Super simple LPF */
 		fDelta = k*fDelta + (1.0-k)*dt;
 		break;
+	    case 10:
+		// Magnetic Variation degrees
+		fMagVariation = stof(token);
+		break;
+	    case 11:
+		// Magnetic Variation followed by *checksum
+		ss2.str(token);
+		getline(ss2, token2, '*');
+		if (token2[0] == 'W')
+		    fMagVariation *= -1.0;
+		// FIXME
+		break;
+ 	    default:
+ 		// do nothing
+ 		break;
 	    }
 	}
 	i++;
     }
-
-
-#endif
     SET_DEBUG_STACK;
     return true;
 }

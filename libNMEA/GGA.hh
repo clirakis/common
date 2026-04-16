@@ -99,6 +99,11 @@ public:
      */
     std::string Encode(void);
 
+    /*!
+     * clear contents.
+     */
+    void Clear(void);
+
     /*! operator overload to output contents of class for inspection
      * this data is in character format. 
      */

@@ -9,6 +9,7 @@
  * Restrictions/Limitations :
  *
  * Change Descriptions :
+ * 16-Apr-26 Modified to use different decoding method. 
  *
  * Classification : Unclassified
  *
@@ -23,6 +24,7 @@ using namespace std;
 #include <string>
 #include <cmath>
 #include <cstring> 
+#include <sstream>
 
 // Local Includes.
 #include "debug.h"
@@ -53,13 +55,7 @@ using namespace std;
 GGA::GGA(void) : NMEA_Position()
 {
     SET_DEBUG_STACK;
-    fGeoidheight  = 0.0;
-    fAltitude     = 0.0;
-    fFixIndicator = 0;
-    fSatellites   = 0;
-    fHDOP         = 0.0;
-    fAge          = 0.0;
-    fStationID    = 0;
+    Clear();
     SET_DEBUG_STACK;
 }
 /**
@@ -91,76 +87,85 @@ bool GGA::Decode(const char *line)
      * Capture the PC time of the message.
      */
     clock_gettime( CLOCK_REALTIME, &fPCTime);
+    string         token, token2;
+    istringstream  sstream(line);
+    istringstream  ss2;
 
-    char *p = (char *) line;
+    // Clear out contents
+    Clear();
 
-    // get time
-    p = strchr(p, ',')+1;
+    // loop over all fields and put the result into token. 
+    uint32_t i = 0;
+    while (getline(sstream, token, ','))
+    {
+        //cout << i << " " << token << " " << token.size() << endl;
+	if(token.size()>0)
+	{
+	    switch(i)
+	    {
+	    case 0:
+		// Should be GGA preamble. 
+		break;
+	    case 1:
+		// Time field
+		fUTC = stoi(token);
+		fSeconds = DecodeUTCFixTime( token.c_str(), &fMilliseconds, NULL);
+		break;
+	    case 2:
+		fLatitude = DecodeDegMin(token.c_str());
+		break;
+	    case 3:
+		if (token[0] == 'S') fLatitude *= -1.0;
+		break;
+	    case 4:
+		fLongitude = DecodeDegMin(token.c_str());
+		break;
+	    case 5:
+		if (token[0] == 'W') fLongitude *= -1.0;
+		break;
+	    case 6:
+		fFixIndicator = stoi(token);
+		break;
+	    case 7:
+		fSatellites = stoi(token);
+		break;
+	    case 8:
+		fHDOP = stof(token);
+		break;
+	    case 9:
+		fAltitude = stof(token);
+		break;
+	    case 10:
+		// meters skip. 
+		break;
+	    case 11:
+		// Geoid sep. 
+		fGeoidheight = stof(token);
+		break;
+	    case 12:
+		// Meters, skip.
+		break;
+	    case 13:
+		ss2.str(token);
+		// Age of differential record space reference station id
+		getline(ss2, token2, ' ');
+		fAge = stof(token2);
+		// Reference station ID
+		getline(ss2, token2, ' ');
+		fStationID = stoi(token2);
+		break;
+	    case 14:
+		// Checksum
+		// FIXME
+		break;
 
-    // Changing this up a bit
-    // use fUTC as original format. 
-    // 
-    fUTC     = atof(p);
-    fSeconds = DecodeUTCFixTime( p, &fMilliseconds, NULL);
+	    }
+	}
+	i++;
+    }
 
-    // parse out latitude
-    p = strchr(p, ',')+1;
-    if (',' != *p)
-    {
-	fLatitude = DecodeDegMin(p);
-    }
-    
-    p = strchr(p, ',')+1;
-    if (',' != *p)
-    {
-	if (p[0] == 'S') fLatitude *= -1.0;
-    }
-    
-    // parse out longitude
-    p = strchr(p, ',')+1;
-    if (',' != *p)
-    {
-	fLongitude = DecodeDegMin(p);
-    }
-    
-    p = strchr(p, ',')+1;
-    if (',' != *p)
-    {
-	if (p[0] == 'W') fLongitude *= -1.0;
-    }
-    
-    p = strchr(p, ',')+1;
-    if (',' != *p)
-    {
-	fFixIndicator = atoi(p);
-    }
-    
-    p = strchr(p, ',')+1;
-    if (',' != *p)
-    {
-	fSatellites = atoi(p);
-    }
-    
-    p = strchr(p, ',')+1;
-    if (',' != *p)
-    {
-	fHDOP = atof(p);
-    }
-    
-    p = strchr(p, ',')+1;
-    if (',' != *p)
-    {
-	fAltitude = atof(p);
-    }
-    
-    p = strchr(p, ',')+1;
-    p = strchr(p, ',')+1;
-    if (',' != *p)
-    {
-	fGeoidheight = atof(p);
-    }
-    return true;
     SET_DEBUG_STACK;
+    return true;
 }
 
 /**
@@ -245,6 +250,7 @@ string GGA::Encode(void)
     rv = rv + txt +"*";
     snprintf(txt, sizeof(txt),"%2.2X", Checksum(rv));
     rv = rv + txt +"\n\r";
+    SET_DEBUG_STACK;
 
     return rv;
 }
@@ -306,3 +312,15 @@ ostream& operator<<(ostream& output, const GGA &n)
  *
  *******************************************************************
  */
+void GGA::Clear(void)
+{
+    SET_DEBUG_STACK;
+    fGeoidheight  = 0.0;
+    fAltitude     = 0.0;
+    fFixIndicator = 0;
+    fSatellites   = 0;
+    fHDOP         = 0.0;
+    fAge          = 0.0;
+    fStationID    = 0;
+    SET_DEBUG_STACK;
+}
