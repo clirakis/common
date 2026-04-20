@@ -18,6 +18,7 @@
  * 10-Mar-24    Added in GPS-pc time delta. 
  * 24-Mar-24    Added in TOD 
  * 28-Apr-24    made into SO library
+ * 20-Apr-26    put Checksum up front before doing the full decode.
  * 
  * Classification : Unclassified
  *
@@ -43,6 +44,7 @@ using namespace std;
 #include <time.h>
 #include <unistd.h>
 #include <ctype.h>
+#include <sstream>
 
 // Local includes
 #include "tools.h"        // Units conversions etc. 
@@ -203,13 +205,26 @@ bool NMEA_GPS::parse(const char *nmea)
 {
     SET_DEBUG_STACK;
     bool    rc = false;
+    string line(nmea);        // make a local copy
 
     /*
      * if possible need VTG, XTC, WPL, APB- auto pilot b
+     *
+     * Find and perform the checksum first. 
      */
-
+    size_t n = line.find("*");
+    if (n == string::npos)
+    {
+	return false; // no checksum, incomplete sentance
+    }
+    if (!CheckSum(nmea))
+    {
+	return false; // bad checksum
+    }
+    
     // look for a few common sentences
-    if (strstr(nmea, "$GPGGA")) {
+    if (strstr(nmea, "$GPGGA")) 
+    {
 	// found GGA
 	fLastID = kMESSAGE_GGA; // Position
 	rc = fGGA->Decode(nmea);
