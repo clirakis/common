@@ -137,13 +137,13 @@ uint8_t NMEA_GPS::parseHex(char c)
 /**
  ******************************************************************
  *
- * Function Name : 
+ * Function Name : Checksum
  *
  * Description : 
  *
- * Inputs :
+ * Inputs : line to parse,
  *
- * Returns :
+ * Returns : false if checksum is bad or missing. 
  *
  * Error Conditions :
  * 
@@ -154,32 +154,42 @@ uint8_t NMEA_GPS::parseHex(char c)
  *
  *******************************************************************
  */
-bool NMEA_GPS::CheckSum(const char *line)
+bool NMEA_GPS::CheckSum(const char *input)
 {
     SET_DEBUG_STACK;
+    bool     rv = true;      // assume success
+    string   line(input);    // make a local copy.
+    uint8_t  sum =0;          // sum at end
 
-    /*
-     * do checksum check
-     * first look if we even have one
-     */
-    if (line[strlen(line)-4] == '*') 
+    size_t n = line.find("*");
+    if (n != string::npos)
     {
-	uint16_t sum = parseHex(line[strlen(line)-3]) * 16;
-	sum += parseHex(line[strlen(line)-2]);
-    
+
+	/*
+	 * get the checksum value. 
+	 */
+	string val = line.substr(n+1,string::npos);
+	uint32_t expected = stoi(val, nullptr, 16);
+
+	size_t start = line.find("$") + 1;
+	/* do everything between $ and *, the line delimiters. 
+	 * do checksum check
+	 * first look if we even have one
+	 */
 	// check checksum 
-	for (uint32_t i=2; i < (strlen(line)-4); i++) 
+	for (uint32_t i=start; i < n; i++) 
 	{
 	    sum ^= line[i];
 	}
-	if (sum != 0) 
-	{
-	    // bad checksum :(
-	    return false;
-	}
+	rv = (sum == expected);
     }
+    else
+    {
+	rv = false; // no checksum, incomplete sentance
+    }
+
     SET_DEBUG_STACK;
-    return true;
+    return rv;
 }
 /**
  ******************************************************************
@@ -212,11 +222,6 @@ bool NMEA_GPS::parse(const char *nmea)
      *
      * Find and perform the checksum first. 
      */
-    size_t n = line.find("*");
-    if (n == string::npos)
-    {
-	return false; // no checksum, incomplete sentance
-    }
     if (!CheckSum(nmea))
     {
 	return false; // bad checksum
