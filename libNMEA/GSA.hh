@@ -76,6 +76,8 @@ public:
     inline static size_t DataSize(void) 
 	{return (4*sizeof(float)+16*sizeof(char));};
 
+    void Clear(void);
+
     /*!
      * Encode the data into a NMEA string. 
      */

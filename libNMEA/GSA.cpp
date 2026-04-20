@@ -9,6 +9,7 @@
  * Restrictions/Limitations :
  *
  * Change Descriptions :
+ * 19-Apr-26 New method of decoding. 
  *
  * Classification : Unclassified
  *
@@ -24,6 +25,7 @@ using namespace std;
 #include <string>
 #include <cmath>
 #include <cstring>
+#include <sstream>
 
 // Local Includes.
 #include "debug.h"
@@ -53,9 +55,7 @@ using namespace std;
 GSA::GSA(void)
 {
     SET_DEBUG_STACK;
-    fMode1 = fMode2 = 'N';
-    memset( fSatellite, 0, sizeof(fSatellite));
-    fPDOP=fHDOP=fVDOP = 0.0;
+    Clear();
     SET_DEBUG_STACK;
 }
 /**
@@ -81,28 +81,66 @@ GSA::GSA(void)
 bool GSA::Decode(const char *line)
 {
     SET_DEBUG_STACK;
-    int  i;
-    char *p = (char *) line;
+    string         token, token2;
+    istringstream  sstream(line);
+    istringstream  ss2;
 
-    p = strchr(p, ',')+1;
-    fMode1 = *p;
+    uint32_t  i = 0;
+    uint32_t  j = 0;
 
-    p = strchr(p, ',')+1;
-    fMode2 = atoi(p);
 
-    for (i=0;i<12;i++)
+    Clear();
+    while (getline(sstream, token, ','))
     {
-	p = strchr(p, ',')+1;
-	fSatellite[i] = atoi(p);
-    } 
-    p = strchr(p, ',')+1;
-    fPDOP = atof(p);
-
-    p = strchr(p, ',')+1;
-    fHDOP = atof(p);
-
-    p = strchr(p, ',')+1;
-    fVDOP = atof(p);
+        //cout << i << " " << token << " " << token.size() << endl;
+	if(token.size()>0)
+	{
+	    switch(i)
+	    {
+	    case 0:
+		// Should be the GSA preamble. Do nothing
+		break;
+	    case 1:
+		// Mode M or A
+		fMode1 = token[0];
+		break;
+	    case 2:
+		// Fix type 1 - not available, 2 - 2D, 3 - 3D
+		fMode2 = stoi(token);
+		break;
+	    case 3:           // 0
+		// Start of satellites, upto 12
+	    case 4:           // 1
+	    case 5:           // 2
+	    case 6:           // 3
+	    case 7:           // 4
+	    case 8:           // 5
+	    case 9:           // 6
+	    case 10:          // 7
+	    case 11:          // 8
+	    case 12:          // 9
+	    case 13:          // 10
+	    case 14:          // 11
+		fSatellite[j] = stoi(token);
+		j++;
+		break;
+	    case 15: 
+		fPDOP = stof(token);
+		break;
+	    case 16:
+		fHDOP = stof(token);
+		break;
+	    case 17:
+		ss2.str(token);
+		// now separate the VDOP from the Checksum
+		getline(ss2, token2, '*');
+		fVDOP = stof(token2);
+		// FIXME - missing CKSUM
+		break;
+	    }
+	}
+	i++;
+    }
     SET_DEBUG_STACK;
     return true;
 }
@@ -193,4 +231,32 @@ string GSA::Encode(void)
     snprintf(txt,sizeof(txt),"%2.2X",Checksum(rv));
     rv += txt;
     return rv;
+}
+/**
+ ******************************************************************
+ *
+ * Function Name : Clear
+ *
+ * Description :
+ *
+ * Inputs : NONE
+ *
+ * Returns :
+ *
+ * Error Conditions :
+ * 
+ * Unit Tested on: 
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+void GSA::Clear(void)
+{
+    SET_DEBUG_STACK;
+    fMode1 = fMode2 = 'N';
+    memset( fSatellite, 0, sizeof(fSatellite));
+    fPDOP=fHDOP=fVDOP = 0.0;
+    SET_DEBUG_STACK;
 }
