@@ -112,6 +112,7 @@ bool RMC::Decode(const char *line)
     const float k = 0.95;
 
     SET_DEBUG_STACK;
+    bool rc = true;
     double tmp;
     struct tm now;
     float dt;
@@ -191,9 +192,14 @@ bool RMC::Decode(const char *line)
 		// Magnetic Variation followed by *checksum
 		ss2.str(token);
 		getline(ss2, token2, '*');
-		if (token2[0] == 'W')
-		    fMagVariation *= -1.0;
-		// FIXME
+		if (token2.size()>0)
+		{
+		    if (token2[0] == 'W')
+			fMagVariation *= -1.0;
+		    // FIXME  - Not decoding checksum. 
+		}
+		else
+		    rc = false;
 		break;
  	    default:
  		// do nothing
@@ -203,7 +209,7 @@ bool RMC::Decode(const char *line)
 	i++;
     }
     SET_DEBUG_STACK;
-    return true;
+    return rc;
 }
 /**
  ******************************************************************

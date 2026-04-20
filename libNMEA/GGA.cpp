@@ -82,7 +82,7 @@ GGA::GGA(void) : NMEA_Position()
 bool GGA::Decode(const char *line)
 {
     SET_DEBUG_STACK;
-
+    bool rc = true;
     /*
      * Capture the PC time of the message.
      */
@@ -151,21 +151,20 @@ bool GGA::Decode(const char *line)
 		getline(ss2, token2, ' ');
 		fAge = stof(token2);
 		// Reference station ID
-		getline(ss2, token2, ' ');
-		fStationID = stoi(token2);
+		getline(ss2, token2, '*');
+		if (token2.size()>0)
+		    fStationID = stoi(token2);
+		else 
+		    rc = false;
+		// Checksum comes after this. FIXME
 		break;
-	    case 14:
-		// Checksum
-		// FIXME
-		break;
-
 	    }
 	}
 	i++;
     }
 
     SET_DEBUG_STACK;
-    return true;
+    return rc;
 }
 
 /**

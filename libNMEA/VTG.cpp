@@ -136,6 +136,7 @@ VTG::~VTG (void)
 bool VTG::Decode(const char *line)
 {
     SET_DEBUG_STACK;
+    bool rc = true;
     string         token, token2;
     istringstream  sstream(line);
     istringstream  ss2;
@@ -186,11 +187,17 @@ bool VTG::Decode(const char *line)
 	    case 9:
 		ss2.str(token);
 		getline(ss2, token2, '*');
+		if (token2.size()>0)
+		{
+		    // mode and no space checksum
+		    fMode = token2[0];
 
-		// mode and no space checksum
-		fMode = token2[0];
-
-		// Checksum FIXME
+		    // Checksum FIXME
+		}
+		else
+		{
+		    rc = false;
+		}
 		break;
 	    default:
 		break;
@@ -199,7 +206,7 @@ bool VTG::Decode(const char *line)
 	i++;
     }
     SET_DEBUG_STACK;
-    return true;
+    return rc;
 }
 /**
  ******************************************************************

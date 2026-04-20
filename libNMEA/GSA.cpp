@@ -81,6 +81,7 @@ GSA::GSA(void)
 bool GSA::Decode(const char *line)
 {
     SET_DEBUG_STACK;
+    bool rc = true;
     string         token, token2;
     istringstream  sstream(line);
     istringstream  ss2;
@@ -134,7 +135,10 @@ bool GSA::Decode(const char *line)
 		ss2.str(token);
 		// now separate the VDOP from the Checksum
 		getline(ss2, token2, '*');
-		fVDOP = stof(token2);
+		if(token2.size() > 0)
+		    fVDOP = stof(token2);
+		else
+		    rc = false;
 		// FIXME - missing CKSUM
 		break;
 	    }
@@ -142,7 +146,7 @@ bool GSA::Decode(const char *line)
 	i++;
     }
     SET_DEBUG_STACK;
-    return true;
+    return rc;
 }
 /**
  ******************************************************************
