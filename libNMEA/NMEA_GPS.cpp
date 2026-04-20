@@ -157,37 +157,32 @@ uint8_t NMEA_GPS::parseHex(char c)
 bool NMEA_GPS::CheckSum(const char *input)
 {
     SET_DEBUG_STACK;
-    bool     rv = true;      // assume success
+    bool     rv = false;     // assume failure.
     string   line(input);    // make a local copy.
-    uint8_t  sum =0;          // sum at end
+    uint8_t  sum =0;         // sum at end
 
     size_t n = line.find("*");
     if (n != string::npos)
     {
-
 	/*
 	 * get the checksum value. 
 	 */
 	string val = line.substr(n+1,string::npos);
-	uint32_t expected = stoi(val, nullptr, 16);
-
-	size_t start = line.find("$") + 1;
-	/* do everything between $ and *, the line delimiters. 
-	 * do checksum check
-	 * first look if we even have one
-	 */
-	// check checksum 
-	for (uint32_t i=start; i < n; i++) 
+	if (val.size()<=3)
 	{
-	    sum ^= line[i];
-	}
-	rv = (sum == expected);
-    }
-    else
-    {
-	rv = false; // no checksum, incomplete sentance
-    }
+	    uint32_t expected = stoi(val, nullptr, 16);
 
+	    size_t start = line.find("$") + 1;
+	    /* 
+	     * do everything between $ and *, the line delimiters. 
+	     */
+	    for (uint32_t i=start; i < n; i++) 
+	    {
+		sum ^= line[i];
+	    }
+	    rv = (sum == expected);
+	}
+    }
     SET_DEBUG_STACK;
     return rv;
 }
