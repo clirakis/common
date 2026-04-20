@@ -54,7 +54,7 @@ public:
     inline static size_t DataSize(void) 
 	{return (4*sizeof(float)+4*sizeof(char));};
 
-    string Encode(void);
+    std::string Encode(void);
     std::string ModeStr(void) const;
 
     void Clear(void);
@@ -62,7 +62,7 @@ public:
     /*! operator overload to output contents of class for inspection
      * this data is in character format. 
      */
-    friend ostream& operator<<(ostream& output, const VTG &n); 
+    friend std::ostream& operator<<(std::ostream& output, const VTG &n); 
 
 private:
 

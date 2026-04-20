@@ -77,7 +77,7 @@ public:
      * operator overload to output contents of class for inspection
      * this data is in character format. 
      */
-    friend ostream& operator<<(ostream& output, const NMEA_Position &n); 
+    friend std::ostream& operator<<(std::ostream& output, const NMEA_Position &n); 
 
 protected:
     struct timespec fPCTime;
