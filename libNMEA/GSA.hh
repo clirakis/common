@@ -48,7 +48,7 @@ public:
     /*!
      * Get the full ID array!
      */
-    inline const unsigned char* IDS(void) {return fSatellite;};
+    inline const unsigned char* IDS(void) const {return fSatellite;};
     /*!
      * get the PDOP
      */
