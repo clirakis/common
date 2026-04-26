@@ -60,7 +60,7 @@ public:
 
     /* THINGS USED to relay in shared memory. --------------------- */
     /*! Get a pointer to the beginning of the data storage. */
-    inline void* DataPointer(void) {return (void*)&fPCTime;};
+    inline const void* DataPointer(void) const {return (void*)&fPCTime;};
 
     /*! 
      * Return the overall data size for the structure. 

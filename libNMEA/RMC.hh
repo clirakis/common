@@ -77,7 +77,7 @@ public:
     void SetPosition(const NMEA_Position &p);
 
     /*! Get a pointer to the beginning of the data storage. */
-    inline void* DataPointer(void) {return (void*)&fPCTime;};
+    inline const void* DataPointer(void) const {return (void*)&fPCTime;};
 
     /*! Return the overall data size for the structure. */
     inline static size_t DataSize(void) 
