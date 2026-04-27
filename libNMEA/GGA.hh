@@ -59,8 +59,9 @@ public:
     inline float HDOP(void)       const {return fHDOP;};
 
     /* THINGS USED to relay in shared memory. --------------------- */
+
     /*! Get a pointer to the beginning of the data storage. */
-    inline const void* DataPointer(void) const {return (void*)&fPCTime;};
+    inline void* DataPointer(void) {return (void*)&fPCTime;};
 
     /*! 
      * Return the overall data size for the structure. 

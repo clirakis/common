@@ -48,7 +48,7 @@ public:
     inline void  SetMode(MODES v)  { fMode = v;};
 
     /*! Get a pointer to the beginning of the data storage. */
-    inline const void* DataPointer(void) const {return (void*)&fTrue;};
+    inline void* DataPointer(void) {return (void*)&fTrue;};
 
     /*! Return the overall data size for the structure. */
     inline static size_t DataSize(void) 
