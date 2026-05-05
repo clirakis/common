@@ -53,10 +53,10 @@ class NMEA_GPS
     inline bool Error(void)     {return !(fErrorCode == kERROR_NONE);};
     inline int  LastID(void)    {return fLastID;};
     inline void SetLastID(MessageID m) {fLastID = m;};
-    inline const GGA* pGGA(void) const     {return fGGA;};
-    inline const RMC* pRMC(void) const     {return fRMC;};
-    inline const VTG* pVTG(void) const     {return fVTG;};
-    inline const GSA* pGSA(void) const     {return fGSA;};
+    inline GGA* pGGA(void) const     {return fGGA;};
+    inline RMC* pRMC(void) const     {return fRMC;};
+    inline VTG* pVTG(void) const     {return fVTG;};
+    inline GSA* pGSA(void) const     {return fGSA;};
 
 
     bool parse(const char *);
