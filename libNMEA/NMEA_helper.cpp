@@ -9,6 +9,8 @@
  * Restrictions/Limitations :
  *
  * Change Descriptions :
+ * 13-May-26 CBL using gmtime to make the struct tm adds the offset
+ *               in when converting to seconds. 
  *
  * Classification : Unclassified
  *
@@ -65,7 +67,9 @@ time_t DecodeUTCFixTime(const char *p, float *ms, struct tm *now)
      */
     time_t current;
     time(&current);
-    struct tm *tmnow = gmtime(&current);
+
+    //struct tm *tmnow = gmtime(&current);
+    struct tm *tmnow = localtime(&current);
 
     /*
      * Input format should be of the string format HHMMSS.mm
